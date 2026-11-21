@@ -132,5 +132,7 @@ $('followUpBtn').onclick=()=>{
 window.addEventListener('pagehide',()=>stop({resetStatus:false}));
 if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('room-embedded');
 setVoiceButtons('▶ Listen to answer',false);
-topics();render();if(seed.length)choose(seed[0]);
+topics();render();
+const requestedFaq = new URLSearchParams(location.search).get('faq');
+if (seed.length) choose(seed.find(item => item.id === requestedFaq) || seed[0]);
 })();
