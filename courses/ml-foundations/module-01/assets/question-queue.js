@@ -1,8 +1,8 @@
 (()=>{'use strict';
 const cfg=window.TEACHREACH_QUESTION_SERVICE||{}, $=id=>document.getElementById(id), localKey='teachreach-m1-my-registered-questions';
 let sending=false, busyTimer=null;
-const localGet=()=>{try{return JSON.parse(localStorage.getItem(localKey)||'[]')}catch{return []}};
-const localSave=items=>{try{localStorage.setItem(localKey,JSON.stringify(items))}catch{}};
+const localGet=()=>{try{return JSON.parse(sessionStorage.getItem(localKey)||'[]')}catch{return []}};
+const localSave=items=>{try{sessionStorage.setItem(localKey,JSON.stringify(items))}catch{}};
 function td(row,text){const e=document.createElement('td');e.textContent=String(text??'');row.append(e)}
 function formatDate(s){const d=new Date(s);return Number.isNaN(+d)?String(s||'—'):d.toLocaleDateString()}
 function ownRows(){let t=$('ownQuestionRows');if(!t)return;t.replaceChildren();let all=localGet();if(!all.length){let r=t.insertRow();let c=r.insertCell();c.colSpan=4;c.textContent='You have not registered a question from this device.';return}all.forEach(x=>{let r=t.insertRow();td(r,x.id);td(r,x.name);td(r,x.email);td(r,x.question)})}
