@@ -25,9 +25,24 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 - **Record answers**: `courses/ml-foundations/module-01/faculty-recordings.html` records your actual voice from a browser microphone. Download files using the exact FAQ ID and upload to `courses/ml-foundations/module-01/assets/audio/`.
 - **Notebook source**: `courses/ml-foundations/module-01/ML_Foundations_Module1_PyTorch.ipynb`.
 
-## New modules
+## Module 02 — From Predictions to Probabilities
 
-Reuse `courses/ml-foundations/` as the permanent course landing page. Create `module-02/`, `module-03/`, etc. with the same student-facing navigation, course-specific notebook and FAQ. GitHub Pages automatically updates after commits to `main`.
+**Module 01 → Module 02 transition:** the Module 01 overview and final lecture slide now introduce uncertainty after Ava's toy tensor prediction of 55. Module 02 opens with a recap of the feature vector, matrix, weights, and bias, then introduces random variables and probability distributions using the same running example.
+
+- 53 teaching slides covering eight probability lessons and a synthesis.
+- Five interactive browser experiments: Normal distributions, conditional probability, Bayes updates, sampling, and Gaussian likelihood.
+- Sixteen graded-in-browser exercises with worked answers and local progress tracking.
+- A complete 42-cell PyTorch notebook: `courses/ml-foundations/module-02/ML_Foundations_Module2_Probability.ipynb`, readable in-browser and optionally runnable in Colab.
+- Twenty-four module-specific curated office-hour FAQs, using the same static professor portrait and the browser's built-in speech synthesis.
+- A module-specific question registration form and public pending-question table, ready for the same free Apps Script service used by Module 01.
+
+**Office hours content:** Module 02's FAQ records live in `courses/ml-foundations/module-02/assets/content.js` as `window.TR_M2.faq`. Module 01's established office-hours speech and UI are reused, with no new subscriptions or student API keys.
+
+**Question inbox:** Both modules use a single faculty-controlled Google Sheet, separated by the `Module` field. When the Apps Script web app is deployed, enter the same `/exec` URL into both modules' `assets/question-config.js` files. The question-service script has been updated to accept module-01 and module-02.
+
+## Future modules
+
+Reuse `courses/ml-foundations/` as the course landing page. Add `module-03/` and beyond with the same student-facing navigation, course-specific notebook and FAQ. GitHub Pages automatically updates after commits to `main`.
 
 ## Publishing and Blackboard
 

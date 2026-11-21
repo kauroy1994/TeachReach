@@ -1,12 +1,12 @@
 (()=>{'use strict';
-const cfg=window.TEACHREACH_QUESTION_SERVICE||{}, $=id=>document.getElementById(id), localKey='teachreach-m1-my-registered-questions';
+const cfg=window.TEACHREACH_QUESTION_SERVICE||{}, $=id=>document.getElementById(id), localKey='teachreach-'+String(cfg.module||'module-01')+'-my-registered-questions';
 let sending=false, busyTimer=null;
 const localGet=()=>{try{return JSON.parse(sessionStorage.getItem(localKey)||'[]')}catch{return []}};
 const localSave=items=>{try{sessionStorage.setItem(localKey,JSON.stringify(items))}catch{}};
 function td(row,text){const e=document.createElement('td');e.textContent=String(text??'');row.append(e)}
 function formatDate(s){const d=new Date(s);return Number.isNaN(+d)?String(s||'—'):d.toLocaleDateString()}
 function ownRows(){let t=$('ownQuestionRows');if(!t)return;t.replaceChildren();let all=localGet();if(!all.length){let r=t.insertRow();let c=r.insertCell();c.colSpan=4;c.textContent='You have not registered a question from this device.';return}all.forEach(x=>{let r=t.insertRow();td(r,x.id);td(r,x.name);td(r,x.email);td(r,x.question)})}
-function publicRows(rows){const b=$('questionRows');if(!b)return;b.replaceChildren();if(!rows.length){let r=b.insertRow();let c=r.insertCell();c.colSpan=5;c.textContent='No questions in the class register yet. Start the conversation!';return}rows.forEach(x=>{const r=b.insertRow();td(r,formatDate(x.date));td(r,x.student||'Student');td(r,x.question);td(r,x.lesson||'Module 01');let c=r.insertCell();let sp=document.createElement('span');sp.className='status-pending';sp.textContent=x.status||'Awaiting answer';c.append(sp)})}
+function publicRows(rows){const b=$('questionRows');if(!b)return;b.replaceChildren();if(!rows.length){let r=b.insertRow();let c=r.insertCell();c.colSpan=5;c.textContent='No questions in the class register yet. Start the conversation!';return}rows.forEach(x=>{const r=b.insertRow();td(r,formatDate(x.date));td(r,x.student||'Student');td(r,x.question);td(r,x.lesson||String(cfg.module||'module-01'));let c=r.insertCell();let sp=document.createElement('span');sp.className='status-pending';sp.textContent=x.status||'Awaiting answer';c.append(sp)})}
 function status(text){$('formStatus').textContent=text}
 function queueStatus(text){$('queueStatus').textContent=text}
 function loadShared(){ownRows();if(!cfg.url){publicRows([]);queueStatus('The shared class register will open after the instructor connects the question service. You can prepare your question here.');return}

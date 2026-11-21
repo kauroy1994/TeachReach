@@ -7,7 +7,7 @@
 const TEACHREACH_SHEET_ID = '1i5se-ApkNFNxh1cRSx7oI1DN8K65RaNbPb2ohesbLZI';
 const TEACHREACH_SHEET_NAME = 'Questions';
 const TEACHREACH_PARENT_ORIGIN = 'https://kauroy1994.github.io';
-const TEACHREACH_MODULE = 'module-01';
+const TEACHREACH_MODULES = ['module-01', 'module-02'];
 
 function getQuestionSheet_() {
   const sheet = SpreadsheetApp.openById(TEACHREACH_SHEET_ID).getSheetByName(TEACHREACH_SHEET_NAME);
@@ -26,12 +26,12 @@ function publicName_(fullName) {
   if (!parts.length) return 'Student';
   return parts[0].slice(0, 35) + (parts.length > 1 ? ' ' + parts[parts.length - 1][0].toUpperCase() + '.' : '');
 }
-function publicQuestions_() {
+function publicQuestions_(module) {
   const sh = getQuestionSheet_();
   const last = sh.getLastRow();
   if (last < 2) return [];
   const rows = sh.getRange(2, 1, last - 1, 11).getValues();
-  return rows.filter(r => r[3] === TEACHREACH_MODULE && String(r[9]).toLowerCase() === 'pending')
+  return rows.filter(r => r[3] === module && String(r[9]).toLowerCase() === 'pending')
     .map(r => ({ date: r[0] instanceof Date ? r[0].toISOString() : r[0], id: String(r[1]),
       student: String(r[6]), lesson: String(r[7]), question: String(r[8]), status:'Awaiting answer' }))
     .reverse().slice(0, 150);
@@ -42,7 +42,8 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ok:false,error:'Invalid callback'}))
       .setMimeType(ContentService.MimeType.JSON);
   }
-  const result = {ok:true,items:publicQuestions_()};
+  const module = field_(e && e.parameter && e.parameter.module,30);
+  const result = {ok:true,items:TEACHREACH_MODULES.includes(module) ? publicQuestions_(module) : []};
   // JSONP allows a static GitHub Pages site to read the public, email-free queue.
   return ContentService.createTextOutput(callback + '(' + JSON.stringify(result) + ');')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
@@ -63,7 +64,7 @@ function doPost(e) {
     const name = field_(p.name, 80), email = field_(p.email, 160), question = field_(p.question, 650);
     const lesson = field_(p.lesson, 50), module = field_(p.module, 30);
     if (name.length < 2 || question.length < 8 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return receipt_(receipt);
-    if (module !== TEACHREACH_MODULE || !nonce || !lesson) return receipt_(receipt);
+    if (!TEACHREACH_MODULES.includes(module) || !nonce || !lesson) return receipt_(receipt);
     const lock = LockService.getScriptLock(); lock.waitLock(12000);
     try {
       const sh = getQuestionSheet_();
