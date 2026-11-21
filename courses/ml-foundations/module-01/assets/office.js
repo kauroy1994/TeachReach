@@ -43,6 +43,10 @@ function choose(x){
   $('faqAnswer').textContent=x.answer;
   $('faqFormal').textContent=x.formal||'See the matching classroom example.';
   $('faqCode').textContent=x.code||'# See the module notebook.';
+  const solution = $('faqSolution');
+  solution.open = false;
+  solution.hidden = !x.checkAnswer;
+  $('faqCheckAnswer').textContent = x.checkAnswer || '';
   $('faqCheck').textContent=x.check||'Can you apply the idea to another example?';
   $('answerTopic').textContent=x.topic||'Topic';
   render();

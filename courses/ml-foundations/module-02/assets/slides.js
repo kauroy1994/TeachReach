@@ -49,6 +49,10 @@ function render(){
   $('mathBlock').textContent=s.math;
   $('explainText').textContent=s.explain||"Connect this representation to the same Campus Study Coach model introduced in Module 1.";
   $('visualArea').innerHTML=Array.isArray(s.visual) ? cards(s.visual) : diagram(s.visual);
+  const solution = $('slideSolution');
+  solution.open = false;
+  solution.hidden = !s.checkAnswer;
+  $('slideCheckAnswer').textContent = s.checkAnswer || "";
   $('checkText').textContent=s.check||"Explain the connection to Module 1.";
   $('codeWrap').hidden=!codeVisible;
   $('codeToggle').disabled=!Boolean(s.code?.trim());
@@ -96,6 +100,7 @@ $('outlineClose').onclick=()=>{$('outline').hidden=true};
 $('notesClose').onclick=()=>{$('notes').hidden=true};
 document.addEventListener("keydown",e=>{
   if(["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;
+  if(e.key === " " && e.target.closest("summary,button,a"))return;
   if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();jump(i+1)}
   if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();jump(i-1)}
   if(e.key.toLowerCase()==="n")$('notesToggle').click();

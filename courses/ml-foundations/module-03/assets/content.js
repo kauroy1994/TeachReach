@@ -47,7 +47,8 @@ window.TR_M3 = {
           "prediction minus observation"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nprint(mu.item(), y.item())"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nprint(mu.item(), y.item())",
+      "checkAnswer": "The two weights and the bias can change. Ava’s inputs [2, 3], her observed 60 and the assumed σ = 10 stay fixed. Changing a parameter changes the predicted mean."
     },
     {
       "section": "01 · The observation",
@@ -74,7 +75,8 @@ window.TR_M3 = {
           "at μ = 55"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\nprint(loss.item())"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\nprint(loss.item())",
+      "checkAnswer": "Only (μ − 60)²/200 varies with μ. The normalization term log(10√(2π)) stays constant because the spread stays at 10."
     },
     {
       "section": "02 · Differentiate",
@@ -101,7 +103,8 @@ window.TR_M3 = {
           "loss slopes up"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\nh = 0.01\nprint(((nll(mu+h)-nll(mu-h))/(2*h)).item())"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\nh = 0.01\nprint(((nll(mu+h)-nll(mu-h))/(2*h)).item())",
+      "checkAnswer": "At μ = 60 the residual and slope are both zero. Any move away adds a positive squared residual to the same constant, so 60 minimizes the loss."
     },
     {
       "section": "02 · Differentiate",
@@ -128,7 +131,8 @@ window.TR_M3 = {
           "−0.05 × 1"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())",
+      "checkAnswer": "Ava completed three sets and studied two hours. Multiplying the shared mean slope −0.05 by 3 gives −0.15 for the sets weight, versus −0.10 for hours and −0.05 for the bias."
     },
     {
       "section": "03 · Update",
@@ -155,7 +159,8 @@ window.TR_M3 = {
           "20 − (−0.05)"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())\nwith torch.no_grad():\n    print((x @ (w - dw) + b - db).item())"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())\nwith torch.no_grad():\n    print((x @ (w - dw) + b - db).item())",
+      "checkAnswer": "At rate 1, the two weights rise by 0.10 and 0.15 and the bias rises by 0.05. Their combined effect on Ava’s mean is 2(0.10) + 3(0.15) + 0.05 = 0.70 points."
     },
     {
       "section": "03 · Update",
@@ -182,7 +187,8 @@ window.TR_M3 = {
           "check each partial"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\n\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\n\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())\n\nmu.retain_grad()  # Keep the intermediate slope so we can inspect it.\nloss.backward()\ntorch.testing.assert_close(mu.grad, slope)\ntorch.testing.assert_close(w.grad, dw)\ntorch.testing.assert_close(b.grad, db)\nprint(\"Autograd:\", mu.grad.item(), w.grad.tolist(), b.grad.item())\n\neta = 1.0\nwith torch.no_grad():\n    w -= eta * w.grad\n    b -= eta * b.grad\n    updated_mean = x @ w + b\n    updated_loss = nll(updated_mean)\n\nprint(\"New weights and bias:\", w.tolist(), b.item())\nprint(f\"Mean: {mu.item():.2f} -> {updated_mean.item():.2f}\")\nprint(f\"NLL: {loss.item():.6f} -> {updated_loss.item():.6f}\")\ntorch.testing.assert_close(updated_mean, x.new_tensor(55.7))\nassert updated_loss < loss"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\n\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\n\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())\n\nmu.retain_grad()  # Keep the intermediate slope so we can inspect it.\nloss.backward()\ntorch.testing.assert_close(mu.grad, slope)\ntorch.testing.assert_close(w.grad, dw)\ntorch.testing.assert_close(b.grad, db)\nprint(\"Autograd:\", mu.grad.item(), w.grad.tolist(), b.grad.item())\n\neta = 1.0\nwith torch.no_grad():\n    w -= eta * w.grad\n    b -= eta * b.grad\n    updated_mean = x @ w + b\n    updated_loss = nll(updated_mean)\n\nprint(\"New weights and bias:\", w.tolist(), b.item())\nprint(f\"Mean: {mu.item():.2f} -> {updated_mean.item():.2f}\")\nprint(f\"NLL: {loss.item():.6f} -> {updated_loss.item():.6f}\")\ntorch.testing.assert_close(updated_mean, x.new_tensor(55.7))\nassert updated_loss < loss",
+      "checkAnswer": "Detaching μ breaks the recorded path from the loss back to w and b. With σ fixed here, the loss then has no differentiable input and backward() cannot compute those gradients."
     },
     {
       "section": "04 · Learning rates",
@@ -209,7 +215,8 @@ window.TR_M3 = {
           "farther away"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\ny = x.new_tensor(60.)\nfor eta in [0., 1., 100/14, 10., 100/7, 16.]:\n    trial_w = x.new_tensor([10., 5.], requires_grad=True)\n    trial_b = x.new_tensor(20., requires_grad=True)\n    errors = []\n    for _ in range(3):\n        mean = x @ trial_w + trial_b\n        trial_loss = -torch.distributions.Normal(mean, 10.).log_prob(y)\n        dw, db = torch.autograd.grad(trial_loss, (trial_w, trial_b))\n        with torch.no_grad():\n            trial_w -= eta * dw\n            trial_b -= eta * db\n            errors.append(round((x @ trial_w + trial_b - y).item(), 3))\n    print(f\"Rate {eta:.3f}: errors after three steps {errors}\")"
+      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\ny = x.new_tensor(60.)\nfor eta in [0., 1., 100/14, 10., 100/7, 16.]:\n    trial_w = x.new_tensor([10., 5.], requires_grad=True)\n    trial_b = x.new_tensor(20., requires_grad=True)\n    errors = []\n    for _ in range(3):\n        mean = x @ trial_w + trial_b\n        trial_loss = -torch.distributions.Normal(mean, 10.).log_prob(y)\n        dw, db = torch.autograd.grad(trial_loss, (trial_w, trial_b))\n        with torch.no_grad():\n            trial_w -= eta * dw\n            trial_b -= eta * db\n            errors.append(round((x @ trial_w + trial_b - y).item(), 3))\n    print(f\"Rate {eta:.3f}: errors after three steps {errors}\")",
+      "checkAnswer": "Yes. At rate 10, the new mean is 62. Its error is +2 instead of −5. With fixed spread, the squared error term falls from 25/200 to 4/200, so the NLL decreases."
     },
     {
       "section": "04 · Learning rates",
@@ -236,7 +243,8 @@ window.TR_M3 = {
           "one hour, one set"
         ]
       ],
-      "code": "import torch\nX = torch.tensor([[2., 3.], [1., 1.]])\nfor w, b in [([10., 5.], 25.), ([10., 6.], 22.)]:\n    print((X @ torch.tensor(w) + b).tolist())"
+      "code": "import torch\nX = torch.tensor([[2., 3.], [1., 1.]])\nfor w, b in [([10., 5.], 25.), ([10., 6.], 22.)]:\n    print((X @ torch.tensor(w) + b).tolist())",
+      "checkAnswer": "Yes. Weights [10, 5] with bias 25 and weights [10, 6] with bias 22 both give Ava 60. For [1, 1] they predict 40 and 38 respectively."
     }
   ],
   "exercises": [
@@ -332,7 +340,8 @@ window.TR_M3 = {
       "formal": "∂L/∂μ = (μ − y)/σ²",
       "code": "print((55 - 60) / 10**2)",
       "check": "If σ doubled, how would the slope change?",
-      "topic": "Loss"
+      "topic": "Loss",
+      "checkAnswer": "The slope would be one quarter as large because variance is the square of the spread. At σ = 20 it is −5/400 = −0.0125."
     },
     {
       "id": "m3-faq-1",
@@ -341,7 +350,8 @@ window.TR_M3 = {
       "formal": "∇w L = −0.05 [2, 3]",
       "code": "print(-0.05 * torch.tensor([2., 3.]))",
       "check": "What gradient would an unused feature with value zero receive?",
-      "topic": "Chain rule"
+      "topic": "Chain rule",
+      "checkAnswer": "Zero for that weight on this example. The mean slope is multiplied by the feature value, and that value is zero."
     },
     {
       "id": "m3-faq-2",
@@ -350,7 +360,8 @@ window.TR_M3 = {
       "formal": "b′ = 20 − 1(−0.05) = 20.05",
       "code": "print(20 - 1 * (-0.05))",
       "check": "Which way would the bias move if Ava scored 50?",
-      "topic": "Update"
+      "topic": "Update",
+      "checkAnswer": "Down. The mean slope would be (55 − 50)/100 = +0.05, so a step at rate 1 would lower the bias from 20 to 19.95."
     },
     {
       "id": "m3-faq-3",
@@ -359,7 +370,8 @@ window.TR_M3 = {
       "formal": "(62 − 60)² < (55 − 60)²",
       "code": "print((62-60)**2, (55-60)**2)",
       "check": "What happens when the distances before and after the step are equal?",
-      "topic": "Learning rate"
+      "topic": "Learning rate",
+      "checkAnswer": "With the same spread, equal distances give equal Gaussian loss. For example, means 55 and 65 are both five points from 60."
     },
     {
       "id": "m3-faq-4",
@@ -368,7 +380,8 @@ window.TR_M3 = {
       "formal": "θ′ = θ − η∇L(θ)",
       "code": "loss.backward()\nwith torch.no_grad():\n    w -= eta * w.grad\n    b -= eta * b.grad",
       "check": "Why should a second training step compute a fresh loss?",
-      "topic": "Autograd"
+      "topic": "Autograd",
+      "checkAnswer": "The updated parameters give a new mean and therefore a new slope. Run another forward pass to compute the gradient at the new parameters."
     }
   ]
 };

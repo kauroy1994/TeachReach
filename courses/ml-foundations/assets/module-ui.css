@@ -888,3 +888,20 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
 @media (max-width: 600px) {
   .tr-slide-page .probability-cards { grid-template-columns: 1fr; }
 }
+
+/* Worked answers in classroom slides, practice, and virtual office hours. */
+.tr-check-solution { margin: .8rem 0; text-align: left; }
+.tr-check-solution[hidden] { display: none !important; }
+.tr-check-solution > summary {
+  display: list-item; width: fit-content; cursor: pointer;
+  padding: .55rem .85rem; border: 1px solid #9e1b32; border-radius: .5rem;
+  background: #fff; color: #85162c; font: 700 1rem/1.35 system-ui, sans-serif;
+}
+.tr-check-solution > summary:focus-visible { outline: 3px solid #315b78; outline-offset: 3px; }
+.tr-check-solution > summary > span { display: inline; color: inherit; font: inherit; letter-spacing: normal; text-transform: none; }
+.tr-check-solution:not([open]) .tr-hide-answer, .tr-check-solution[open] .tr-show-answer { display: none; }
+.tr-check-solution > p, .tr-check-solution > ol {
+  background: #faf3f5; color: #321f26; border-left: 3px solid #9e1b32;
+  margin: .5rem 0; padding: .7rem 1rem; font: 500 1rem/1.55 system-ui, sans-serif;
+}
+.tr-check-solution > ol { padding-left: 2.4rem; }

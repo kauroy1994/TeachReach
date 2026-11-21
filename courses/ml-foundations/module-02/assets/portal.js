@@ -63,7 +63,11 @@ $("checkExercise").onclick=()=>{
  else feedback("Not quite. "+ex.hint,"note");
 };
 $("hintExercise").onclick=()=>feedback(exercises[activeExercise].hint,"note");
-$("explainExercise").onclick=()=>feedback(exercises[activeExercise].explanation,"signal");
+$("explainExercise").onclick=()=>{
+ const ex=exercises[activeExercise];
+ const answer=ex.type==="choice" ? ex.options[ex.answer] : ex.answer;
+ feedback("Answer: "+answer+" — "+ex.explanation,"signal");
+};
 $("previousExercise").onclick=()=>choose(activeExercise-1);
 $("nextExercise").onclick=()=>choose(activeExercise+1);
 choose(0);
