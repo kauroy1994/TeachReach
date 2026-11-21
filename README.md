@@ -40,6 +40,11 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 
 **Question inbox:** Both modules use a single faculty-controlled Google Sheet, separated by the `Module` field. When the Apps Script web app is deployed, enter the same `/exec` URL into both modules' `assets/question-config.js` files. The question-service script has been updated to accept module-01 and module-02.
 
+
+## Consistent interface across modules
+
+Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `module-ui.js`. Both use the same UA header, module tabs, low-data toggle, and accessible view controls. Slides, Explore labs, Notebooks, and Office Hours provide **Full screen** (in-page Fullscreen API) and **Open in new tab** as distinct controls. Standalone resources also show a consistent Full screen control and a link back to their module. On the slide decks, press **F** to enter/exit full screen, **G** for the slide navigator, **N** for speaker notes, and arrow keys to navigate. Module-specific lesson content, exercises, FAQs, and notebook source files remain separate.
+
 ## Future modules
 
 Reuse `courses/ml-foundations/` as the course landing page. Add `module-03/` and beyond with the same student-facing navigation, course-specific notebook and FAQ. GitHub Pages automatically updates after commits to `main`.

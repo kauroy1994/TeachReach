@@ -56,6 +56,13 @@ function render(){
 }
 function jump(j){i=clamp(j,0,all.length-1);codeVisible=false;render();$('outline').hidden=true}
 $('previous').onclick=()=>jump(i-1);
+function toggleDeckFullscreen(){
+ const root=document.documentElement;
+ if(document.fullscreenElement){document.exitFullscreen?.().catch(()=>{})}
+ else if(root.requestFullscreen){root.requestFullscreen().catch(()=>{})}
+}
+$('m2FullBtn').onclick=toggleDeckFullscreen;
+document.addEventListener('fullscreenchange',()=>{$('m2FullBtn').textContent=document.fullscreenElement?'⤢ Exit full screen (F)':'⛶ Full screen (F)'});
 $('next').onclick=()=>jump(i+1);
 $('notesToggle').onclick=()=>{$('notes').hidden=!$('notes').hidden};
 $('codeToggle').onclick=()=>{codeVisible=!codeVisible;render()};
@@ -77,6 +84,7 @@ document.addEventListener("keydown",e=>{
   if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();jump(i-1)}
   if(e.key.toLowerCase()==="n")$('notesToggle').click();
   if(e.key.toLowerCase()==="g")$('outlineToggle').click();
+  if(e.key.toLowerCase()==="f"){$("m2FullBtn").click()}
   if(e.key==="Escape"){$('outline').hidden=true;$('notes').hidden=true}
 });
 const requested=Number(location.hash.replace("#",""));

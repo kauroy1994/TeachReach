@@ -4,6 +4,7 @@ const D=window.TR_M2,$=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function openTab(t){
  if(!["overview","slides","lab","practice","notebook","office","question"].includes(t))t="overview";
+ document.body.dataset.currentTab=t;
  document.querySelectorAll("[data-tab]").forEach(b=>{const active=b.dataset.tab===t;b.classList.toggle("active",active);b.setAttribute("aria-selected",String(active))});
  document.querySelectorAll("[data-section]").forEach(p=>{p.hidden=p.dataset.section!==t});
  const frame=$({slides:"slidesFrame",lab:"labFrame",notebook:"notebookFrame",office:"officeFrame"}[t]);
