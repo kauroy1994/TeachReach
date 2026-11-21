@@ -22,3 +22,49 @@ body{background:#fbfaf9}
 .code-box,.big-code,.bridge-code{background:#343b40;color:#fff}
 .progress-fill,.deck-progress>div{background:#9E1B32}
 :focus-visible{outline:3px solid #9E1B32;outline-offset:2px}
+
+
+/* Audio control contrast — overrides general university-brand button backgrounds. */
+.room-page .room-voice .room-button{
+  background:#9E1B32;
+  color:#FFFFFF;
+  border:1px solid #9E1B32;
+  font-weight:800;
+  opacity:1;
+}
+.room-page .room-voice .room-button.room-button-outline{
+  background:#FFFFFF;
+  color:#761329;
+  border-color:#9E1B32;
+}
+.room-page .room-voice .room-button.room-button-soft{
+  background:#E4E9ED;
+  color:#253440;
+  border-color:#AAB6BF;
+}
+.room-page .room-voice .room-button:disabled{
+  opacity:1;
+  background:#E4E9ED;
+  color:#36434D;
+  border-color:#ABB6BE;
+  cursor:not-allowed;
+}
+.room-page .room-voice .room-button:not(:disabled):hover{
+  background:#772432;
+  border-color:#772432;
+  color:#FFFFFF;
+}
+.room-page .room-voice .room-button.room-button-outline:not(:disabled):hover{
+  background:#FCEEF1;
+  color:#761329;
+  border-color:#9E1B32;
+}
+.room-page .room-voice .room-button.room-button-soft:not(:disabled):hover{
+  background:#D1DAE1;
+  color:#1F2F3C;
+  border-color:#94A3AF;
+}
+.room-page .room-voice .room-button:focus-visible{
+  outline:3px solid #253440;
+  outline-offset:3px;
+}
