@@ -7,6 +7,6 @@
 
 Your repository contains all source files; you can edit website text through GitHub's web editor with no terminal or pip install.
 
-**Student question handling:** The question form creates an email to `kroy2@ua.edu` because static GitHub Pages does not accept form submissions. Students only need their usual email client. For a shared form inbox later, use an institution-approved Microsoft Forms or Google Forms link.
+Before publishing curriculum changes, run `python3 scripts/check_curriculum.py` from the repository root. Correct any reported differences between the catalog and the student pages.
 
-**Adding an FAQ:** Edit the JavaScript array in `courses/ml-foundations/module-01/assets/faq_seed.js` and commit. Open the office-hours page afterward to confirm the new answer.
+**Asynchronous office hours.** Review the pending table on the module’s “Ask a question” tab. Add the answer to the module FAQ, then mark the row answered or remove it in the private register. Refresh the page to see the updated queue. See [question register setup](question-service/SETUP.md) for the shared service.

@@ -12,7 +12,7 @@ The TeachReach course is **Machine Learning Foundations: From Mathematics to Mod
 - **Stage III — Foundations of Modern AI (09–13):** deep learning and representations; self-supervised learning and embeddings; sequence modeling, attention and transformers; language modeling and LLMs; generative models (VAEs, GANs, diffusion).
 - **Stage IV — Intelligent and Reliable Learning (14–16):** reinforcement learning; trustworthy ML; integrated machine-learning capstone.
 
-**Full syllabus:** `courses/ml-foundations/syllabus.html`. Stage overviews: `courses/ml-foundations/stage-01/` through `stage-04/`. Modules 01–02 are **released** and retain their original learning resources. Modules 03–16 have **dedicated, navigable syllabus-preview pages** with the same seven-section layout and transparent in-development indicators.
+**Full syllabus:** `courses/ml-foundations/syllabus.html`. Stage overviews: `courses/ml-foundations/stage-01/` through `stage-04/`. Modules 01–03 are **released**. Modules 04–16 have **dedicated, navigable syllabus-preview pages** with the same seven-section layout and transparent in-development indicators.
 
 **Every module includes formative practice exercises when released.** Students are **graded on a different instructor-administered in-class variant at the end of each module**. The website's correct-answer feedback is not a graded score. The syllabus includes a *proposed* allocation of 16 end-of-module assessments worth 80% total plus the integrated capstone worth 20%, subject to instructor confirmation.
 
@@ -52,7 +52,7 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 
 **Office hours content:** Module 02's FAQ records live in `courses/ml-foundations/module-02/assets/content.js` as `window.TR_M2.faq`. Module 01's established office-hours speech and UI are reused, with no new subscriptions or student API keys.
 
-**Question inbox:** Both modules use a single faculty-controlled Google Sheet, separated by the `Module` field. When the Apps Script web app is deployed, enter the same `/exec` URL into both modules' `assets/question-config.js` files. The question-service script has been updated to accept module-01 and module-02.
+**Question inbox:** The released modules use a single faculty-controlled Google Sheet, separated by the `Module` field. When the Apps Script web app is deployed, enter the same `/exec` URL into the released modules' `assets/question-config.js` files. The question-service script has been updated to accept Modules 01–03.
 
 
 ## PyTorch example consistency
@@ -72,9 +72,17 @@ The same example controls appear throughout both learning modules:
 
 Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `module-ui.js`. Both use the same UA header, module tabs, low-data toggle, and accessible view controls. Slides, Explore labs, Notebooks, and Office Hours provide **Full screen** (in-page Fullscreen API) and **Open in new tab** as distinct controls. Standalone resources also show a consistent Full screen control and a link back to their module. On the slide decks, press **F** to enter/exit full screen, **G** for the slide navigator, **N** for speaker notes, and arrow keys to navigate. Module-specific lesson content, exercises, FAQs, and notebook source files remain separate.
 
+## Module 03 — Calculus, Gradients, and Optimization
+
+Students derive a Gaussian loss gradient for Ava’s fictional observed score of 60 and take one step from the predicted mean of 55. The slides, loss-curve and learning-rate lab, practice exercises, and downloadable PyTorch notebook use the same starting parameters. Faculty can edit the five FAQs in `courses/ml-foundations/module-03/assets/content.js`.
+
+## Curriculum release check
+
+Run `python3 scripts/check_curriculum.py` before publishing a module. It compares the catalog with the course roadmap, stage cards, syllabus rows, and planned module descriptions. A mismatch identifies the module and field and returns a failing exit code. GitHub Actions also runs the check on pushes and pull requests.
+
 ## Future modules
 
-Reuse `courses/ml-foundations/` as the course landing page. Add `module-03/` and beyond with the same student-facing navigation, course-specific notebook and FAQ. GitHub Pages automatically updates after commits to `main`.
+Reuse `courses/ml-foundations/` as the course landing page. Release Module 04 and later modules with the same student-facing navigation, course-specific notebook and FAQ. GitHub Pages automatically updates after commits to `main`.
 
 ## Publishing and Blackboard
 

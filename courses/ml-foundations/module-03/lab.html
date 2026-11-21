@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#9E1B32"><title>Interactive Gradient Lab · Module 03 · TeachReach</title><link rel="stylesheet" href="../module-02/assets/module.css"><link rel="stylesheet" href="../assets/module-ui.css?v=module03-1"></head><body data-tr-standalone="true" data-tr-module="03" class=" tr-standalone-page">
+<header class="tr-resource-header">
+ <a class="tr-resource-brand" href="../../../index.html" aria-label="TeachReach homepage"><span class="tr-resource-mark">TR</span><span class="tr-resource-label"><small>KAUSHIK ROY, UNIVERSITY OF ALABAMA</small><strong>Teach<span>Reach</span></strong></span></a>
+ <nav class="tr-resource-nav" aria-label="Module 03 resource navigation">
+ <a href="../../../index.html">Home</a>
+ <a href="../index.html">Course</a>
+ <a href="index.html#overview">Module 03</a>
+ <a href="../module-02/">Module 02</a>
+ <a href="slides.html">Slides</a>
+ <a href="notebook.html">Notebook</a>
+ <a href="office.html">Office hours</a><a href="../syllabus.html">Syllabus</a></nav>
+ </header>
+<main class="page"><span class="eyebrow">MODULE 03 · EXPLORE</span><h1>Read the slope. Choose the step.</h1>
+<section class="lab-card"><h2>1. Move the predicted mean</h2>
+<p>Hold the fictional score at 60 and σ at 10. The curve shows the Gaussian NLL. The short straight line is the tangent at the selected mean.</p>
+<label for="mean"><b>Predicted mean μ</b></label> <input id="mean" type="range" min="45" max="75" step="0.5" value="55">
+<output for="mean" id="meanValue">55</output>
+<svg id="curve" viewBox="0 0 540 220" role="img" aria-label="Gaussian negative log-likelihood against mean, with tangent at the selected mean" style="display:block;width:100%;max-width:650px"></svg>
+<p id="slopeOutput" aria-live="polite"></p></section>
+<section class="lab-card"><h2>2. Choose one learning rate</h2><p>Each trial starts with the original prediction of 55 and gradients [−0.10, −0.15, −0.05]. Try rates 1, 10, and 16. Before each change, predict whether the loss will fall.</p>
+<label for="rate"><b>Learning rate η</b></label> <input id="rate" type="range" min="0" max="20" step="0.5" value="1"> <output for="rate" id="rateValue">1</output>
+<div class="table-wrap"><table><thead><tr><th>Parameter or result</th><th>Before</th><th>After one step</th></tr></thead><tbody id="updateRows"></tbody></table></div>
+<p id="diagnosis" aria-live="polite"></p><a href="notebook.html">Verify this update in PyTorch</a></section></main><footer class="tr-resource-footer"><span><b>KAUSHIK ROY, UNIVERSITY OF ALABAMA</b> · TeachReach · Machine Learning Foundations · Module 03</span><nav><a href="index.html#overview">Module overview</a> · <a href="../index.html">Course modules</a> · <a href="../../../index.html">Home</a></nav></footer><script src="../assets/module-ui.js?v=module03-1"></script><script src="./assets/lab.js"></script></body></html>

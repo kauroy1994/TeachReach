@@ -28,7 +28,7 @@ function renderMarkdown(source){
 }
 async function showNotebook(){
  try{
-  const r=await fetch("./ML_Foundations_Module2_Probability.ipynb",{cache:"no-cache"});
+  const r=await fetch(document.querySelector("a[download]").href,{cache:"no-cache"});
   if(!r.ok)throw Error("Notebook request failed: "+r.status);
   const nb=await r.json();if(!Array.isArray(nb.cells))throw Error("Notebook format not recognized");
   $("cellCount").textContent=nb.cells.length+" notebook cells";

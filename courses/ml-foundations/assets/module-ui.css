@@ -70,65 +70,65 @@
 .tr-module-tabs .tr-ask-nav:hover,.tr-module-tabs .tr-ask-nav.active{
   background:var(--tr-deep)!important;color:white!important
 }
-.tr-module-02 .page.tr-module-main{max-width:1420px;padding:clamp(16px,3vw,42px) clamp(14px,3vw,48px)}
-.tr-module-02 .tr-module-main .hero{
+:is(.tr-module-02,.tr-module-03) .page.tr-module-main{max-width:1420px;padding:clamp(16px,3vw,42px) clamp(14px,3vw,48px)}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero{
   min-height:475px;background:linear-gradient(115deg,#9E1B32,#772432)!important;
   border:0;border-radius:27px;box-shadow:0 24px 68px #9e1b3224;
   overflow:hidden;color:#fff!important
 }
-.tr-module-02 .tr-module-main .hero-copy{padding:clamp(27px,4.3vw,60px)}
-.tr-module-02 .tr-module-main .hero-copy .eyebrow{color:#ffe1e8}
-.tr-module-02 .tr-module-main .hero-copy h1{color:#fff}
-.tr-module-02 .tr-module-main .hero-copy h1 em{color:#ffdae4;font-style:normal}
-.tr-module-02 .tr-module-main .hero-copy p{color:#ffedf1}
-.tr-module-02 .tr-module-main .hero .btn:not(.secondary){
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero-copy{padding:clamp(27px,4.3vw,60px)}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero-copy .eyebrow{color:#ffe1e8}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero-copy h1{color:#fff}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero-copy h1 em{color:#ffdae4;font-style:normal}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero-copy p{color:#ffedf1}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero .btn:not(.secondary){
   background:white!important;border-color:white!important;color:#772432!important
 }
-.tr-module-02 .tr-module-main .hero .btn.secondary{
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero .btn.secondary{
   background:#ffffff12!important;border-color:#ffffff9d!important;color:white!important
 }
-.tr-module-02 .tr-module-main .hero-visual{border:1px solid #fff9;background:#fff9;
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero-visual{border:1px solid #fff9;background:#fff9;
   box-shadow:0 12px 35px #2a0d1826;align-self:center;margin:20px 20px 20px 0}
-.tr-module-02[data-current-tab]:not([data-current-tab="overview"]) #moduleHero{display:none!important}
-.tr-module-02[data-current-tab]:not([data-current-tab="overview"]) .tr-module-main{
+:is(.tr-module-02,.tr-module-03)[data-current-tab]:not([data-current-tab="overview"]) #moduleHero{display:none!important}
+:is(.tr-module-02,.tr-module-03)[data-current-tab]:not([data-current-tab="overview"]) .tr-module-main{
   padding-top:0
 }
-.tr-module-02[data-current-tab="slides"] .tr-module-main,
-.tr-module-02[data-current-tab="lab"] .tr-module-main,
-.tr-module-02[data-current-tab="notebook"] .tr-module-main,
-.tr-module-02[data-current-tab="office"] .tr-module-main{
+:is(.tr-module-02,.tr-module-03)[data-current-tab="slides"] .tr-module-main,
+:is(.tr-module-02,.tr-module-03)[data-current-tab="lab"] .tr-module-main,
+:is(.tr-module-02,.tr-module-03)[data-current-tab="notebook"] .tr-module-main,
+:is(.tr-module-02,.tr-module-03)[data-current-tab="office"] .tr-module-main{
   max-width:none!important;padding:0!important
 }
-.tr-module-02 [data-section="slides"] .panel,
-.tr-module-02 [data-section="lab"] .panel,
-.tr-module-02 [data-section="notebook"] .panel,
-.tr-module-02 [data-section="office"] .panel{
+:is(.tr-module-02,.tr-module-03) [data-section="slides"] .panel,
+:is(.tr-module-02,.tr-module-03) [data-section="lab"] .panel,
+:is(.tr-module-02,.tr-module-03) [data-section="notebook"] .panel,
+:is(.tr-module-02,.tr-module-03) [data-section="office"] .panel{
   margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
   box-shadow:none!important;background:transparent!important
 }
-.tr-module-02 .tr-module-main .tabpane[hidden]{display:none!important}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .tabpane[hidden]{display:none!important}
 .tr-module-01[data-current-tab]:not([data-current-tab="overview"]) #tr-next-module-teaser{display:none!important}
-.tr-module-02 .tr-module-main .section-head h2,
-.tr-module-02 .tr-module-main .panel h2{color:#26313a}
-.tr-module-02 .tr-module-main .panel{border-radius:21px}
-.tr-module-02 .tr-module-main .practice-layout .panel{
+:is(.tr-module-02,.tr-module-03) .tr-module-main .section-head h2,
+:is(.tr-module-02,.tr-module-03) .tr-module-main .panel h2{color:#26313a}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .panel{border-radius:21px}
+:is(.tr-module-02,.tr-module-03) .tr-module-main .practice-layout .panel{
   border:1px solid var(--tr-border);box-shadow:0 12px 38px #43212b13;border-radius:21px
 }
-.tr-module-02 .tr-module-main .practice-layout .exercise-menu button{
+:is(.tr-module-02,.tr-module-03) .tr-module-main .practice-layout .exercise-menu button{
   background:white;border:1px solid #e3dfe2;color:#43545f;border-radius:10px
 }
-.tr-module-02 .tr-module-main .practice-layout .exercise-menu button.active{
+:is(.tr-module-02,.tr-module-03) .tr-module-main .practice-layout .exercise-menu button.active{
   background:var(--tr-soft);border-color:#d9a2b1;color:#8c2440
 }
-.tr-module-01 .embed-header,.tr-module-02 .embed-header{
+.tr-module-01 .embed-header,:is(.tr-module-02,.tr-module-03) .embed-header{
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
   gap:14px;min-height:92px;padding:14px clamp(15px,3vw,48px)!important;
   background:#faf7f7;border-bottom:1px solid var(--tr-border);margin:0!important
 }
-.tr-module-01 .embed-header h2,.tr-module-02 .embed-header h2{
+.tr-module-01 .embed-header h2,:is(.tr-module-02,.tr-module-03) .embed-header h2{
   font-size:clamp(21px,2vw,31px);line-height:1.2;letter-spacing:-.045em;margin:3px 0 6px
 }
-.tr-module-01 .embed-header p,.tr-module-02 .embed-header p{
+.tr-module-01 .embed-header p,:is(.tr-module-02,.tr-module-03) .embed-header p{
   font-size:12px;line-height:1.5;color:#5c6975;margin:0
 }
 .tr-view-controls{
@@ -154,15 +154,15 @@
 .tr-view-button:focus-visible,.tr-view-link:focus-visible,.tr-standalone-full:focus-visible{
   outline:3px solid #375269;outline-offset:3px
 }
-.tr-module-01 .embed-frame,.tr-module-02 .frame{
+.tr-module-01 .embed-frame,:is(.tr-module-02,.tr-module-03) .frame{
   display:block;width:100%;height:calc(100dvh - 219px)!important;min-height:560px;
   max-height:none!important;border:0!important;border-radius:0!important;background:#fff
 }
-.tr-module-01 iframe:fullscreen,.tr-module-02 iframe:fullscreen{
+.tr-module-01 iframe:fullscreen,:is(.tr-module-02,.tr-module-03) iframe:fullscreen{
   width:100vw!important;height:100vh!important;border:0!important;
   min-height:0!important;max-height:none!important;background:#fff
 }
-.tr-module-01 .tr-module-footer,.tr-module-02 .tr-module-footer{
+.tr-module-01 .tr-module-footer,:is(.tr-module-02,.tr-module-03) .tr-module-footer{
   background:#fff;border-top:1px solid var(--tr-border)
 }
 .tr-standalone-full{
@@ -215,9 +215,9 @@ body.low-data .tr-module-main .hero-visual{display:none}
     padding:11px!important;justify-content:center
   }
   .tr-module-tabs .tr-ask-nav{margin:0}
-  .tr-module-02 .tr-module-main .hero{grid-template-columns:1fr;min-height:0}
-  .tr-module-02 .tr-module-main .hero-visual{display:none}
-  .tr-module-01 .embed-frame,.tr-module-02 .frame{min-height:540px}
+  :is(.tr-module-02,.tr-module-03) .tr-module-main .hero{grid-template-columns:1fr;min-height:0}
+  :is(.tr-module-02,.tr-module-03) .tr-module-main .hero-visual{display:none}
+  .tr-module-01 .embed-frame,:is(.tr-module-02,.tr-module-03) .frame{min-height:540px}
 }
 @media(max-width:620px){
   .tr-brand-label strong{font-size:19px}.tr-brand-label small{font-size:8px}
@@ -225,10 +225,10 @@ body.low-data .tr-module-main .hero-visual{display:none}
   .tr-header-utils{gap:5px}.tr-course-link{display:none!important}
   .tr-module-link{padding:7px;font-size:10px!important}
   .tr-module-header #lowDataToggle{padding:7px!important;font-size:10px!important}
-  .tr-module-01 .embed-header,.tr-module-02 .embed-header{padding:13px 15px!important}
+  .tr-module-01 .embed-header,:is(.tr-module-02,.tr-module-03) .embed-header{padding:13px 15px!important}
   .tr-view-controls{width:100%;margin:0;justify-content:flex-start}
   .tr-view-button,.tr-view-link{flex:1}
-  .tr-module-01 .embed-frame,.tr-module-02 .frame{height:calc(100dvh - 250px)!important;min-height:450px}
+  .tr-module-01 .embed-frame,:is(.tr-module-02,.tr-module-03) .frame{height:calc(100dvh - 250px)!important;min-height:450px}
   .tr-slide-footer{justify-content:center!important}
   .tr-slide-footer a,.tr-slide-footer button{font-size:11px!important;padding:7px 8px!important}
   .tr-standalone-toolbar{width:100%;justify-content:flex-start}
@@ -328,44 +328,44 @@ body.low-data .tr-module-main .hero-visual{display:none}
 
 
 /* TeachReach UI harmonization: one pattern for the course portal and all resource pages. */
-.tr-module-01 .quickbar,.tr-module-02 .tr-quickbar{
+.tr-module-01 .quickbar,:is(.tr-module-02,.tr-module-03) .tr-quickbar{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
   gap:12px;margin:24px 0 34px
 }
-.tr-module-01 .quickbar button,.tr-module-02 .tr-quickbar button{
+.tr-module-01 .quickbar button,:is(.tr-module-02,.tr-module-03) .tr-quickbar button{
   min-width:0;border-radius:17px!important;border:1px solid #e6e0e2!important;
   background:#fff!important;color:#26313a!important;
   padding:18px!important;display:flex;gap:12px;align-items:center;
   text-align:left;min-height:91px;box-shadow:0 8px 23px #3b27300d;
   transition:border-color .15s,transform .15s
 }
-.tr-module-01 .quickbar button:hover,.tr-module-02 .tr-quickbar button:hover{
+.tr-module-01 .quickbar button:hover,:is(.tr-module-02,.tr-module-03) .tr-quickbar button:hover{
   transform:translateY(-2px);border-color:#d2a2ac!important
 }
-.tr-module-01 .quickbar .quickicon,.tr-module-02 .tr-quickbar .quickicon{
+.tr-module-01 .quickbar .quickicon,:is(.tr-module-02,.tr-module-03) .tr-quickbar .quickicon{
   flex:0 0 50px;width:50px;height:50px;display:grid;place-items:center;
   background:#fff0f2;color:#9E1B32;border-radius:13px;font-size:26px
 }
-.tr-module-01 .quickbar button strong,.tr-module-02 .tr-quickbar button strong{
+.tr-module-01 .quickbar button strong,:is(.tr-module-02,.tr-module-03) .tr-quickbar button strong{
   display:block;font-size:15px;font-weight:800;color:#26313a
 }
-.tr-module-01 .quickbar button small,.tr-module-02 .tr-quickbar button small{
+.tr-module-01 .quickbar button small,:is(.tr-module-02,.tr-module-03) .tr-quickbar button small{
   display:block;margin-top:4px;color:#5F6A72;font-size:12px;line-height:1.4
 }
-.tr-module-01 .teacher-card,.tr-module-02 .tr-teacher-card{
+.tr-module-01 .teacher-card,:is(.tr-module-02,.tr-module-03) .tr-teacher-card{
   display:flex;align-items:center;gap:21px;padding:22px 24px;max-width:620px;
   background:#fff;border:1px solid #e6e0e2;border-radius:22px;margin-top:26px
 }
-.tr-module-01 .teacher-card img,.tr-module-02 .tr-teacher-card img{
+.tr-module-01 .teacher-card img,:is(.tr-module-02,.tr-module-03) .tr-teacher-card img{
   width:78px;height:78px;flex:0 0 78px;object-fit:cover;border-radius:50%;
   border:3px solid #f0d5db
 }
-.tr-module-01 .teacher-card b,.tr-module-02 .tr-teacher-card b{font-size:19px}
-.tr-module-01 .teacher-card p,.tr-module-02 .tr-teacher-card p{
+.tr-module-01 .teacher-card b,:is(.tr-module-02,.tr-module-03) .tr-teacher-card b{font-size:19px}
+.tr-module-01 .teacher-card p,:is(.tr-module-02,.tr-module-03) .tr-teacher-card p{
   color:#5F6A72;font-size:13px;line-height:1.6;margin:5px 0 9px
 }
-.tr-module-02 .tr-module-main .hero{margin:0 0 24px}
-.tr-module-01 .tr-course-footer,.tr-module-02 .tr-course-footer{
+:is(.tr-module-02,.tr-module-03) .tr-module-main .hero{margin:0 0 24px}
+.tr-module-01 .tr-course-footer,:is(.tr-module-02,.tr-module-03) .tr-course-footer{
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
   gap:15px;padding:22px clamp(16px,4vw,54px);
   background:#fff;border-top:1px solid #e5e0e2;
@@ -375,16 +375,16 @@ body.low-data .tr-module-main .hero-visual{display:none}
 .tr-course-footer .tr-footer-links{display:flex;gap:12px;flex-wrap:wrap}
 .tr-course-footer .tr-footer-links a{font-weight:790;color:#852a43!important;text-decoration:none}
 .tr-course-footer .tr-footer-links a:hover{text-decoration:underline}
-.tr-module-02 .steps .step{
+:is(.tr-module-02,.tr-module-03) .steps .step{
   border:1px solid #e3d9db!important;border-radius:17px!important;
   padding:17px;background:white;box-shadow:none
 }
-.tr-module-02 .steps .step .step-num{
+:is(.tr-module-02,.tr-module-03) .steps .step .step-num{
   display:grid;place-items:center;width:35px;height:35px;
   background:#9E1B32;color:white;border-radius:50%;
   font-size:17px;font-weight:800
 }
-.tr-module-02 .steps .step h3{margin:16px 0 5px;color:#772432}
+:is(.tr-module-02,.tr-module-03) .steps .step h3{margin:16px 0 5px;color:#772432}
 /* Avoid double navigation inside an embedded professor page; retain the portrait in both modules. */
 body.room-page.room-embedded header.tr-resource-header{display:none!important}
 body.room-page.room-embedded .room-shell{
@@ -484,102 +484,102 @@ body.tr-slide-page .deck-stage,body.tr-slide-page .slide{
   body.room-page.room-embedded .avatar-frame{display:flex!important;max-width:none!important;height:120px!important}
   body.room-page.room-embedded .avatar-stage{height:120px!important;min-height:0!important;width:136px!important;flex:0 0 136px}
   body.room-page.room-embedded .avatar-bottom{flex:1}
-  .tr-module-01 .quickbar,.tr-module-02 .tr-quickbar{grid-template-columns:1fr 1fr}
-  .tr-module-01 .quickbar button,.tr-module-02 .tr-quickbar button{
+  .tr-module-01 .quickbar,:is(.tr-module-02,.tr-module-03) .tr-quickbar{grid-template-columns:1fr 1fr}
+  .tr-module-01 .quickbar button,:is(.tr-module-02,.tr-module-03) .tr-quickbar button{
     padding:12px!important;min-height:75px
   }
-  .tr-module-01 .quickbar .quickicon,.tr-module-02 .tr-quickbar .quickicon{
+  .tr-module-01 .quickbar .quickicon,:is(.tr-module-02,.tr-module-03) .tr-quickbar .quickicon{
     width:35px;height:35px;flex-basis:35px;font-size:20px
   }
-  .tr-module-01 .teacher-card,.tr-module-02 .tr-teacher-card{gap:12px;padding:15px}
-  .tr-module-01 .teacher-card img,.tr-module-02 .tr-teacher-card img{
+  .tr-module-01 .teacher-card,:is(.tr-module-02,.tr-module-03) .tr-teacher-card{gap:12px;padding:15px}
+  .tr-module-01 .teacher-card img,:is(.tr-module-02,.tr-module-03) .tr-teacher-card img{
     width:60px;height:60px;flex-basis:60px
   }
   .tr-resource-brand .tr-resource-label small{font-size:8px}
   .tr-resource-brand .tr-resource-label strong{font-size:19px}
 }
 @media(max-width:410px){
-  .tr-module-01 .quickbar,.tr-module-02 .tr-quickbar{grid-template-columns:1fr}
+  .tr-module-01 .quickbar,:is(.tr-module-02,.tr-module-03) .tr-quickbar{grid-template-columns:1fr}
 }
 
 
 /* Shared exercise presentation and registration layout for both modules. */
-.tr-module-01 .practice-layout,.tr-module-02 .practice-layout{
+.tr-module-01 .practice-layout,:is(.tr-module-02,.tr-module-03) .practice-layout{
   display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px
 }
-.tr-module-01 .practice-menu,.tr-module-02 .exercise-menu{
+.tr-module-01 .practice-menu,:is(.tr-module-02,.tr-module-03) .exercise-menu{
   display:grid;gap:7px;max-height:560px;overflow:auto
 }
-.tr-module-01 .practice-menu button,.tr-module-02 .exercise-menu button{
+.tr-module-01 .practice-menu button,:is(.tr-module-02,.tr-module-03) .exercise-menu button{
   display:flex;align-items:center;justify-content:space-between;
   min-height:42px;padding:11px 13px;border-radius:10px;
   border:1px solid #e8e2e3!important;background:#fff!important;
   color:#45545e!important;text-align:left;line-height:1.4;
   font-size:12px!important;font-weight:760!important
 }
-.tr-module-01 .practice-menu button.active,.tr-module-02 .exercise-menu button.active{
+.tr-module-01 .practice-menu button.active,:is(.tr-module-02,.tr-module-03) .exercise-menu button.active{
   background:#fff0f2!important;color:#8b2540!important;border-color:#d9a5b4!important
 }
-.tr-module-01 .practice-menu button:hover,.tr-module-02 .exercise-menu button:hover{
+.tr-module-01 .practice-menu button:hover,:is(.tr-module-02,.tr-module-03) .exercise-menu button:hover{
   background:#fff6f7!important;border-color:#d1adb8!important
 }
-.tr-module-01 .answers,.tr-module-02 .answer-list{
+.tr-module-01 .answers,:is(.tr-module-02,.tr-module-03) .answer-list{
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
 }
-.tr-module-01 .answers button,.tr-module-02 .answer-list button{
+.tr-module-01 .answers button,:is(.tr-module-02,.tr-module-03) .answer-list button{
   padding:15px!important;min-height:68px;border-radius:12px!important;
   background:#fcfafa!important;border:1px solid #ddd4d9!important;
   color:#354653!important;font-size:14px!important;font-weight:650!important
 }
-.tr-module-01 .answers button.selected,.tr-module-02 .answer-list button.selected{
+.tr-module-01 .answers button.selected,:is(.tr-module-02,.tr-module-03) .answer-list button.selected{
   background:#fff0f2!important;color:#772432!important;border-color:#9E1B32!important
 }
 .tr-module-01 #page-question .page-heading h1,
-.tr-module-02 [data-section="question"] .section-head h2{
+:is(.tr-module-02,.tr-module-03) [data-section="question"] .section-head h2{
   font-size:clamp(29px,3.4vw,43px)!important;letter-spacing:-.05em;line-height:1.15
 }
 .tr-module-01 #page-question .form-card,
-.tr-module-02 [data-section="question"] .panel{
+:is(.tr-module-02,.tr-module-03) [data-section="question"] .panel{
   background:#fff;border:1px solid #e5e0e2;border-radius:20px;
   box-shadow:0 12px 32px #43212b10
 }
 .tr-module-01 #page-question input,
 .tr-module-01 #page-question textarea,
 .tr-module-01 #page-question select,
-.tr-module-02 [data-section="question"] input,
-.tr-module-02 [data-section="question"] textarea,
-.tr-module-02 [data-section="question"] select{
+:is(.tr-module-02,.tr-module-03) [data-section="question"] input,
+:is(.tr-module-02,.tr-module-03) [data-section="question"] textarea,
+:is(.tr-module-02,.tr-module-03) [data-section="question"] select{
   border:1px solid #cbd5db;border-radius:9px;background:#fff;color:#26313a;
   padding:12px;font-size:13px
 }
 .tr-module-01 #page-question input:focus-visible,
-.tr-module-02 [data-section="question"] input:focus-visible{
+:is(.tr-module-02,.tr-module-03) [data-section="question"] input:focus-visible{
   outline:3px solid #d7a1b0;outline-offset:2px
 }
-.tr-module-01 #page-question table,.tr-module-02 [data-section="question"] table{
+.tr-module-01 #page-question table,:is(.tr-module-02,.tr-module-03) [data-section="question"] table{
   width:100%;border-collapse:collapse;font-size:12px;
 }
-.tr-module-01 #page-question th,.tr-module-02 [data-section="question"] th{
+.tr-module-01 #page-question th,:is(.tr-module-02,.tr-module-03) [data-section="question"] th{
   background:#f8eff1;color:#5d3442;text-align:left;font-weight:850
 }
 .tr-module-01 #page-question th,.tr-module-01 #page-question td,
-.tr-module-02 [data-section="question"] th,.tr-module-02 [data-section="question"] td{
+:is(.tr-module-02,.tr-module-03) [data-section="question"] th,:is(.tr-module-02,.tr-module-03) [data-section="question"] td{
   padding:11px;border-bottom:1px solid #e6e3e4
 }
 body.room-page.room-embedded .tr-resource-footer{display:none!important}
 @media(max-width:900px){
-  .tr-module-01 .practice-layout,.tr-module-02 .practice-layout{
+  .tr-module-01 .practice-layout,:is(.tr-module-02,.tr-module-03) .practice-layout{
     grid-template-columns:1fr
   }
-  .tr-module-01 .practice-menu,.tr-module-02 .exercise-menu{
+  .tr-module-01 .practice-menu,:is(.tr-module-02,.tr-module-03) .exercise-menu{
     display:flex;overflow-x:auto;max-height:none;flex-wrap:nowrap;gap:7px
   }
-  .tr-module-01 .practice-menu button,.tr-module-02 .exercise-menu button{
+  .tr-module-01 .practice-menu button,:is(.tr-module-02,.tr-module-03) .exercise-menu button{
     min-width:175px;flex:0 0 auto
   }
 }
 @media(max-width:600px){
-  .tr-module-01 .answers,.tr-module-02 .answer-list{
+  .tr-module-01 .answers,:is(.tr-module-02,.tr-module-03) .answer-list{
     grid-template-columns:1fr
   }
 }
@@ -660,11 +660,11 @@ body.room-page.room-embedded .tr-resource-footer{display:none!important}
 }
 
 /* Portal top strip matches Module 01's 7px UA crimson stripe. */
-.tr-module-02 .topline{height:7px!important;background:#9E1B32!important}
+:is(.tr-module-02,.tr-module-03) .topline{height:7px!important;background:#9E1B32!important}
 
 /* Match question registration columns in Module 02 to Module 01. */
-.tr-module-02 [data-section="question"] .grid-2{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:25px}
-@media(max-width:900px){.tr-module-02 [data-section="question"] .grid-2{grid-template-columns:1fr}}
+:is(.tr-module-02,.tr-module-03) [data-section="question"] .grid-2{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:25px}
+@media(max-width:900px){:is(.tr-module-02,.tr-module-03) [data-section="question"] .grid-2{grid-template-columns:1fr}}
 
 /* 2026-11-21 · Unified scrollable lecture stage (both modules).
    The slide, not its internal content rows, owns vertical scrolling. */
@@ -783,7 +783,7 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
 @media(max-width:950px){body.tr-slide-page .tr-bridge-summary{grid-template-columns:1fr!important}}
 
 /* Syllabus and stage navigation shared by Modules 01 and 02. */
-.tr-module-01 .tr-course-progress,.tr-module-02 .tr-course-progress{
+.tr-module-01 .tr-course-progress,:is(.tr-module-02,.tr-module-03) .tr-course-progress{
  display:flex;align-items:center;gap:11px 16px;flex-wrap:wrap;
  padding:12px 16px;margin:12px 0 20px;background:#fff;
  border:1px solid #e8d8df;border-left:4px solid #9E1B32;border-radius:11px;
@@ -796,7 +796,7 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
  color:#882641!important;font-weight:850;text-decoration:none!important
 }
 .tr-course-progress a:hover{text-decoration:underline!important}
-.tr-module-01 .tr-assessment-notice,.tr-module-02 .tr-assessment-notice{
+.tr-module-01 .tr-assessment-notice,:is(.tr-module-02,.tr-module-03) .tr-assessment-notice{
  display:block;background:#fff4f6;border:1px solid #e5c6ce;
  border-left:4px solid #9E1B32;padding:16px 19px;
  margin:0 0 22px;border-radius:12px;
@@ -804,15 +804,15 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
 }
 .tr-assessment-notice strong{color:#762339;font-weight:900}
 .tr-assessment-notice a{color:#842640!important;font-weight:850!important;text-decoration:underline!important}
-.tr-module-01 .tr-header-utils,.tr-module-02 .tr-header-utils{gap:6px 9px}
-.tr-module-01 .tr-header-utils .tr-course-link,.tr-module-02 .tr-header-utils .tr-course-link{font-size:11px!important}
+.tr-module-01 .tr-header-utils,:is(.tr-module-02,.tr-module-03) .tr-header-utils{gap:6px 9px}
+.tr-module-01 .tr-header-utils .tr-course-link,:is(.tr-module-02,.tr-module-03) .tr-header-utils .tr-course-link{font-size:11px!important}
 @media(max-width:1100px){
 .tr-module-01 .tr-header-utils .tr-course-link,
-.tr-module-02 .tr-header-utils .tr-course-link{padding:6px 8px;font-size:10px!important}
+:is(.tr-module-02,.tr-module-03) .tr-header-utils .tr-course-link{padding:6px 8px;font-size:10px!important}
 }
 @media(max-width:760px){
 .tr-module-01 .tr-header-utils .tr-course-link,
-.tr-module-02 .tr-header-utils .tr-course-link{display:none!important}
+:is(.tr-module-02,.tr-module-03) .tr-header-utils .tr-course-link{display:none!important}
 .tr-course-progress{gap:8px!important}
 }
 

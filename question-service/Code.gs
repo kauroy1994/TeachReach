@@ -7,7 +7,7 @@
 const TEACHREACH_SHEET_ID = '1i5se-ApkNFNxh1cRSx7oI1DN8K65RaNbPb2ohesbLZI';
 const TEACHREACH_SHEET_NAME = 'Questions';
 const TEACHREACH_PARENT_ORIGIN = 'https://kauroy1994.github.io';
-const TEACHREACH_MODULES = ['module-01', 'module-02'];
+const TEACHREACH_MODULES = ['module-01', 'module-02', 'module-03'];
 
 function getQuestionSheet_() {
   const sheet = SpreadsheetApp.openById(TEACHREACH_SHEET_ID).getSheetByName(TEACHREACH_SHEET_NAME);

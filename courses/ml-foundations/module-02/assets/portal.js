@@ -1,6 +1,6 @@
 (()=>{
 "use strict";
-const D=window.TR_M2,$=id=>document.getElementById(id);
+const D=window.TR_M3 || window.TR_M2,$=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function openTab(t,record=true){
  if(!["overview","slides","lab","practice","notebook","office","question"].includes(t))t="overview";
@@ -17,7 +17,7 @@ document.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",(
 window.addEventListener("hashchange",()=>openTab(location.hash.slice(1),false));
 window.addEventListener("message",e=>{if(e.origin===location.origin&&e.data?.type==="teachreach-open-question")openTab("question")});
 const exercises=D.exercises;let activeExercise=0,selected=null;
-const key="teachreach-m02-exercise-progress";
+const key="teachreach-m"+document.body.dataset.trModule+"-exercise-progress";
 let solved={};try{solved=JSON.parse(localStorage.getItem(key)||"{}")}catch{solved={}}
 function save(){try{localStorage.setItem(key,JSON.stringify(solved))}catch{}}
 function feedback(message,type="note"){

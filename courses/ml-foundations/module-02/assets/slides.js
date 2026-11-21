@@ -1,6 +1,6 @@
 (()=>{
 "use strict";
-const all=window.TR_M2.slides;
+const all=(window.TR_M3 || window.TR_M2).slides;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s===undefined?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -46,7 +46,7 @@ function render(){
   $('slideLead').textContent=s.lead;
   $('mathBlock').textContent=s.math;
   $('explainText').textContent=s.explain||"Connect this representation to the same Campus Study Coach model introduced in Module 1.";
-  $('visualArea').innerHTML=diagram(s.visual);
+  $('visualArea').innerHTML=Array.isArray(s.visual) ? cards(s.visual) : diagram(s.visual);
   $('checkText').textContent=s.check||"Explain the connection to Module 1.";
   $('codeWrap').hidden=!codeVisible;
   $('codeToggle').disabled=!Boolean(s.code?.trim());
@@ -56,7 +56,7 @@ function render(){
   $('codeContent').textContent=s.code||"";
   $('noteContent').textContent=s.note||"Ask students to explain the diagram and formal notation.";
   $('notes').hidden=true;
-  document.title=(i+1)+" / "+all.length+" · "+s.title+" · Module 02";
+  document.title=(i+1)+" / "+all.length+" · "+s.title+" · Module "+document.body.dataset.trModule;
   try{history.replaceState(null,"",location.pathname+"#"+(i+1))}catch{}
 }
 function jump(j){i=clamp(j,0,all.length-1);codeVisible=false;render();$('slide').scrollTop=0;$('outline').hidden=true}

@@ -5,7 +5,7 @@ const body=document.body;
 const module=body.dataset.trModule;
 function readLowData(){try{return localStorage.getItem("teachreach-lowdata")==="1"}catch{return false}}
 function writeLowData(x){try{localStorage.setItem("teachreach-lowdata",x?"1":"0")}catch{}}
-function initModule02(){
+function initModulePortal(){
   const low=$("lowDataToggle"),menu=$("menuToggle"),nav=$("siteNav");
   if(!low||!menu||!nav)return;
   let enabled=readLowData();
@@ -20,7 +20,7 @@ function initModule02(){
   }));
   update();
 }
-if(module==="02" && body.classList.contains("tr-module-02"))initModule02();
+if(["02","03"].includes(module) && body.dataset.currentTab) initModulePortal();
 function make(tag,cls,label){
   const element=document.createElement(tag);element.className=cls;
   if(label)element.textContent=label;
@@ -102,5 +102,5 @@ function initStandalone(){
   header.append(holder);
 }
 if(body.dataset.trStandalone==="true")initStandalone();
-if(body.classList.contains("tr-module-01")||body.classList.contains("tr-module-02"))initEmbedControls();
+if(body.classList.contains("tr-module-01")||["02","03"].includes(module))initEmbedControls();
 })();
