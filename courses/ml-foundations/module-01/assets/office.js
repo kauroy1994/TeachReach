@@ -54,7 +54,7 @@ function chooseVoice(){
     ||null;
 }
 function splitSpeech(text){
-  const sentences=String(text||'').replace(/\\s+/g,' ').trim().match(/[^.!?]+[.!?]*|[^.!?]+$/g)||[];
+  const sentences=String(text||'').replace(/\s+/g,' ').trim().match(/[^.!?]+[.!?]*|[^.!?]+$/g)||[];
   const chunks=[];
   for(const sentence of sentences){
     const s=sentence.trim();if(!s)continue;
