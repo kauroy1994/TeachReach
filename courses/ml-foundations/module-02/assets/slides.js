@@ -56,7 +56,7 @@ function render(){
   document.title=(i+1)+" / "+all.length+" · "+s.title+" · Module 02";
   try{history.replaceState(null,"",location.pathname+"#"+(i+1))}catch{}
 }
-function jump(j){i=clamp(j,0,all.length-1);codeVisible=false;render();$('outline').hidden=true}
+function jump(j){i=clamp(j,0,all.length-1);codeVisible=false;render();$('slide').scrollTop=0;$('outline').hidden=true}
 $('previous').onclick=()=>jump(i-1);
 function toggleDeckFullscreen(){
  const root=document.documentElement;

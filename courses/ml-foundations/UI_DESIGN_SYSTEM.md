@@ -27,6 +27,16 @@ Teaching content differs by module, but navigation and instructional controls sh
 - Office hours in both modules display the same static faculty photograph, offer browser narration, and display module-specific curated FAQ answers.
 - Full-page resources have the same TeachReach header, module navigation, fullscreen toolbar, and course footer.
 
+
+## Slide scrolling and overlap prevention (critical)
+- The presentation header and footer are fixed-height/flex-shrink-zero structural regions. The central slide stage is the **only** independently scrollable region on both modules: `overflow-y:auto; min-height:0; flex:1 1 auto`.
+- Module 01 must not use `display:grid; align-items:center; flex:1` on `.slide-content`. That combination compresses long teaching slides and can visually overlap content with the footer. The shared CSS overrides it with normal block layout and allows the parent slide stage to scroll.
+- Long PyTorch examples scroll within their code block; they must not push or overlap subsequent diagrams. The slide itself remains scrollable for the content below.
+- Module 01's Full screen control must remain visible on small screens; older local CSS hides the last control at 600px and must be overridden.
+- Responsive slide footers can wrap into two rows on phone widths, retaining All slides, Office hours, Speaker notes, Full screen, Back and Next.
+- Advancing to a new slide resets the slide scroll position to the top.
+- Audit both collapsed and expanded PyTorch examples, long exercises, diagrams, end-of-deck slides, and horizontal overflow at desktop, tablet and phone widths.
+
 ## Responsive behavior
 - Desktop: horizontal header and navigation; wide slide/lab content.
 - Tablet: wrapping layout and simplified geometry.
