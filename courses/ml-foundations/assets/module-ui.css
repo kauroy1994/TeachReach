@@ -769,3 +769,15 @@ body.tr-slide-page .tr-slide-footer #m2FullBtn{
   }
   body.tr-slide-page .tr-slide-head,body.tr-slide-page .tr-slide-footer{display:none!important}
 }
+
+/* Visually reviewed: Module 1 bridge slides use the same single PyTorch panel as Module 2. */
+body.tr-slide-page .tr-bridge-summary{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;
+  gap:14px;width:100%
+}
+body.tr-slide-page .tr-bridge-summary>div{min-width:0;overflow-wrap:anywhere}
+body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+/* Keep Module 1 question tables horizontally scrollable without scrolling the entire page. */
+.tr-module-01 #page-question{overflow-x:clip!important}
+.tr-module-01 #page-question .queue-scroll{max-width:100%;overflow-x:auto!important}
+@media(max-width:950px){body.tr-slide-page .tr-bridge-summary{grid-template-columns:1fr!important}}
