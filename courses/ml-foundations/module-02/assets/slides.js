@@ -12,7 +12,7 @@ function svgCurve(kind){
   const curve=(s,stroke,fill)=>{let pts=xs.map(x=>[(x-20)/65*590+16,225-pdf(x,55,s)*3900]);let path="M"+pts.map(p=>p.map(y=>y.toFixed(1)).join(",")).join(" L");return '<path d="'+path+'" fill="none" stroke="'+stroke+'" stroke-width="3.5"/>'};
   const shade=xs.filter(x=>x>=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*3900]);
   let html='<svg viewBox="0 0 620 270" role="img" aria-label="A probability density curve for possible scores, centered at fifty five."><defs><linearGradient id="g"><stop stop-color="#dfa8b6"/><stop offset="1" stop-color="#9e1b32"/></linearGradient></defs><path d="M16 225H610" stroke="#9fb0bd" stroke-width="2"/>';
-  if(["threshold","interval","cdf","density","distribution"].includes(kind)){const pts=(kind==="interval"?xs.filter(x=>x>=50&&x<=60):kind==="cdf"?xs.filter(x=>x<=60):shade);html+='<path d="M'+pts[0][0].toFixed(1)+',225 L'+pts.map(p=>p.map(y=>y.toFixed(1)).join(",")).join(" L")+' L'+pts[pts.length-1][0].toFixed(1)+',225 Z" fill="#e1aebc" opacity=".65"/>';}
+  if(["threshold","interval","cdf","density","distribution"].includes(kind)){const pts=(kind==="interval"?xs.filter(x=>x>=50&&x<=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*3900]):kind==="cdf"?xs.filter(x=>x<=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*3900]):shade);html+='<path d="M'+pts[0][0].toFixed(1)+',225 L'+pts.map(p=>p.map(y=>y.toFixed(1)).join(",")).join(" L")+' L'+pts[pts.length-1][0].toFixed(1)+',225 Z" fill="#e1aebc" opacity=".65"/>';}
   html+=curve(10,"#9E1B32");
   if(["normal","spread","variance","means"].includes(kind)){html+=curve(5,"#345978")+curve(15,"#b77e42")+'<text x="400" y="36" font-size="13" fill="#345978">Narrower σ</text><text x="400" y="54" font-size="13" fill="#b77e42">Wider σ</text>';}
   html+='<line x1="'+(16+(55-20)/65*590)+'" y1="22" x2="'+(16+(55-20)/65*590)+'" y2="228" stroke="#9e1b32" stroke-dasharray="5 5"/><text x="328" y="247" fill="#762339" font-size="12">55</text><text x="12" y="248" fill="#6c7b83" font-size="12">20</text><text x="585" y="248" fill="#6c7b83" font-size="12">85</text><text x="245" y="264" fill="#596b78" font-size="12">Possible exam score</text></svg>';
@@ -45,9 +45,11 @@ function render(){
   $('explainText').textContent=s.explain||"Connect this representation to the same Campus Study Coach model introduced in Module 1.";
   $('visualArea').innerHTML=diagram(s.visual);
   $('checkText').textContent=s.check||"Explain the connection to Module 1.";
-  $('codeWrap').hidden=!s.code||!codeVisible;
-  $('codeToggle').hidden=!s.code;
+  $('codeWrap').hidden=!codeVisible;
+  $('codeToggle').disabled=!Boolean(s.code?.trim());
+  $('codeToggle').hidden=false;
   $('codeToggle').textContent=codeVisible?"Hide PyTorch example":"Show PyTorch example";
+  $('codeToggle').setAttribute("aria-expanded",String(codeVisible));
   $('codeContent').textContent=s.code||"";
   $('noteContent').textContent=s.note||"Ask students to explain the diagram and formal notation.";
   $('notes').hidden=true;
@@ -65,7 +67,16 @@ $('m2FullBtn').onclick=toggleDeckFullscreen;
 document.addEventListener('fullscreenchange',()=>{$('m2FullBtn').textContent=document.fullscreenElement?'⤢ Exit full screen (F)':'⛶ Full screen (F)'});
 $('next').onclick=()=>jump(i+1);
 $('notesToggle').onclick=()=>{$('notes').hidden=!$('notes').hidden};
-$('codeToggle').onclick=()=>{codeVisible=!codeVisible;render()};
+$('codeToggle').onclick=()=>{
+  codeVisible=!codeVisible;
+  $('codeWrap').hidden=!codeVisible;
+  $('codeToggle').textContent=codeVisible?"Hide PyTorch example":"Show PyTorch example";
+  $('codeToggle').setAttribute("aria-expanded",String(codeVisible));
+};
+$('codeCopy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(all[i].code);$('codeCopy').textContent="Copied ✓";}
+  catch{$('codeCopy').textContent="Select code to copy";}
+};
 $('outlineToggle').onclick=()=>{
   $('outline').hidden=!$('outline').hidden;
   if($('outline').hidden)return;
@@ -85,6 +96,7 @@ document.addEventListener("keydown",e=>{
   if(e.key.toLowerCase()==="n")$('notesToggle').click();
   if(e.key.toLowerCase()==="g")$('outlineToggle').click();
   if(e.key.toLowerCase()==="f"){$("m2FullBtn").click()}
+  if(e.key.toLowerCase()==="p"){$("codeToggle").click()}
   if(e.key==="Escape"){$('outline').hidden=true;$('notes').hidden=true}
 });
 const requested=Number(location.hash.replace("#",""));

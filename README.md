@@ -41,6 +41,16 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 **Question inbox:** Both modules use a single faculty-controlled Google Sheet, separated by the `Module` field. When the Apps Script web app is deployed, enter the same `/exec` URL into both modules' `assets/question-config.js` files. The question-service script has been updated to accept module-01 and module-02.
 
 
+## PyTorch example consistency
+
+The same example controls appear throughout both learning modules:
+
+- **Module 01:** all **56** classroom slides have a **Show PyTorch example** button (including the Module 02 teaser and exercise/notation slides), and all **7** interactive tensor lessons provide the same Show/Hide and Copy controls.
+- **Module 02:** all **53** classroom slides have runnable, self-contained PyTorch examples; all **5** probability-lab experiments have matching Show/Hide and Copy controls with slider-aware code.
+- Classroom presentation shortcuts are identical: **F** full screen, **G** slide overview, **N** speaker notes, **P** PyTorch example, and arrow keys for navigation.
+- The shared styling for these controls lives in `courses/ml-foundations/assets/module-ui.css`. The module-specific code is kept in Module 01's `assets/slide_examples.js`, Module 02's `assets/content.js`, and Module 02's `assets/lab_examples.js`.
+- Both modules keep faculty-curated office hours, the complete notebook, exercises, the question register, and the course/home navigation.
+
 ## Consistent interface across modules
 
 Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `module-ui.js`. Both use the same UA header, module tabs, low-data toggle, and accessible view controls. Slides, Explore labs, Notebooks, and Office Hours provide **Full screen** (in-page Fullscreen API) and **Open in new tab** as distinct controls. Standalone resources also show a consistent Full screen control and a link back to their module. On the slide decks, press **F** to enter/exit full screen, **G** for the slide navigator, **N** for speaker notes, and arrow keys to navigate. Module-specific lesson content, exercises, FAQs, and notebook source files remain separate.
