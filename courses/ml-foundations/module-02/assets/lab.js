@@ -64,7 +64,8 @@ function renderMLE(){
  const nll=n*Math.log(s*Math.sqrt(2*Math.PI))+ys.reduce((a,y)=>a+.5*((y-mu)/s)**2,0);
  const fitted=ys.reduce((a,y)=>a+y,0)/ys.length,variance=ys.reduce((a,y)=>a+(y-fitted)**2,0)/ys.length;
  set("fitMeanVal",mu);set("fitSigmaVal",s);set("fitNLL",fmt(nll,3));set("fitOptimal",fmt(fitted,1)+" / "+fmt(Math.sqrt(variance),2));
- const fn=x=>Math.exp(-.035*(ys.length*Math.log(s*Math.sqrt(2*Math.PI))+ys.reduce((a,y)=>a+.5*((y-x)/s)**2,0)-18));
+ // L(x, s) / L(fitted, s) for these observations with fixed sigma.
+ const fn=x=>Math.exp(-n*(x-fitted)**2/(2*s*s));
  $("fitPlot").innerHTML=linePlot(fn,{low:35,high:75,title:"Candidate mean μ → relative likelihood",color:"#345978"});
 }
 function selectTab(id){

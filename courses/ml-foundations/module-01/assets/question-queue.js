@@ -27,5 +27,14 @@ const handler=(ev)=>{if(!/^https:\/\/(?:script\.google\.com|(?:[a-z0-9-]+\.)*goo
 function cleanup(){sending=false;$('registerBtn').disabled=false;clearTimeout(busyTimer);window.removeEventListener('message',handler);form.remove()}
 window.addEventListener('message',handler);form.submit();busyTimer=setTimeout(()=>{cleanup();status('Registration has not been confirmed. Check the class register before trying again.')},17000)
 }
+if(!cfg.url){
+ const form=$('questionForm');
+ const notice=document.createElement('p');
+ notice.setAttribute('role','status');
+ notice.textContent='Question registration is closed. You can draft your question here until the instructor opens the class register.';
+ form.before(notice);
+ $('registerBtn').disabled=true;
+ $('refreshQuestions').disabled=true;
+}
 $('questionForm')?.addEventListener('submit',submit);$('refreshQuestions')?.addEventListener('click',loadShared);loadShared();
 })();

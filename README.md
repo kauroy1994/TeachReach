@@ -45,7 +45,7 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 
 - 53 teaching slides covering eight probability lessons and a synthesis.
 - Five interactive browser experiments: Normal distributions, conditional probability, Bayes updates, sampling, and Gaussian likelihood.
-- Sixteen graded-in-browser exercises with worked answers and local progress tracking.
+- Sixteen formative exercises with immediate feedback, worked answers and local progress tracking.
 - A complete 42-cell PyTorch notebook: `courses/ml-foundations/module-02/ML_Foundations_Module2_Probability.ipynb`, readable in-browser and optionally runnable in Colab.
 - Twenty-four module-specific curated office-hour FAQs, using the same static professor portrait and the browser's built-in speech synthesis.
 - A module-specific question registration form and public pending-question table, ready for the same free Apps Script service used by Module 01.

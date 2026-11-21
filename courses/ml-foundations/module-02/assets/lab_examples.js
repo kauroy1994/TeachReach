@@ -83,5 +83,6 @@ for(const section of document.querySelectorAll("[data-labpanel]")){
 document.querySelectorAll('#meanSlider,#sigmaSlider,#thresholdSlider,#countA,#countB,#countC,#countD,#priorSlider,#sensitivitySlider,#fprSlider,#strongSignal,#weakSignal,#sampleSlider,#fitMeanSlider,#fitSigmaSlider').forEach(x=>{
   x.addEventListener("input",refresh);x.addEventListener("change",refresh);
 });
+$("resetConditional").addEventListener("click",refresh);
 refresh();
 })();

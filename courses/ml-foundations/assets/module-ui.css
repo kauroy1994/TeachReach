@@ -874,3 +874,17 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
  .tr-planned-module .tr-quickbar{grid-template-columns:1fr}
  .tr-planned-module .tr-quickbar .quickcard{min-height:64px}
 }
+
+.tr-slide-page .loss-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.tr-slide-page .probability-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .tr-slide-page .probability-cards { grid-template-columns: 1fr; }
+}

@@ -2,19 +2,19 @@
 "use strict";
 const D=window.TR_M2,$=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function openTab(t){
+function openTab(t,record=true){
  if(!["overview","slides","lab","practice","notebook","office","question"].includes(t))t="overview";
  document.body.dataset.currentTab=t;
  document.querySelectorAll("[data-tab]").forEach(b=>{const active=b.dataset.tab===t;b.classList.toggle("active",active);b.setAttribute("aria-selected",String(active))});
  document.querySelectorAll("[data-section]").forEach(p=>{p.hidden=p.dataset.section!==t});
  const frame=$({slides:"slidesFrame",lab:"labFrame",notebook:"notebookFrame",office:"officeFrame"}[t]);
  if(frame&&!frame.src)frame.src=frame.dataset.src;
- try{history.replaceState(null,"",location.pathname+"#"+t)}catch{}
+ if(record && location.hash!=="#"+t)history.pushState(null,"","#"+t);
  document.documentElement.scrollTop=0;
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.tab)));
 document.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.open)));
-window.addEventListener("hashchange",()=>openTab(location.hash.slice(1)));
+window.addEventListener("hashchange",()=>openTab(location.hash.slice(1),false));
 window.addEventListener("message",e=>{if(e.origin===location.origin&&e.data?.type==="teachreach-open-question")openTab("question")});
 const exercises=D.exercises;let activeExercise=0,selected=null;
 const key="teachreach-m02-exercise-progress";
@@ -67,5 +67,5 @@ $("explainExercise").onclick=()=>feedback(exercises[activeExercise].explanation,
 $("previousExercise").onclick=()=>choose(activeExercise-1);
 $("nextExercise").onclick=()=>choose(activeExercise+1);
 choose(0);
-openTab(location.hash.slice(1)||"overview");
+openTab(location.hash.slice(1)||"overview",false);
 })();

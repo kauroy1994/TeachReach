@@ -14,7 +14,7 @@ const openTab=(name,updateURL=true)=>{
   b.setAttribute("tabindex",active?"0":"-1");
  }
  body.dataset.currentTab=name;
- if(updateURL)history.replaceState(null,"",location.pathname+"#"+name);
+ if(updateURL && location.hash!=="#"+name)history.pushState(null,"","#"+name);
  document.getElementById("siteNav")?.classList.remove("open");
  const toggle=document.getElementById("menuToggle");
  if(toggle)toggle.setAttribute("aria-expanded","false");
