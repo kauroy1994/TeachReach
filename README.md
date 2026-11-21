@@ -28,14 +28,14 @@ Module 01 — **Why machine learning? Tensors, data, predictions and learning**
 - Complete in-browser PyTorch notebook, with an optional Google Colab link
 - Professor-curated FAQ office hours displaying Professor Roy's portrait
 - Professor-recorded audio playback when an FAQ's audio recording exists in `assets/audio/`
-- Shared question queue with student confirmation numbers after the one-time question-service deployment
+- Embedded Google Form for asynchronous office-hours questions
 
 The site is **static**: no Python, backend server, GPU, paid API key, or LLM account is needed for students.
 
 ## Faculty operation
 
-- **Class question register**: [Private Google Sheet](https://docs.google.com/spreadsheets/d/1i5se-ApkNFNxh1cRSx7oI1DN8K65RaNbPb2ohesbLZI/edit). Deploy the free Google Apps Script once: [question-service/SETUP.md](question-service/SETUP.md).
-- **FAQ content**: `courses/ml-foundations/module-01/assets/faq_seed.js`. Add faculty-approved explanations and change answered question status in the private Sheet.
+- **Office-hours questions**: Open the form response tab in the [Private Google Sheet](https://docs.google.com/spreadsheets/d/1i5se-ApkNFNxh1cRSx7oI1DN8K65RaNbPb2ohesbLZI/edit) and filter by module.
+- **FAQ content**: `courses/ml-foundations/module-01/assets/faq_seed.js`. Add faculty-approved explanations and manage answered rows in the private response sheet.
 - **Record answers**: `courses/ml-foundations/module-01/faculty-recordings.html` records your actual voice from a browser microphone. Download files using the exact FAQ ID and upload to `courses/ml-foundations/module-01/assets/audio/`.
 - **Notebook source**: `courses/ml-foundations/module-01/ML_Foundations_Module1_PyTorch.ipynb`.
 
@@ -48,11 +48,11 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 - Seventeen formative exercises with immediate feedback, worked answers and local progress tracking.
 - A complete 42-cell PyTorch notebook: `courses/ml-foundations/module-02/ML_Foundations_Module2_Probability.ipynb`, readable in-browser and optionally runnable in Colab.
 - Twenty-four module-specific curated office-hour FAQs, using the same static professor portrait and the browser's built-in speech synthesis.
-- A module-specific question registration form and public pending-question table, ready for the same free Apps Script service used by Module 01.
+- The office-hours Google Form opens with Module 02 selected.
 
 **Office hours content:** Module 02's FAQ records live in `courses/ml-foundations/module-02/assets/content.js` as `window.TR_M2.faq`. Module 01's established office-hours speech and UI are reused, with no new subscriptions or student API keys.
 
-**Question inbox:** The released modules use a single faculty-controlled Google Sheet, separated by the `Module` field. When the Apps Script web app is deployed, enter the same `/exec` URL into the released modules' `assets/question-config.js` files. The question-service script has been updated to accept Modules 01–03.
+**Question inbox:** Google Forms writes submissions from the three released modules to the same spreadsheet. [Form and response-sheet details](question-service/SETUP.md).
 
 
 ## PyTorch example consistency
