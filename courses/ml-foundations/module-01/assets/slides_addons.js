@@ -10,7 +10,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nava = torch.tensor([2., 3.])\nprint(ava.shape, ava.ndim)",
     "output": "torch.Size([2]) 1",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Does shape (2,) tell you which entry is study hours?",
+    "checkAnswer": "The shape gives the length. You also need the feature order, here hours followed by sets."
   },
   {
     "kind": "bridge",
@@ -23,7 +24,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nX = torch.tensor([[2.,3.],\n                  [4.,1.],\n                  [5.,2.]])\nprint(X.shape, X[:,0])",
     "output": "torch.Size([3, 2]) tensor([2., 4., 5.])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "What does X[1, 0] select in this example?",
+    "checkAnswer": "The second student’s first feature. Ben studied 4 hours, so the value is 4."
   },
   {
     "kind": "bridge",
@@ -36,7 +38,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nX = torch.tensor([[2.,3.],[4.,1.],[5.,2.]])\nw = torch.tensor([10.,5.])\nb = torch.tensor(20.)\npred = X @ w + b\nprint(pred, pred.shape)",
     "output": "tensor([55., 65., 80.]) torch.Size([3])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Why does multiplying a (3, 2) matrix by a length-two weight vector work?",
+    "checkAnswer": "Each of the two entries per row has a matching weight. Adding their products gives one value per row."
   },
   {
     "kind": "bridge",
@@ -49,7 +52,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nX = torch.tensor([[2.,3.],[4.,1.],[5.,2.]])\nminutes = X.clone()\nminutes[:,0] *= 60\nprint(minutes)\nprint(minutes.shape)",
     "output": "tensor([[120.,   3.],\n        [240.,   1.],\n        [300.,   2.]])\ntorch.Size([3, 2])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Ava’s first entry goes from 2 to 120. Does that add another axis?",
+    "checkAnswer": "No. It changes the unit and the value in one position. The table still has student rows and feature columns."
   },
   {
     "kind": "bridge",
@@ -62,7 +66,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nlogs = torch.tensor([\n [[1.,2.],[2.,3.],[3.,4.]],\n [[2.,0.],[4.,2.],[6.,4.]]\n])\nprint(logs.shape)",
     "output": "torch.Size([2, 3, 2])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "What does the middle 3 mean in (2, 3, 2)?",
+    "checkAnswer": "There are three daily observations per student. The final 2 counts features per day."
   },
   {
     "kind": "bridge",
@@ -75,7 +80,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nlogs = torch.tensor([[[1.,2.],[2.,3.],[3.,4.]],\n                     [[2.,0.],[4.,2.],[6.,4.]]])\navg = logs.mean(dim=1)\nprint(avg)\nprint(avg.shape)",
     "output": "tensor([[2., 3.],\n        [4., 2.]])\ntorch.Size([2, 2])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Which averaging operation would combine different students’ records by mistake?",
+    "checkAnswer": "Averaging over axis 0 combines students. For a separate average for each student, average over axis 1, the days."
   },
   {
     "kind": "bridge",
@@ -88,7 +94,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nimages = torch.tensor([\n [[[0.,1.,0.],[1.,1.,1.],[0.,1.,0.]]],\n [[[1.,0.,1.],[0.,1.,0.],[1.,0.,1.]]]\n])\nprint(images.shape)",
     "output": "torch.Size([2, 1, 3, 3])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Why retain a channel axis of length one for grayscale?",
+    "checkAnswer": "It identifies where channels belong in the same image layout used for color images."
   },
   {
     "kind": "bridge",
@@ -101,7 +108,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nimages = torch.tensor([\n [[[0.,1.,0.],[1.,1.,1.],[0.,1.,0.]]],\n [[[1.,0.,1.],[0.,1.,0.],[1.,0.,1.]]]\n])\nflat = images.flatten(start_dim=1)\nprint(flat.shape)\nprint(flat[0])",
     "output": "torch.Size([2, 9])\ntensor([0., 1., 0., 1., 1., 1., 0., 1., 0.])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Can you tell from the length 9 alone whether an image was 3 by 3 or 1 by 9?",
+    "checkAnswer": "No. Both layouts contain nine pixels. Save the original shape if you need to reconstruct the picture."
   },
   {
     "kind": "bridge",
@@ -114,7 +122,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nimages = torch.tensor([\n [[[0.,1.,0.],[1.,1.,1.],[0.,1.,0.]]],\n [[[1.,0.,1.],[0.,1.,0.],[1.,0.,1.]]]\n])\nclips = torch.stack([images, images*0.5],dim=1)\nprint(clips.shape)",
     "output": "torch.Size([2, 2, 1, 3, 3])",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "What does selecting one time index for every student leave?",
+    "checkAnswer": "One image per student, with axes for student, channel, pixel row and pixel column."
   },
   {
     "kind": "bridge",
@@ -127,7 +136,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nX = torch.tensor([[2.,3.],[4.,1.],[5.,2.]])\nweights = torch.tensor([10.,5.])\npred = X @ weights + 20\ntarget = torch.tensor([60.,70.,75.])\nloss = ((pred-target)**2).mean()\nprint(loss.item())",
     "output": "25.0",
     "minutes": 3,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "If the three errors are 0, 0 and 3, what is their mean squared error?",
+    "checkAnswer": "The squared errors are 0, 0 and 9. Their mean is 9/3 = 3."
   },
   {
     "kind": "bridge",
@@ -140,7 +150,8 @@ window.TEACHREACH_BRIDGES = [
     "code": "import torch\nX = torch.tensor([[2.,3.],[4.,1.],[5.,2.]])\ntarget = torch.tensor([60.,70.,75.])\nw = torch.tensor([10.,5.],requires_grad=True)\nb = torch.tensor(20.,requires_grad=True)\nloss = (((X@w+b)-target)**2).mean()\nloss.backward()\nwith torch.no_grad():\n    w -= .01*w.grad\n    b -= .01*b.grad\nprint(round(float((((X@w+b)-target)**2).mean().detach()),4))",
     "output": "24.4185",
     "minutes": 4,
-    "note": "Connect the example to the mathematical statement, check each tensor shape, then read and run the Python code line by line. Ask students to predict the displayed output before revealing it."
+    "check": "Which part of an update controls how far we move for a given gradient?",
+    "checkAnswer": "The learning rate scales the gradient. Doubling it doubles the proposed parameter change from the same starting point."
   },
   {
     "kind": "writing",
@@ -152,8 +163,7 @@ window.TEACHREACH_BRIDGES = [
     "formal": "Let X ∈ ℝ³ˣ² denote the feature matrix, where Xᵢ₁ is study hours and Xᵢ₂ is completed practice sets for student i.",
     "latex": "Let $X\\in\\mathbb{R}^{3\\times 2}$ denote the feature matrix, where $X_{i1}$ and $X_{i2}$ are study hours and practice-set counts.",
     "question": "How would you rewrite this definition for n students with d features?",
-    "minutes": 3,
-    "note": "Ask students to write the symbols and define every index before revealing the suggested academic wording. In a paper, avoid leaving symbols undefined."
+    "minutes": 3
   },
   {
     "kind": "writing",
@@ -165,8 +175,7 @@ window.TEACHREACH_BRIDGES = [
     "formal": "Let X ∈ ℝⁿˣᵈ, w ∈ ℝᵈ, and b ∈ ℝ. We define the predictions as ŷ = Xw + b·1ₙ ∈ ℝⁿ.",
     "latex": "For $X\\in\\mathbb{R}^{n\\times d}$, $w\\in\\mathbb{R}^d$, and $b\\in\\mathbb{R}$, define $\\hat{y}=Xw+b\\mathbf{1}_n$.",
     "question": "Where do you define what n and d represent, and why does the output have length n?",
-    "minutes": 3,
-    "note": "Contrast concise, correct mathematical model specification with an ambiguous statement like “we multiply the data by weights.” Emphasize unit and shape compatibility."
+    "minutes": 3
   },
   {
     "kind": "writing",
@@ -178,7 +187,6 @@ window.TEACHREACH_BRIDGES = [
     "formal": "For θ=(w,b), minimize L(θ)=(1/n)Σᵢ₌₁ⁿ(fθ(xᵢ)−yᵢ)²; update θ ← θ−η∇θL(θ).",
     "latex": "$\\mathcal{L}(\\theta)=\\frac{1}{n}\\sum_{i=1}^n(f_{\\theta}(x_i)-y_i)^2$, followed by $\\theta\\leftarrow\\theta-\\eta\\nabla_{\\theta}\\mathcal{L}(\\theta)$.",
     "question": "Which symbols must be defined in prose before a reader can reproduce the update?",
-    "minutes": 4,
-    "note": "Invite students to define theta, the observed targets, the learning rate, and the training set size. This is formal method-writing practice, not just equation reading."
+    "minutes": 4
   }
 ];

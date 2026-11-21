@@ -8,3 +8,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/check_curriculum.py
+      - name: Check slide questions and module transitions in Chromium
+        run: |
+          python3 -m venv "$RUNNER_TEMP/lesson-checks"
+          source "$RUNNER_TEMP/lesson-checks/bin/activate"
+          pip install playwright==1.56.0
+          python -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
+          CHROME_BIN="$(command -v google-chrome)" python scripts/check_lesson_navigation.py http://127.0.0.1:8080

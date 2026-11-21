@@ -13,7 +13,7 @@ function svgCurve(kind){
   const curve=(s,stroke,fill)=>{let pts=xs.map(x=>[(x-20)/65*590+16,225-pdf(x,55,s)*scale]);let path="M"+pts.map(p=>p.map(y=>y.toFixed(1)).join(",")).join(" L");return '<path d="'+path+'" fill="none" stroke="'+stroke+'" stroke-width="3.5"/>'};
   const shade=xs.filter(x=>x>=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*scale]);
   let html='<svg viewBox="0 0 620 270" role="img" aria-label="A probability density curve for possible scores, centered at fifty five."><defs><linearGradient id="g"><stop stop-color="#dfa8b6"/><stop offset="1" stop-color="#9e1b32"/></linearGradient></defs><path d="M16 225H610" stroke="#9fb0bd" stroke-width="2"/>';
-  if(["threshold","interval","cdf","density","distribution"].includes(kind)){const pts=(kind==="interval"?xs.filter(x=>x>=50&&x<=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*scale]):kind==="cdf"?xs.filter(x=>x<=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*scale]):shade);html+='<path d="M'+pts[0][0].toFixed(1)+',225 L'+pts.map(p=>p.map(y=>y.toFixed(1)).join(",")).join(" L")+' L'+pts[pts.length-1][0].toFixed(1)+',225 Z" fill="#e1aebc" opacity=".65"/>';}
+  if(["threshold","interval","cdf","density","distribution"].includes(kind)){const pts=(["interval","density"].includes(kind)?xs.filter(x=>x>=50&&x<=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*scale]):kind==="cdf"?xs.filter(x=>x<=60).map(x=>[(x-20)/65*590+16,225-pdf(x)*scale]):shade);html+='<path d="M'+pts[0][0].toFixed(1)+',225 L'+pts.map(p=>p.map(y=>y.toFixed(1)).join(",")).join(" L")+' L'+pts[pts.length-1][0].toFixed(1)+',225 Z" fill="#e1aebc" opacity=".65"/>';}
   html+=curve(10,"#9E1B32");
   if(compareSpread){html+=curve(5,"#345978")+curve(15,"#b77e42")+'<text x="400" y="36" font-size="13" fill="#345978">σ = 5</text><text x="400" y="54" font-size="13" fill="#b77e42">σ = 15</text><text x="400" y="72" font-size="13" fill="#9E1B32">σ = 10</text>';}
   html+='<line x1="'+(16+(55-20)/65*590)+'" y1="22" x2="'+(16+(55-20)/65*590)+'" y2="228" stroke="#9e1b32" stroke-dasharray="5 5"/><text x="328" y="247" fill="#762339" font-size="12">55</text><text x="12" y="248" fill="#6c7b83" font-size="12">20</text><text x="585" y="248" fill="#6c7b83" font-size="12">85</text><text x="245" y="264" fill="#596b78" font-size="12">Possible exam score</text></svg>';
@@ -40,37 +40,43 @@ function render(){
   $('slideNum').textContent=String(i+1).padStart(2,"0");
   $('slideCount').textContent=(i+1)+" / "+all.length;
   $('progressBar').style.width=((i+1)/all.length*100).toFixed(1)+"%";
-  $('previous').disabled=i===0;$('next').disabled=i===all.length-1;
-  const continuation = $('nextModuleLesson');
-  if (continuation) continuation.hidden = i !== all.length - 1;
+  $('previous').disabled = i === 0;
+  $('next').hidden = i === all.length - 1;
+  $('continueModule').hidden = i !== all.length - 1;
   $('sectionLabel').textContent=s.section;
   $('slideTitle').textContent=s.title;
   $('slideLead').textContent=s.lead;
-  $('mathBlock').textContent=s.math;
-  $('explainText').textContent=s.explain||"Connect this representation to the same Campus Study Coach model introduced in Module 1.";
-  const visual = $('visualArea');
-  if (s.figure) {
-    const image = document.createElement('img');
-    image.src = s.figure.src;
-    image.alt = s.figure.alt;
-    image.style.cssText = 'display:block;width:100%;height:auto';
-    visual.replaceChildren(image);
+  const reviewPanel = $('reviewPanel');
+  reviewPanel.replaceChildren();
+  $('lessonPanel').hidden = Boolean(s.review);
+  if (s.review) {
+    reviewPanel.append(renderLessonChecks('End-of-module questions', s.review));
   } else {
-    visual.innerHTML=Array.isArray(s.visual) ? cards(s.visual) : diagram(s.visual);
+    $('mathBlock').textContent=s.math;
+    $('explainText').textContent=s.explain || '';
+    const visual = $('visualArea');
+    if (s.figure) {
+      const image = document.createElement('img');
+      image.src = s.figure.src;
+      image.alt = s.figure.alt;
+      image.style.cssText = 'display:block;width:100%;height:auto';
+      visual.replaceChildren(image);
+    } else {
+      visual.innerHTML=Array.isArray(s.visual) ? cards(s.visual) : diagram(s.visual);
+    }
+    const solution = $('slideSolution');
+    solution.open = false;
+    solution.hidden = !s.checkAnswer;
+    $('slideCheckAnswer').textContent = s.checkAnswer || "";
+    $('checkText').textContent=s.check||"Explain the connection to Module 1.";
   }
-  const solution = $('slideSolution');
-  solution.open = false;
-  solution.hidden = !s.checkAnswer;
-  $('slideCheckAnswer').textContent = s.checkAnswer || "";
-  $('checkText').textContent=s.check||"Explain the connection to Module 1.";
   $('codeWrap').hidden=!codeVisible;
   $('codeToggle').disabled=!Boolean(s.code?.trim());
   $('codeToggle').hidden=false;
   $('codeToggle').textContent=codeVisible?"Hide PyTorch example":"Show PyTorch example";
   $('codeToggle').setAttribute("aria-expanded",String(codeVisible));
+  $('codeCopy').textContent='Copy code';
   $('codeContent').textContent=s.code||"";
-  $('noteContent').textContent=s.note||"Ask students to explain the diagram and formal notation.";
-  $('notes').hidden=true;
   document.title=(i+1)+" / "+all.length+" · "+s.title+" · Module "+document.body.dataset.trModule;
   try{history.replaceState(null,"",location.pathname+"#"+(i+1))}catch{}
 }
@@ -84,7 +90,6 @@ function toggleDeckFullscreen(){
 $('m2FullBtn').onclick=toggleDeckFullscreen;
 document.addEventListener('fullscreenchange',()=>{$('m2FullBtn').textContent=document.fullscreenElement?'⤢ Exit full screen (F)':'⛶ Full screen (F)'});
 $('next').onclick=()=>jump(i+1);
-$('notesToggle').onclick=()=>{$('notes').hidden=!$('notes').hidden};
 $('codeToggle').onclick=()=>{
   codeVisible=!codeVisible;
   $('codeWrap').hidden=!codeVisible;
@@ -106,19 +111,21 @@ $('outlineToggle').onclick=()=>{
   });
 };
 $('outlineClose').onclick=()=>{$('outline').hidden=true};
-$('notesClose').onclick=()=>{$('notes').hidden=true};
 document.addEventListener("keydown",e=>{
   if(["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;
   if(e.key === " " && e.target.closest("summary,button,a"))return;
   if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();jump(i+1)}
   if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();jump(i-1)}
-  if(e.key.toLowerCase()==="n")$('notesToggle').click();
   if(e.key.toLowerCase()==="g")$('outlineToggle').click();
   if(e.key.toLowerCase()==="f"){$("m2FullBtn").click()}
   if(e.key.toLowerCase()==="p"){$("codeToggle").click()}
-  if(e.key==="Escape"){$('outline').hidden=true;$('notes').hidden=true}
+  if(e.key==="Escape"){$('outline').hidden=true}
 });
 const requested=Number(location.hash.replace("#",""));
 i=Number.isInteger(requested)&&requested>0&&requested<=all.length?requested-1:0;
+window.addEventListener('hashchange', () => {
+  const slide = Number(location.hash.slice(1));
+  if (Number.isInteger(slide) && slide >= 1 && slide <= all.length) jump(slide - 1);
+});
 render();
 })();

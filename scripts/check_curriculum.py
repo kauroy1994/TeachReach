@@ -106,7 +106,7 @@ def check():
         if not live:
             hero = page.find(".//section[@data-section='overview']/div/div")
             equal(mid + " preview title", words(hero.find("h1")), m["title"])
-            equal(mid + " preview description", words(hero.find("p")), m["subtitle"] + ". " + m["summary"])
+            equal(mid + " preview description", words(hero.find("p")), m["subtitle"].rstrip(".") + (" " if m["subtitle"].endswith("?") else ". ") + m["summary"])
         elif page.find(".//body").get("data-tr-module") != f"{m['n']:02}":
             errors.append(f"{mid}: incorrect module landing page")
         if live:

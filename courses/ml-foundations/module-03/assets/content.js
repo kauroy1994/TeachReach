@@ -1,4 +1,4 @@
-window.TR_M3 = {
+window.TR_M3 ={
   "lessons": [
     {
       "id": "loss",
@@ -47,8 +47,7 @@ window.TR_M3 = {
       ],
       "check": "What would the model predict with bias 21? What would Ava’s observed score be?",
       "checkAnswer": "The prediction would rise to 56. Her observed exam score stays 60. We changed the rule, not the record.",
-      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nprint(mean.item(), (x @ w + 21).item())",
-      "note": "Wait for both numbers before revealing. This distinguishes a prediction from its target."
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nprint(mean.item(), (x @ w + 21).item())"
     },
     {
       "section": "01 · Score a prediction",
@@ -75,8 +74,7 @@ window.TR_M3 = {
       ],
       "check": "If we shift the mean from 55 down to 54, should the loss rise or fall?",
       "checkAnswer": "It rises. At the same spread, 60 is farther from the center 54, so the density there is smaller.",
-      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nfor mean in [54, 55, 56]:\n    print(mean, round(loss(mean).item(), 6))",
-      "note": "Use the two numbers from the end of Module 02. The trial at 56 is a comparison, not the training step."
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nfor mean in [54, 55, 56]:\n    print(mean, round(loss(mean).item(), 6))"
     },
     {
       "section": "01 · Score a prediction",
@@ -103,8 +101,7 @@ window.TR_M3 = {
       ],
       "check": "At a mean of 58, what penalty do we add?",
       "checkAnswer": "58 − 60 = −2. Square it and divide by 200 to get 4/200 = 0.020.",
-      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nmeans = torch.tensor([55., 56., 58., 60.])\nprint(penalty(means))",
-      "note": "Have students do the three arithmetic operations before showing code. Squaring treats misses on either side equally."
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nmeans = torch.tensor([55., 56., 58., 60.])\nprint(penalty(means))"
     },
     {
       "section": "02 · Measure a slope",
@@ -132,7 +129,6 @@ window.TR_M3 = {
       "check": "From 55 to 57, the penalty changes from 0.125 to 0.045. What is the average slope?",
       "checkAnswer": "The change is −0.080 over two score points. Divide by 2 to get −0.040 per point.",
       "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nm = torch.tensor(55., dtype=torch.float64)\nprint((penalty(m+2) - penalty(m)) / 2)",
-      "note": "If a student answers −0.080, ask for the size of the move on the horizontal axis.",
       "figure": {
         "src": "assets/average-slope.svg",
         "alt": "Mean increases from 55 to 56. Loss penalty drops from 0.125 to 0.080. The slope triangle shows a run of +1 and a rise of −0.045."
@@ -163,8 +159,7 @@ window.TR_M3 = {
       ],
       "check": "Why do we shrink h instead of setting h equal to zero in the fraction?",
       "checkAnswer": "At zero both differences are zero and division by zero is undefined. We examine the ratios for nonzero steps and see which value they approach.",
-      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nm = torch.tensor(55., dtype=torch.float64)\nfor h in [1., .1, .01]:\n    print(h, ((penalty(m+h) - penalty(m))/h).item())",
-      "note": "Ask learners to read one row aloud. Try the measuring-step control in Explore."
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nm = torch.tensor(55., dtype=torch.float64)\nfor h in [1., .1, .01]:\n    print(h, ((penalty(m+h) - penalty(m))/h).item())"
     },
     {
       "section": "02 · Measure a slope",
@@ -191,8 +186,7 @@ window.TR_M3 = {
       ],
       "check": "Where did the two copies of −5h come from?",
       "checkAnswer": "Each factor contributes one cross product: (−5) × h and h × (−5). Together they give −10h.",
-      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nh = torch.tensor(0.1, dtype=torch.float64)\nprint(((penalty(55+h)-penalty(55))/h).item(), ((-10+h)/200).item())",
-      "note": "Write the four products in a 2 × 2 grid if students have not recently expanded a square."
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nh = torch.tensor(0.1, dtype=torch.float64)\nprint(((penalty(55+h)-penalty(55))/h).item(), ((-10+h)/200).item())"
     },
     {
       "section": "02 · Measure a slope",
@@ -219,8 +213,7 @@ window.TR_M3 = {
       ],
       "check": "At 58, which way should the mean move, and what is its local slope?",
       "checkAnswer": "(58 − 60)/100 = −0.02. A small increase toward 60 reduces the loss.",
-      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nmeans = torch.tensor([55., 58., 60., 65.])\nprint((means - 60)/100)",
-      "note": "Link the sign to direction before asking for a formula. This minimum is for the fixed-spread, one-observation example. For another observed score y and any fixed positive spread σ, the same cancellation gives (μ − y)/σ². For Ava, y = 60 and σ² = 100."
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nmeans = torch.tensor([55., 58., 60., 65.])\nprint((means - 60)/100)"
     },
     {
       "section": "03 · Follow one weight",
@@ -247,8 +240,7 @@ window.TR_M3 = {
       ],
       "check": "If only the sets weight rose by 0.20, how far would the mean move?",
       "checkAnswer": "There are three sets, so the mean would move by 3 × 0.20 = 0.60 points, from 55 to 55.60.",
-      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\ntrial = w.clone()\ntrial[1] += .2\nprint((x @ trial + bias).item())",
-      "note": "Separate a parameter from its feature. Study hours stay at two while points awarded per hour can change."
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\ntrial = w.clone()\ntrial[1] += .2\nprint((x @ trial + bias).item())"
     },
     {
       "section": "03 · Follow one weight",
@@ -275,8 +267,7 @@ window.TR_M3 = {
       ],
       "check": "Why is −0.10 a rate, while −0.001 is a predicted change?",
       "checkAnswer": "−0.10 is loss change per unit of weight near the starting model. Multiply by the actual move, 0.01, to estimate the change in loss.",
-      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nactual = loss(55 + 2 * .01) - loss(55)\nprint(\"Estimated:\", -.1 * .01, \"Actual:\", actual.item())",
-      "note": "A small step gives an approximation on a curved loss. The local derivative itself is exact."
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nactual = loss(55 + 2 * .01) - loss(55)\nprint(\"Estimated:\", -.1 * .01, \"Actual:\", actual.item())"
     },
     {
       "section": "03 · Follow one weight",
@@ -303,8 +294,7 @@ window.TR_M3 = {
       ],
       "check": "If a different student had zero practice sets, what would that student’s loss slope be for the sets weight?",
       "checkAnswer": "Zero. Changing the sets weight cannot affect this student’s prediction because that weight is multiplied by zero.",
-      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nd_mean = (mean - 60)/100\nprint(\"Weights:\", d_mean * x, \"Bias:\", d_mean)",
-      "note": "Ask students to write down parameter names above the three entries so they cannot swap them."
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nd_mean = (mean - 60)/100\nprint(\"Weights:\", d_mean * x, \"Bias:\", d_mean)"
     },
     {
       "section": "04 · Update and verify",
@@ -331,8 +321,7 @@ window.TR_M3 = {
       ],
       "check": "At a rate of 0.5, what would the new hours weight be?",
       "checkAnswer": "10 − 0.5 × (−0.10) = 10.05. Halving the rate halves this parameter change.",
-      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nrate = 1.\nslope = (mean - 60)/100\nprint(w - rate * slope * x, bias - rate * slope)",
-      "note": "Have students predict the sign before entering the arithmetic. Name this simultaneous update gradient descent."
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nrate = 1.\nslope = (mean - 60)/100\nprint(w - rate * slope * x, bias - rate * slope)"
     },
     {
       "section": "04 · Update and verify",
@@ -359,8 +348,7 @@ window.TR_M3 = {
       ],
       "check": "Why did the sets-weight increase of 0.15 add 0.45 to the prediction?",
       "checkAnswer": "Ava completed three sets, so a change of 0.15 points per set adds 3 × 0.15 = 0.45 points.",
-      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nupdated = 2*10.10 + 3*5.15 + 20.05\nprint(updated, loss(updated).item())",
-      "note": "Distinguish the trial mean of 56 from the actual training result of 55.70."
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nupdated = 2*10.10 + 3*5.15 + 20.05\nprint(updated, loss(updated).item())"
     },
     {
       "section": "04 · Update and verify",
@@ -387,8 +375,7 @@ window.TR_M3 = {
       ],
       "check": "Which three numerical derivatives should PyTorch produce for the starting model?",
       "checkAnswer": "In parameter order they should be −0.10, −0.15 and −0.05. Write them down before continuing.",
-      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\nmean = x @ w + b\nobserved = x.new_tensor(60.)\nloss = -torch.distributions.Normal(mean, 10.).log_prob(observed)\nprint(mean.item(), loss.item())",
-      "note": "Read the lines in order. The new_tensor call makes 60 a tensor with the same number format as x."
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\nmean = x @ w + b\nobserved = x.new_tensor(60.)\nloss = -torch.distributions.Normal(mean, 10.).log_prob(observed)\nprint(mean.item(), loss.item())"
     },
     {
       "section": "04 · Update and verify",
@@ -415,8 +402,7 @@ window.TR_M3 = {
       ],
       "check": "Immediately after backward(), before any subtraction, what is the hours weight?",
       "checkAnswer": "It is still 10. Its gradient is now stored as −0.10. Only the update changes the weight to 10.10.",
-      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\nmean = x @ w + b\nobserved = x.new_tensor(60.)\nloss = -torch.distributions.Normal(mean, 10.).log_prob(observed)\nloss.backward()\nexpected_w = x.new_tensor([-0.10, -0.15])\nexpected_b = x.new_tensor(-0.05)\ntorch.testing.assert_close(w.grad, expected_w)\ntorch.testing.assert_close(b.grad, expected_b)\nprint(w.grad.tolist(), b.grad.item())",
-      "note": "Explain each .grad as a stored result. A learner should be able to state the weight and its slope separately."
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\nmean = x @ w + b\nobserved = x.new_tensor(60.)\nloss = -torch.distributions.Normal(mean, 10.).log_prob(observed)\nloss.backward()\nexpected_w = x.new_tensor([-0.10, -0.15])\nexpected_b = x.new_tensor(-0.05)\ntorch.testing.assert_close(w.grad, expected_w)\ntorch.testing.assert_close(b.grad, expected_b)\nprint(w.grad.tolist(), b.grad.item())"
     },
     {
       "section": "04 · Update and verify",
@@ -443,17 +429,35 @@ window.TR_M3 = {
       ],
       "check": "Restart at 55 with rate 5. What is the mean after one update? Does loss fall?",
       "checkAnswer": "55 + 5 × 0.70 = 58.50. It is 1.50 points from 60, closer than before, so loss falls.",
-      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nfor rate in [1, 5, 10, 16]:\n    new_mean = 55 + rate * .70\n    print(rate, new_mean, loss(new_mean).item())",
-      "note": "Ask for a prediction before moving the rate slider. The factor 0.70 applies to this starting model only."
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nfor rate in [1, 5, 10, 16]:\n    new_mean = 55 + rate * .70\n    print(rate, new_mean, loss(new_mean).item())"
     },
     {
-      "section": "05 · Prepare for Module 04",
-      "title": "What did one observation teach us?",
+      "section": "END OF MODULE",
+      "title": "Module 03 review questions",
+      "lead": "Work through the questions on paper. Open each answer when you are ready to compare your reasoning.",
+      "review": [
+        [
+          "At means 55 and 56 the penalties are 0.125 and 0.080. What is the average slope over this move? What would you need for the slope right at 55?",
+          "(0.080 − 0.125)/(56 − 55) = −0.045 per score point. Use successively smaller moves from 55 to find the local slope. Here it approaches −0.05."
+        ],
+        [
+          "Ava has two hours and three sets. The loss slope with respect to her predicted mean is −0.05. What slopes should PyTorch report for the two weights and the bias?",
+          "An extra unit of hours weight adds 2 to the mean, an extra unit of sets weight adds 3, and an extra unit of bias adds 1. Multiply each by −0.05 to get −0.10, −0.15 and −0.05."
+        ],
+        [
+          "Start with weights 10 and 5 and bias 20. Subtract the gradient once with learning rate 1. What does the updated rule predict, and what evidence would show whether it helps other students?",
+          "The weights become 10.10 and 5.15, and the bias becomes 20.05. Ava’s new mean is 2 × 10.10 + 3 × 5.15 + 20.05 = 55.70. Compare errors on students whose scores were set aside during training."
+        ]
+      ],
+      "code": "import torch\nx = torch.tensor([2., 3.])\nw = torch.tensor([10., 5.], requires_grad=True)\nb = torch.tensor(20., requires_grad=True)\nloss = -torch.distributions.Normal(x @ w + b, 10.).log_prob(torch.tensor(60.))\nloss.backward()\nprint(w.grad, b.grad)\nwith torch.no_grad():\n    print(x @ (w - w.grad) + (b - b.grad))"
+    },
+    {
+      "section": "UP NEXT · MODULE 04",
+      "title": "From fitting Ava to testing a model",
       "lead": "For Ava, every parameter combination that predicts 60 reaches the same lowest loss. A different student can receive a different prediction from those same models.",
       "math": "2w₁ + 3w₂ + b = 60   ⇒   ∇L = 0",
-      "explain": "In Module 04 we will ask whether a rule fitted to training examples predicts held-out observations well. For the in-class variant, explain one update with unfamiliar values.",
+      "explain": "Both rules fit Ava exactly. Their disagreement on another student gives us a new question. Which rule predicts well on students whose scores we kept out of training? Module 04 begins there.",
       "check": "Can two models fit Ava exactly yet disagree for a student with one hour and one practice set?",
-      "note": "Compare [10, 5], bias 25 with [10, 6], bias 22. Both give 60 for Ava. For [1,1] they give 40 and 38.",
       "visual": [
         [
           "Model A",

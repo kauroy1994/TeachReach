@@ -15,6 +15,12 @@ function renderMarkdown(source){
   table=[];
  }
  for(const raw of lines){const line=raw.trim();
+  const answer = line.match(/^\*\*(?:Worked answer|Warm-up answer)\.\*\*\s*(.+)$/);
+  if (answer) {
+    endList(); endTable();
+    html += '<details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>' + inline(answer[1]) + '</p></details>';
+    continue;
+  }
   if(line.startsWith("|")){endList();table.push(line);continue;}else endTable();
   if(!line){endList();continue}
   if(line.startsWith("### ")){endList();html+="<h3>"+inline(line.slice(4))+"</h3>"}

@@ -1,11 +1,11 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Module 1 Notebook | TeachReach · Kaushik Roy, University of Alabama</title><style>
 :root{--crimson:#9E1B32;--ink:#24292d;--muted:#5F6A72;--line:#dce0e2}*{box-sizing:border-box}body{margin:0;background:#faf9f8;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.top{background:#fff;padding:14px clamp(18px,4vw,70px);border-top:6px solid var(--crimson);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.top strong{color:var(--crimson);font-size:20px}.top a,.tools a{color:#84233a;font-weight:700;text-decoration:none}.wrap{max-width:940px;margin:auto;padding:25px clamp(15px,3vw,35px) 80px}.hero{background:#9E1B32;color:#fff;padding:28px;border-radius:19px;margin:0 0 22px}.hero h1{margin:7px 0;font-size:clamp(26px,3vw,40px);line-height:1.14}.hero p{margin:7px 0 0;color:#f9dce4}.tools{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin:12px 0 32px;padding:13px;background:#fff;border-radius:12px;border:1px solid var(--line)}.tools a{background:#fff1f4;border-radius:9px;padding:8px 12px}.nb-markdown{padding:8px 2px;margin:20px 0}.nb-markdown h1,.nb-markdown h2,.nb-markdown h3{line-height:1.2;letter-spacing:-.035em}.nb-markdown h2{font-size:clamp(23px,2.8vw,32px);margin:26px 0 9px}.nb-markdown p,.nb-markdown li{color:#414a50}.nb-code{background:#222b32;color:#eff2f7;border-radius:13px;overflow:hidden;margin:14px 0 28px;box-shadow:0 12px 24px #26252a12}.nb-code-head{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#323c45;padding:10px 15px;color:#fadce4;font-size:11px;letter-spacing:.09em;font-weight:800}.nb-code button{border:1px solid #ba8a98;border-radius:8px;background:transparent;color:#fff;padding:7px 10px;cursor:pointer}.nb-code pre{white-space:pre-wrap;overflow:auto;overflow-wrap:normal;padding:16px 19px;margin:0;font-size:13px;line-height:1.7;tab-size:4}.nb-code .nb-output{background:#f5f7f8;color:#293b46;border-top:1px solid #d4d8db}.nb-markdown code{background:#f9e5ea;color:#742036;padding:2px 5px;border-radius:4px}.nb-markdown pre{overflow:auto}table{border-collapse:collapse;display:block;overflow:auto}th,td{border:1px solid #ccc;padding:7px 10px}blockquote{border-left:4px solid var(--crimson);padding-left:12px;margin-left:0;color:#46515a}@media(max-width:660px){.wrap{padding:15px 12px 40px}.hero{padding:20px}.nb-code pre{font-size:12px;padding:12px}.tools{gap:5px}}</style><link rel="stylesheet" href="../assets/module-ui.css?v=9606489"></head><body data-tr-standalone="true" data-tr-module="01" class=" tr-standalone-page tr-notebook-page"><header class="tr-resource-header">
- <a class="tr-resource-brand" href="../../../index.html" aria-label="TeachReach homepage"><span class="tr-resource-mark">TR</span><span class="tr-resource-label"><small>KAUSHIK ROY, UNIVERSITY OF ALABAMA</small><strong>Teach<span>Reach</span></strong></span></a>
+ <a target="_top" class="tr-resource-brand" href="../../../index.html" aria-label="TeachReach homepage"><span class="tr-resource-mark">TR</span><span class="tr-resource-label"><small>KAUSHIK ROY, UNIVERSITY OF ALABAMA</small><strong>Teach<span>Reach</span></strong></span></a>
  <nav class="tr-resource-nav" aria-label="Module 01 resource navigation">
- <a href="../../../index.html">Home</a>
- <a href="../index.html">Course</a>
- <a href="index.html#overview">Module 01</a>
- <a href="../module-02/">Module 02</a>
+ <a target="_top" href="../../../index.html">Home</a>
+ <a target="_top" href="../index.html">Course</a>
+ <a target="_top" href="index.html#overview">Module 01</a>
+ <a target="_top" href="../module-02/">Module 02</a>
  <a href="slides.html">Slides</a>
  <a href="notebook.html">Notebook</a>
  <a href="office.html">Office hours</a><a href="../syllabus.html">Syllabus</a></nav>
@@ -37,7 +37,7 @@ assert torch.dot(ava,weights).item() == 35.0</code></pre><pre class="nb-output">
 weights: [10.0, 5.0] shape: (2,)
 weighted contribution: [20.0, 15.0]
 dot product: 35.0
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Change Ava to 3 hours and 4 sets. What is the shape? What is the weighted contribution before adding the starting score?</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Change Ava to 3 hours and 4 sets. What is the shape? What is the weighted contribution before adding the starting score?</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>The shape is (2,). The weighted contribution is 3 × 10 + 4 × 5 = 50 before the bias.</p></details>
 </section><section class="nb-markdown"><h2>2. A 2D tensor is the whole dataset</h2>
 <p>The dataset has <strong>3 rows</strong> (Ava, Ben, Cam) and <strong>2 columns</strong> (hours, practice sets). Both axes have a real-world meaning. Use indexing to ask who or what you want to select.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 7</span><button type="button" data-copy-code="6">Copy code</button></div><pre id="code-6"><code>X = torch.tensor([[2.0,3.0], [4.0,1.0], [5.0,2.0]])
@@ -53,7 +53,7 @@ assert X[:,0].tolist() == [2.0,4.0,5.0]</code></pre><pre class="nb-output">data:
 shape: (3, 2)
 Ava: [2.0, 3.0]
 hours for everyone: [2.0, 4.0, 5.0]
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Create a fourth fictional student with 1 hour and 4 practice sets using <code>torch.cat</code> or by reconstructing <code>X</code>. What is the new shape?</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Create a fourth fictional student with 1 hour and 4 practice sets using <code>torch.cat</code> or by reconstructing <code>X</code>. What is the new shape?</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>(4, 2). You added one student row with the same two feature columns.</p></details>
 </section><section class="nb-markdown"><h2>3. A parameterized function computes predictions</h2>
 <p>Our toy rule uses <strong>10 points per study hour</strong>, <strong>5 points per practice set</strong>, and <strong>20 starting points</strong>. The <em>same</em> parameter values operate on every student. This is a demonstration of computing predictions, a starting model that we will improve through training.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 10</span><button type="button" data-copy-code="9">Copy code</button></div><pre id="code-9"><code>w = torch.tensor([10.0, 5.0])
@@ -64,7 +64,7 @@ print(&#x27;predicted scores:&#x27;, predictions.tolist(), &#x27;shape:&#x27;, t
 assert predictions.tolist() == [55.,65.,80.]
 assert tuple(predictions.shape) == (3,)</code></pre><pre class="nb-output">dataset: (3, 2) weights: (2,) bias: ()
 predicted scores: [55.0, 65.0, 80.0] shape: (3,)
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Without running code, predict the score for 1 hour and 4 practice sets. Then verify with PyTorch. Why must the weight vector have 2 entries for this dataset?</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Without running code, predict the score for 1 hour and 4 practice sets. Then verify with PyTorch. Why must the weight vector have 2 entries for this dataset?</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>50 points. Compute 1 × 10 + 4 × 5 + 20. Each feature has one corresponding weight.</p></details>
 </section><section class="nb-markdown"><h2>4. Tensor transformations and broadcasting</h2>
 <p>Convert only the hours column from hours to minutes. The <em>values</em> change; the <strong>shape stays (3,2)</strong>. The model would need correspondingly adjusted weights (or retraining) to interpret minutes correctly. A scalar starting score broadcasts across every prediction.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 13</span><button type="button" data-copy-code="12">Copy code</button></div><pre id="code-12"><code>minutes_X = X.clone()
@@ -81,7 +81,7 @@ assert tuple(minutes_X.shape)==(3,2)</code></pre><pre class="nb-output">time in 
 shape unchanged: (3, 2)
 before bias: [35.0, 45.0, 60.0]
 after broadcasting scalar bias: [55.0, 65.0, 80.0]
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> If you switch to minutes, what weight should replace <strong>10 points per hour</strong> so the predictions stay unchanged? Verify numerically.</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> If you switch to minutes, what weight should replace <strong>10 points per hour</strong> so the predictions stay unchanged? Verify numerically.</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>Use 10/60 points per minute. For Ava, 120 × (10/60) = 20 points from study time.</p></details>
 </section><section class="nb-markdown"><h2>5. Repeated measurements introduce a 3D tensor</h2>
 <p>Suppose we record <strong>2 students × 3 days × 2 measurements</strong>. The new day axis preserves the temporal organization. Averaging across <code>dim=1</code> means average across the 3 days, retaining the student and feature axes.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 16</span><button type="button" data-copy-code="15">Copy code</button></div><pre id="code-15"><code>logs = torch.tensor([[[1.,2.],[2.,3.],[3.,4.]],
@@ -96,7 +96,7 @@ weekly averages:
  tensor([[2., 3.],
         [4., 2.]])
 weekly averages shape: (2, 2)
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Use <code>.sum(dim=1)</code> instead of <code>.mean(dim=1)</code>. What changes in the values? Does the shape change?</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Use <code>.sum(dim=1)</code> instead of <code>.mean(dim=1)</code>. What changes in the values? Does the shape change?</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>The daily totals are [6, 9] and [12, 6]. Both operations remove the day axis, leaving shape (2, 2).</p></details>
 </section><section class="nb-markdown"><h2>6. Pictures use a 4D tensor</h2>
 <p>A toy grayscale picture has <strong>1 channel, 3 pixel rows, and 3 pixel columns</strong>. Two students' pictures form a batch with shape <strong>(2,1,3,3)</strong>. Flattening <em>each image</em> creates a 9-element feature vector without throwing away pixels, but the original spatial layout is no longer explicit.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 19</span><button type="button" data-copy-code="18">Copy code</button></div><pre id="code-18"><code>images = torch.tensor([[[[0.,1.,0.],[1.,1.,1.],[0.,1.,0.]]],
@@ -109,7 +109,7 @@ assert tuple(images.shape)==(2,1,3,3)
 assert tuple(flat.shape)==(2,9)</code></pre><pre class="nb-output">images shape: (2, 1, 3, 3)
 flattened shape: (2, 9)
 Ava flattened: [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0]
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> What shape represents 4 students, each with a 3-channel 32×32 color picture, using (student, channel, height, width) order?</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> What shape represents 4 students, each with a 3-channel 32×32 color picture, using (student, channel, height, width) order?</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>(4, 3, 32, 32). The lengths count students, color channels, pixel rows and pixel columns.</p></details>
 </section><section class="nb-markdown"><h2>7. 5D is one more meaningful axis</h2>
 <p>When each student uploads two picture snapshots, add a <strong>day</strong> axis between student and channel. More axes do not imply extra mathematical mystery: they encode more independent questions about the data.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 22</span><button type="button" data-copy-code="21">Copy code</button></div><pre id="code-21"><code>snapshots = torch.stack([images, images*0.5],dim=1)
@@ -140,7 +140,7 @@ initial loss: 25.0
 weight gradient: [-3.3333, -6.6667]
 bias gradient: -3.3333
 loss after one gradient step: 24.4185
-</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Change the learning rate from 0.01 to 0.001 and run the training cell from the top. Compare the new loss. Explain <em>why</em> we need a loss function before we can train parameters.</p>
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Change the learning rate from 0.01 to 0.001 and run the training cell from the top. Compare the new loss. Explain <em>why</em> we need a loss function before we can train parameters.</p><details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>Both updates lower the initial loss of 25. The smaller rate changes each parameter by one tenth as much, so the loss after one step stays closer to 25. The loss tells us how to compare the two sets of predictions.</p></details>
 <h2>9. Shape debugger</h2>
 <p>Before running an operation, name the axes and check compatibility.</p>
 </section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 26</span><button type="button" data-copy-code="25">Copy code</button></div><pre id="code-25"><code>bad_weights = torch.tensor([10.,5.,1.])
@@ -151,7 +151,7 @@ except RuntimeError as exc:
 print(&#x27;Correct weight shape for X:&#x27;,tuple(w.shape))
 </code></pre><pre class="nb-output">Expected shape mismatch: size mismatch, got input (3), mat (3x2), vec (3)
 Correct weight shape for X: (2,)
-</pre></section><section class="nb-markdown"><h2>Instructor / self-check answer key (ungraded)</h2>
+</pre></section><section class="nb-markdown"><h2>Practice answer key</h2>
 <ul>
 <li>One-student vector always has shape (2,) when it contains two features. For [3,4], weighted contribution is 3×10 + 4×5 = 50 before the starting bias.</li>
 <li>Four students × two features gives (4,2).</li>
@@ -161,5 +161,5 @@ Correct weight shape for X: (2,)
 <li>Four RGB 32×32 images in (N,C,H,W) format yield shape (4,3,32,32).</li>
 <li>A loss is a numerical criterion that gradients can optimize; changing learning rate changes the size of the parameter update.</li>
 </ul>
-<p><strong>Course design note:</strong> The running example is instructional. It is not a recommendation to predict grades or assess real students from study habits.</p>
-</section></main><script>document.querySelectorAll('[data-copy-code]').forEach(b=>b.onclick=async()=>{let txt=document.getElementById('code-'+b.dataset.copyCode).textContent;try{await navigator.clipboard.writeText(txt);b.textContent='Copied ✓'}catch{b.textContent='Select code to copy'}})</script><script src="../assets/module-ui.js?v=20261121-5"></script><footer class="tr-resource-footer"><span><b>KAUSHIK ROY, UNIVERSITY OF ALABAMA</b> · TeachReach · Machine Learning Foundations · Module 01</span><nav><a href="index.html#overview">Module overview</a> · <a href="../index.html">Course modules</a> · <a href="../../../index.html">Home</a></nav></footer></body></html>
+
+</section></main><script>document.querySelectorAll('[data-copy-code]').forEach(b=>b.onclick=async()=>{let txt=document.getElementById('code-'+b.dataset.copyCode).textContent;try{await navigator.clipboard.writeText(txt);b.textContent='Copied ✓'}catch{b.textContent='Select code to copy'}})</script><script src="../assets/module-ui.js?v=20261121-5"></script><footer class="tr-resource-footer"><span><b>KAUSHIK ROY, UNIVERSITY OF ALABAMA</b> · TeachReach · Machine Learning Foundations · Module 01</span><nav><a target="_top" href="slides.html#55">End-of-module questions</a> · <a href="../module-02/#notebook" target="_top">Continue to Module 02</a> · <a target="_top" href="index.html#overview">Module overview</a> · <a target="_top" href="../index.html">Course modules</a> · <a target="_top" href="../../../index.html">Home</a></nav></footer></body></html>

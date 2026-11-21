@@ -1,51 +1,51 @@
 (()=>{'use strict';const M=window.TEACHREACH_MODULE,$=id=>document.getElementById(id),s=M.story,ex=Object.fromEntries(M.exercises.map(e=>[e.id,e]));let idx=0,revealed=false,codeVisible=false;const safe=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const S=[
-{kind:'ml-welcome',tag:'KAUSHIK ROY, UNIVERSITY OF ALABAMA · MACHINE LEARNING FOUNDATIONS',title:'How do machines learn from examples?',sub:'Start with a problem. Build a prediction. Discover the tensor operations that make it work.',note:'Open by asking: Where do people encounter predictions every day? Invite two student examples and promise to build one small prediction system during this class.',minutes:3},
-{kind:'ml-why',tag:'START WITH A REASON',title:'Every day, we make decisions using patterns.',sub:'Your inbox filters spam. A music app recommends songs. A practice coach estimates how you might perform.',note:'Ask students to name the inputs and output in one of the examples. Move from everyday prediction to a precise learning problem.',minutes:3},
-{kind:'ml-difference',tag:'WHAT MAKES MACHINE LEARNING DIFFERENT?',title:'Instead of writing every rule, learn useful parameters from examples.',sub:'A programmer describes the model structure. Data and a learning procedure determine the parameter values.',note:'Contrast hand-programmed if/else rules with parameters learned from labelled examples. Explain that not every machine-learning method requires labels.',minutes:3},
-{kind:'ml-scenario',tag:'OUR CLASSROOM CHALLENGE',title:'Can study patterns help predict a practice score?',sub:'Meet the Campus Study Coach. We will record study hours and completed practice sets, make predictions, and improve a simple model.',note:'Introduce the scenario before naming tensors. Students should identify two inputs and one output. Make clear that these are teaching values for a small exercise.',minutes:3},
-{kind:'ml-cast',tag:'MEET THE DATA',title:'Three examples give us something to work with.',sub:'Start with Ava, Ben, and Cam. First record their study activity; later compare model predictions with example targets.',note:'Have students read the rows aloud. Prompt them to suggest another measurable feature and decide what its unit would be.',minutes:3},
-{kind:'ml-loop',tag:'THE COMPLETE MACHINE LEARNING JOURNEY',title:'Collect → Represent → Predict → Compare → Improve.',sub:'We will complete this entire loop today and translate every stage into mathematical notation and PyTorch.',note:'Point to each stage. Tell students the class will begin with data, represent it as tensors, compute predictions, calculate errors, and change parameters.',minutes:3},
-{kind:'ml-bridge',code:"import torch\nhours = torch.tensor(2)\nsets = torch.tensor(3)\nscore = 10 * hours + 5 * sets + 20\nprint(score.item())",tag:'THE KEY CONNECTION',title:'Give each number a name before writing code.',sub:'Ava’s two hours and three sets are inputs. The rule returns one prediction. A tensor stores numbers in an order we choose, so the computer can repeat the calculation.',note:'Have the class name one object that holds numbers at each stage, then transition to the original first 1D example.',minutes:2},
-{kind:'cover',tag:'MODULE 01 · MACHINE LEARNING FOUNDATIONS',title:'Now turn our story into a computation.',sub:'We will represent one example, combine a dataset, apply a function, and train parameters.',note:'Introduce the central question: how do we turn real measurements into machine-learning computations? Invite students to describe the input and desired output in their own words.',minutes:2},
-{kind:'goals',tag:'TODAY’S ROUTE',title:'By the end, you can follow the entire computation.',sub:'We are not learning tensor jargon in isolation. We are building a tiny machine-learning system.',note:'Ask students whether a model could be expressed using ordinary tables and numbers. Emphasize that tensors make operations programmable and scalable.',minutes:2},
-{kind:'story',tag:'ONE RUNNING EXAMPLE',title:'Return to the Campus Study Coach.',sub:'Keep the same examples as we introduce each tensor dimension and operation.',note:'Ask students to identify a feature, an example, and an output.',minutes:2},
-{kind:'question',tag:'START WITH A CONCRETE PROBLEM',title:'What information do we need to make one prediction?',sub:'Ava studied 2 hours and completed 3 practice sets. We want to apply the same rule to everyone.',prompt:'Two measurements describe Ava. How should a computer store them together?',note:'Let students answer verbally before introducing the feature vector.',minutes:2},
-{kind:'vector',tag:'1D TENSOR',title:'Start with a list: one student, two numbers.',sub:'Ava’s measurements become a single row of two values. Every position has a meaning.',note:'Explain shape (2,) only after the example. One axis, length two. Rank is one; do not call it a 2D tensor.',minutes:3},
-{kind:'exercise',id:'ex1',tag:'QUICK CHECK · 30 SECONDS',title:'Count measurements, not students.',note:'Reveal after inviting responses. The feature vector [3,4] is 1D because it has one axis.',minutes:2},
-{kind:'dataset',tag:'2D TENSOR',title:'Stack several students into one table.',sub:'Rows are students. Columns are the two measured features.',note:'Invite a student to point to the row for Cam and the column for hours. Contrast a 2D table with a single student vector.',minutes:3},
-{kind:'index',tag:'TENSOR INDEXING',title:'Ask for one row—or just one column.',sub:'An operation can select the study hours for everyone without copying the data into a different format.',note:'X[0] retrieves the first student, X[:,0] retrieves all rows of the hours column. Explain zero-based indexing.',minutes:2},
-{kind:'exercise',id:'ex2',tag:'QUICK CHECK · 45 SECONDS',title:'Translate a classroom into a shape.',note:'Students should articulate the meaning of both axes, not only choose the correct tuple.',minutes:2},
-{kind:'rule',tag:'PARAMETERIZED FUNCTION',title:'A rule turns measurements into a predicted score.',sub:'Our example rule gives 10 points per study hour, 5 per practice set, plus 20 starting points.',note:'Present this as an invented rule. The weight values were chosen for clarity, not learned from data.',minutes:3},
-{kind:'score',tag:'WORKED EXAMPLE',title:'Let’s calculate Ava’s prediction together.',sub:'Multiply each measurement by its weight, add the results, then add the starting score.',note:'Compute aloud: 2x10 =20, 3x5=15, plus 20 =55. Connect the multiplication and sum to a dot product only after the numeric computation.',minutes:3},
-{kind:'batch',tag:'VECTORIZE THE SAME RULE',title:'One operation scores all three students.',sub:'The dataset, model weights, and predictions are all tensors.',note:'Show shape compatibility: X 3x2, w length 2, predictions length 3. The scalar bias broadcasts across predictions.',minutes:3},
-{kind:'exercise',id:'ex3',tag:'YOU DO IT · 60 SECONDS',title:'Predict a fourth student.',note:'Ask students to calculate 20 + (1x10) + (4x5). Answer 50. Emphasize the parameters remain the same for all students.',minutes:2},
-{kind:'transform',tag:'CHANGE THE DATA',title:'Tensor operations transform the measurements.',sub:'Convert the hours column to minutes. The values change; the number of students and features does not.',note:'Explain data preparation as operations on numeric arrays. Also caution that model parameters must change when units change.',minutes:3},
-{kind:'exercise',id:'ex4',tag:'QUICK CHECK',title:'Does changing units change shape?',note:'Values change from 2 to 120 etc. Shape stays (3,2). Differentiate the values from the structure.',minutes:2},
-{kind:'broadcast',tag:'A SUBTLE OPERATION',title:'Add the same starting score to every student.',sub:'One scalar is applied to all three predictions through broadcasting.',note:'Explain that broadcasting follows shape compatibility rules. It is not the same as matrix multiplication. The real physical tensor may not copy the scalar three times.',minutes:2},
-{kind:'shift',tag:'WHY GO BEYOND 2D?',title:'What if observations arrive every day?',sub:'Students now generate repeated measurements, not just one pair of numbers.',note:'Ask whether two axes still suffice for student/day/feature without flattening and losing explicit day structure.',minutes:2},
-{kind:'sequence',tag:'3D TENSOR',title:'Add a day axis. You now have a stack of tables.',sub:'Two students, three days, two measurements per day.',note:'Point to each axis by meaning. These data are for Ava and Ben and are example. Three axes means 3D even if individual values are simple scalars.',minutes:3},
-{kind:'reduce',tag:'AGGREGATE THE TIME AXIS',title:'Average across the three days.',sub:'Keep each student and feature, but remove the day axis.',note:'Ava average [2,3], Ben [4,2]. Show that 2x3x2 becomes 2x2 when reducing dim=1. This is different from flattening.',minutes:3},
-{kind:'exercise',id:'ex5',tag:'QUICK CHECK',title:'Where did the day axis go?',note:'Reduction produces shape (2,2). If students pick (3,2), ask which axis represents students.',minutes:2},
-{kind:'photo',tag:'4D TENSOR',title:'What if data is a picture?',sub:'Now students submit images of their written practice. Even a tiny grayscale image has height and width.',note:'Explain two images, grayscale one channel, 3x3 pixel. Images in standard PyTorch convolutional networks commonly use NCHW; other libraries may use different axis orders.',minutes:3},
-{kind:'flatten',tag:'RESHAPE IMAGE DATA',title:'Turn each picture into a row of pixel measurements.',sub:'Two images, nine pixels each. No pixels disappear, but the spatial layout is no longer explicit.',note:'2x1x3x3 -> 2x9. This is a pedagogical simplification. A real CNN normally preserves spatial structure.',minutes:3},
-{kind:'exercise',id:'ex6',tag:'YOU DO IT',title:'What shape will flattening produce?',note:'Let students calculate 1x3x3=9 features per student. The first axis still has 2 students.',minutes:2},
-{kind:'video',tag:'5D AND BEYOND',title:'Add more independent axes as the data demands.',sub:'Two students × two days × one channel × three rows × three columns.',note:'A 5D tensor is not exotic: it can be a batch of temporal images. Do not conflate 5D rank with number of examples.',minutes:2},
-{kind:'ladder',tag:'CHECKPOINT',title:'Rank tells you how many axes—not how much data.',sub:'The same machine-learning problem can use different tensor ranks depending on what we measure.',note:'Have students tell a story for each axis in the ladder. Relate back to the original study-coach measurements.',minutes:3},
-{kind:'training',tag:'WHAT MAKES IT MACHINE LEARNING?',title:'So far the parameters were chosen by hand.',sub:'Learning begins when we compare predictions with examples of desired outputs and adjust the rule.',note:'Point out that we will now begin training the parameters. Introduce target scores as example. Explain training as adjusting parameters rather than just applying a function.',minutes:2},
-{kind:'loss',tag:'ONE LOSS VALUE',title:'Our initial predictions miss their targets.',sub:'Compute the error for each student, square it, and take the mean.',note:'Predictions [55,65,80], targets [60,70,75]. Differences [-5,-5,5]. Squared errors [25,25,25]. MSE 25.',minutes:3},
-{kind:'exercise',id:'ex7',tag:'LAST NUMERICAL CHECK',title:'Calculate the average squared error.',note:'All 3 squared errors are 25; their average is 25. This makes the first loss deliberately easy.',minutes:2},
-{kind:'gradient',tag:'HOW A MODEL LEARNS',title:'Gradients show which direction should change.',sub:'PyTorch can track the tensor operations and calculate how the loss changes with the parameters.',note:'For this specific three-student batch, the gradients are [-3.3333,-6.6667] for weights, -3.3333 for bias. With lr=.01 the MSE falls to about 24.4185. Do not imply one update guarantees convergence.',minutes:3},
-{kind:'code',tag:'ACTUAL PYTORCH CODE',title:'This entire model is only a few lines of PyTorch.',sub:'Inputs, weights, predictions, loss, and gradients all remain tensors.',note:'Open the runnable module notebook or student page if live internet/local server is available. We checked this example against PyTorch.',minutes:3},
-{kind:'exercise',id:'ex8',tag:'DEBUG THE SHAPE',title:'Why does this matrix multiplication fail?',note:'X has two features, so w must have length two. Contrast (3,2)@(2,) with invalid (3,2)@(3,).',minutes:2},
-{kind:'summary',tag:'PUT IT ALL TOGETHER',title:'Machine learning is a pipeline of tensor operations.',sub:'Data → representation → transformation → parameterized computation → prediction → loss → parameter update.',note:'Ask students to name the numeric object at each step. Avoid introducing too many new symbols during the recap.',minutes:2},
-{kind:'office',tag:'AFTER CLASS',title:'Keep learning with Virtual Office Hours.',sub:'TeachReach uses this very module’s concept relationships, examples, and approved teaching procedures to answer student questions.',note:'Demo the TeachReach student page. State clearly it is an AI representation of the professor; live LLM responses require configured server-side API credentials.',minutes:2},
-{kind:'exit',tag:'EXIT TICKET',title:'Tell me three things before you leave.',sub:'Use complete sentences, not just shape tuples.',note:'Use as final formative assessment. Ask three questions: what shape for 8 students 2 features; why an image batch needs four axes; what operation changes parameters during training.',minutes:2}
+{kind:'ml-welcome',tag:'KAUSHIK ROY, UNIVERSITY OF ALABAMA · MACHINE LEARNING FOUNDATIONS',title:'How do machines learn from examples?',sub:'Start with a problem. Build a prediction. Discover the tensor operations that make it work.',minutes:3},
+{kind:'ml-why',tag:'START WITH A REASON',title:'Every day, we make decisions using patterns.',sub:'Your inbox filters spam. A music app recommends songs. A practice coach estimates how you might perform.',minutes:3},
+{kind:'ml-difference',tag:'WHAT MAKES MACHINE LEARNING DIFFERENT?',title:'Instead of writing every rule, learn useful parameters from examples.',sub:'A programmer describes the model structure. Data and a learning procedure determine the parameter values.',minutes:3},
+{kind:'ml-scenario',tag:'OUR CLASSROOM CHALLENGE',title:'Can study patterns help predict a practice score?',sub:'Meet the Campus Study Coach. We will record study hours and completed practice sets, make predictions, and improve a simple model.',minutes:3},
+{kind:'ml-cast',tag:'MEET THE DATA',title:'Three examples give us something to work with.',sub:'Start with Ava, Ben, and Cam. First record their study activity; later compare model predictions with example targets.',minutes:3},
+{kind:'ml-loop',tag:'THE COMPLETE MACHINE LEARNING JOURNEY',title:'Collect → Represent → Predict → Compare → Improve.',sub:'We will complete this entire loop today and translate every stage into mathematical notation and PyTorch.',minutes:3},
+{kind:'ml-bridge',code:"import torch\nhours = torch.tensor(2)\nsets = torch.tensor(3)\nscore = 10 * hours + 5 * sets + 20\nprint(score.item())",tag:'THE KEY CONNECTION',title:'Give each number a name before writing code.',sub:'Ava’s two hours and three sets are inputs. The rule returns one prediction. A tensor stores numbers in an order we choose, so the computer can repeat the calculation.',minutes:2},
+{kind:'cover',tag:'MODULE 01 · MACHINE LEARNING FOUNDATIONS',title:'Now turn our story into a computation.',sub:'We will represent one example, combine a dataset, apply a function, and train parameters.',minutes:2},
+{kind:'goals',tag:'TODAY’S ROUTE',title:'By the end, you can follow the entire computation.',sub:'We are not learning tensor jargon in isolation. We are building a tiny machine-learning system.',minutes:2},
+{kind:'story',tag:'ONE RUNNING EXAMPLE',title:'Return to the Campus Study Coach.',sub:'Keep the same examples as we introduce each tensor dimension and operation.',minutes:2},
+{kind:'question',tag:'START WITH A CONCRETE PROBLEM',title:'What information do we need to make one prediction?',sub:'Ava studied 2 hours and completed 3 practice sets. We want to apply the same rule to everyone.',prompt:'Two measurements describe Ava. How should a computer store them together?',minutes:2},
+{kind:'vector',tag:'1D TENSOR',title:'Start with a list: one student, two numbers.',sub:'Ava’s measurements become a single row of two values. Every position has a meaning.',minutes:3},
+{kind:'exercise',id:'ex1',tag:'QUICK CHECK · 30 SECONDS',title:'Count measurements, not students.',minutes:2},
+{kind:'dataset',tag:'2D TENSOR',title:'Stack several students into one table.',sub:'Rows are students. Columns are the two measured features.',minutes:3},
+{kind:'index',tag:'TENSOR INDEXING',title:'Ask for one row—or just one column.',sub:'An operation can select the study hours for everyone without copying the data into a different format.',minutes:2},
+{kind:'exercise',id:'ex2',tag:'QUICK CHECK · 45 SECONDS',title:'Translate a classroom into a shape.',minutes:2},
+{kind:'rule',tag:'PARAMETERIZED FUNCTION',title:'A rule turns measurements into a predicted score.',sub:'Our example rule gives 10 points per study hour, 5 per practice set, plus 20 starting points.',minutes:3},
+{kind:'score',tag:'WORKED EXAMPLE',title:'Let’s calculate Ava’s prediction together.',sub:'Multiply each measurement by its weight, add the results, then add the starting score.',minutes:3},
+{kind:'batch',tag:'VECTORIZE THE SAME RULE',title:'One operation scores all three students.',sub:'The dataset, model weights, and predictions are all tensors.',minutes:3},
+{kind:'exercise',id:'ex3',tag:'YOU DO IT · 60 SECONDS',title:'Predict a fourth student.',minutes:2},
+{kind:'transform',tag:'CHANGE THE DATA',title:'Tensor operations transform the measurements.',sub:'Convert the hours column to minutes. The values change; the number of students and features does not.',minutes:3},
+{kind:'exercise',id:'ex4',tag:'QUICK CHECK',title:'Does changing units change shape?',minutes:2},
+{kind:'broadcast',tag:'A SUBTLE OPERATION',title:'Add the same starting score to every student.',sub:'One scalar is applied to all three predictions through broadcasting.',minutes:2},
+{kind:'shift',tag:'WHY GO BEYOND 2D?',title:'What if observations arrive every day?',sub:'Students now generate repeated measurements, not just one pair of numbers.',minutes:2},
+{kind:'sequence',tag:'3D TENSOR',title:'Add a day axis. You now have a stack of tables.',sub:'Two students, three days, two measurements per day.',minutes:3},
+{kind:'reduce',tag:'AGGREGATE THE TIME AXIS',title:'Average across the three days.',sub:'Keep each student and feature, but remove the day axis.',minutes:3},
+{kind:'exercise',id:'ex5',tag:'QUICK CHECK',title:'Where did the day axis go?',minutes:2},
+{kind:'photo',tag:'4D TENSOR',title:'What if data is a picture?',sub:'Now students submit images of their written practice. Even a tiny grayscale image has height and width.',minutes:3},
+{kind:'flatten',tag:'RESHAPE IMAGE DATA',title:'Turn each picture into a row of pixel measurements.',sub:'Two images, nine pixels each. No pixels disappear, but the spatial layout is no longer explicit.',minutes:3},
+{kind:'exercise',id:'ex6',tag:'YOU DO IT',title:'What shape will flattening produce?',minutes:2},
+{kind:'video',tag:'5D AND BEYOND',title:'Add more independent axes as the data demands.',sub:'Two students × two days × one channel × three rows × three columns.',minutes:2},
+{kind:'ladder',tag:'CHECKPOINT',title:'Rank tells you how many axes—not how much data.',sub:'The same machine-learning problem can use different tensor ranks depending on what we measure.',minutes:3},
+{kind:'training',tag:'WHAT MAKES IT MACHINE LEARNING?',title:'So far the parameters were chosen by hand.',sub:'Learning begins when we compare predictions with examples of desired outputs and adjust the rule.',minutes:2},
+{kind:'loss',tag:'ONE LOSS VALUE',title:'Our initial predictions miss their targets.',sub:'Compute the error for each student, square it, and take the mean.',minutes:3},
+{kind:'exercise',id:'ex7',tag:'LAST NUMERICAL CHECK',title:'Calculate the average squared error.',minutes:2},
+{kind:'gradient',tag:'HOW A MODEL LEARNS',title:'Gradients show which direction should change.',sub:'PyTorch can track the tensor operations and calculate how the loss changes with the parameters.',minutes:3},
+{kind:'code',tag:'ACTUAL PYTORCH CODE',title:'This entire model is only a few lines of PyTorch.',sub:'Inputs, weights, predictions, loss, and gradients all remain tensors.',minutes:3},
+{kind:'exercise',id:'ex8',tag:'DEBUG THE SHAPE',title:'Why does this matrix multiplication fail?',minutes:2},
+{kind:'summary',tag:'PUT IT ALL TOGETHER',title:'Machine learning is a pipeline of tensor operations.',sub:'Data → representation → transformation → parameterized computation → prediction → loss → parameter update.',minutes:2},
+{kind:'office',tag:'AFTER CLASS',title:'Keep learning with Virtual Office Hours.',sub:'Search the module FAQ or register a question for Professor Roy.',minutes:2},
+{kind:'exit',tag:'EXIT TICKET',title:'Module 01 review questions',sub:'Try each question on your own, then compare your reasoning with the worked answer.',minutes:2}
  ];
 
 // Module 02 continuity: the final slide opens the next mathematical foundation.
-S.push({kind:'m2-teaser',tag:'UP NEXT · MODULE 02',title:'A prediction is not a promise.',sub:'Ava has x = [2, 3], and our toy tensor model predicts 55. But what is the probability that she actually scores above 60?',note:'Ask students to distinguish the computed prediction from possible observed outcomes. Connect a distribution to the same x, w, b already used in class. Invite students to open Module 02 next.',minutes:3});
-// Professor-reviewed notation-and-code bridges are inserted immediately after
+S.push({kind:'m2-teaser',tag:'UP NEXT · MODULE 02',title:'From tensors to probability',sub:'Ava has x = [2, 3], and our toy tensor model predicts 55. But what is the probability that she actually scores above 60?',minutes:3});
+// Notation-and-code examples are inserted immediately after
 // the real-world examples they explain (not collected as a detached appendix).
 for (const bridge of (window.TEACHREACH_BRIDGES || [])) {
   const where = S.findIndex(item => item.kind === bridge.after);
@@ -64,7 +64,155 @@ for(const slide of S){
       PYTORCH.byKind?.[slide.kind]||"";
   }
 }
-const READ_ALOUD = {
+const checks = {
+  "ml-welcome": [
+    "A music app predicts which song you will play next. What could it learn from your past listening?",
+    "Which songs you played, skipped or replayed give it examples of your preferences."
+  ],
+  "ml-why": [
+    "What could an inbox filter predict about a new message?",
+    "It could predict whether the message is spam. Examples of messages already marked as spam give it something to learn from."
+  ],
+  "ml-difference": [
+    "Our score rule gives 10 points per hour. What would make that number a learned weight?",
+    "Use past study records and scores to adjust the number according to how well the rule predicts."
+  ],
+  "ml-scenario": [
+    "Which two facts about Ava are available before the quiz? What do we want to predict?",
+    "We know her study hours and completed practice sets. Her quiz score is the outcome we want to predict."
+  ],
+  "ml-cast": [
+    "Ava completes a fourth practice set. Which entry in her record changes?",
+    "Her practice-set entry goes from 3 to 4. Her hours remain 2, so her new row is [2, 4]."
+  ],
+  "ml-loop": [
+    "Which step first requires the actual quiz scores?",
+    "Comparison. To measure a prediction error, we need both the prediction and the score that was observed."
+  ],
+  "ml-bridge": [
+    "Keep the three sets and change hours from 2 to 3. What will print?",
+    "65. One additional hour adds 10 points to the original 55."
+  ],
+  "cover": [
+    "Two students have identical recorded inputs. What does the same fixed rule predict for them?",
+    "The same score. The calculation receives exactly the same numbers for both."
+  ],
+  "goals": [
+    "What would you compare to find out whether the score rule works on a new student?",
+    "Compute the prediction from the study record, then compare it with that student’s observed score."
+  ],
+  "story": [
+    "Ava is one example. Name a feature and give its value for her.",
+    "Study hours is a feature, and its value is 2. Completed practice sets is another, with value 3."
+  ],
+  "question": [
+    "How could you store Ava’s two measurements so another person knows which is which?",
+    "Use an ordered list [2, 3] and record the order as [hours, sets]. Reversing the labels changes what the numbers mean."
+  ],
+  "vector": [
+    "If we record sleep hours as a third feature, what is the shape of Ava’s list?",
+    "It becomes (3,). There is still one axis, now with three entries."
+  ],
+  "dataset": [
+    "A fourth student joins the table. Which dimension grows?",
+    "The row count increases from 3 to 4. With the same two features the shape becomes (4, 2)."
+  ],
+  "index": [
+    "In X[:, 0], whose hours do we get?",
+    "All three students’ hours. The colon selects every row and 0 selects the first column."
+  ],
+  "rule": [
+    "What score does the rule predict for zero hours and zero sets?",
+    "20. Both weighted measurements contribute zero, leaving the starting score or bias."
+  ],
+  "score": [
+    "Which contributes more to Ava’s prediction, her hours or her sets?",
+    "Hours contribute 2 × 10 = 20 points. Sets contribute 3 × 5 = 15 points."
+  ],
+  "batch": [
+    "If X has eight rows and two columns, how many scores does X @ w + b return?",
+    "Eight. The same two weights combine the two entries in each row into one score."
+  ],
+  "transform": [
+    "After converting hours to minutes, what weight per minute preserves the score?",
+    "10/60 points per minute. Multiplying 120 minutes by 10/60 gives the same 20 points as two hours at 10."
+  ],
+  "broadcast": [
+    "If the bias rises from 20 to 22, which predictions change?",
+    "Each prediction rises by 2 because the same bias is added to every row."
+  ],
+  "shift": [
+    "What detail would disappear if we recorded only each student’s total weekly study hours?",
+    "We could no longer tell which day the study happened. A day axis preserves that information."
+  ],
+  "sequence": [
+    "In a tensor ordered as student, day, feature, what remains after selecting one student and one day?",
+    "One list of two features, the hours and practice sets for that student on that day."
+  ],
+  "reduce": [
+    "Ava studies 1, 2 and 3 hours on three days. What single value replaces those hours after averaging?",
+    "2 hours per day, since (1 + 2 + 3)/3 = 2. The practice-set values are averaged separately."
+  ],
+  "photo": [
+    "What changes in (2, 1, 3, 3) if each picture has three color channels?",
+    "The channel count changes from 1 to 3, giving (2, 3, 3, 3). There are still two pictures."
+  ],
+  "flatten": [
+    "If each of two images has one channel, two rows and four columns, what is the flattened batch shape?",
+    "Each image supplies 1 × 2 × 4 = 8 values. Keeping the two images separate gives (2, 8)."
+  ],
+  "video": [
+    "A third day is added for both students. Which length changes in (2, 2, 1, 3, 3)?",
+    "The second length counts days. The new shape is (2, 3, 1, 3, 3)."
+  ],
+  "ladder": [
+    "Which has more axes, a list with 100 entries or a table with two rows and two columns?",
+    "The table has two axes. The list has one axis even though it contains more entries."
+  ],
+  "training": [
+    "Ava scores 60 after the rule predicts 55. Which numbers can training adjust?",
+    "The weights and bias in the rule. Her recorded study activity and observed score supply the example used to judge the rule."
+  ],
+  "loss": [
+    "What squared error comes from predicting 65 when the observed score is 60?",
+    "The signed miss is 5. Squaring gives 25, the same penalty as a five-point miss in the other direction."
+  ],
+  "gradient": [
+    "After a small parameter update, the same batch’s loss changes from 25 to about 24.42. What can we conclude?",
+    "The updated rule fits these three examples better according to this loss. We need fresh examples to assess performance on other students."
+  ],
+  "code": [
+    "What value is available after the prediction line but before loss.backward() runs?",
+    "The predicted scores already exist. The backward call computes how the loss changes with each trainable parameter."
+  ],
+  "summary": [
+    "Where in the sequence do the measured quiz scores first enter?",
+    "They enter when we compare predictions with targets to calculate the loss."
+  ],
+  "office": [
+    "You can compute an average, but your result has the wrong shape. What details would make a useful question?",
+    "Include the input shape, what each axis counts, which axis you averaged, and the shape you obtained. Those details locate the step that needs explaining."
+  ],
+  "m2-teaser": [
+    "A rule gives every student in a group a prediction of 55. Can you tell from that number alone what fraction will score above 60?",
+    "No. The rule supplies a point prediction. To estimate the fraction above 60, we need information about how actual scores vary around it."
+  ]
+};
+const reviewQuestions = [
+  [
+    "Eight students each report hours and practice sets. What is the table shape, and what does one row mean?",
+    "(8, 2). A row holds both measurements for one student."
+  ],
+  [
+    "Why does a batch of grayscale pictures have four axes in our layout?",
+    "The axes count images, channels, pixel rows and pixel columns. Grayscale needs one channel, so the channel axis has length 1."
+  ],
+  [
+    "A rule predicts 55 and Ava scores 60. What changes during a training update?",
+    "The observed score and the inputs stay fixed. We adjust the weights and bias using the loss to judge whether the predictions improve."
+  ]
+];
+const interpretation = {
   vector: 'x holds two real numbers. Position 0 holds hours and position 1 holds sets.',
   dataset: 'A capital X is a whole table. The first index chooses a student; the second chooses a measurement.',
   rule: 'Multiply each feature by its own weight, add those products, then add the starting score.',
@@ -102,7 +250,7 @@ function matrix(){return `<div class="big-matrix">${s.students.flatMap(x=>[x.hou
 function pixel(vals){return `<div class="pixels-big">${vals.flat().map(v=>`<span class="${v?'on':''}"></span>`).join('')}</div>`}
 const A=[[0,1,0],[1,1,1],[0,1,0]],B=[[1,0,1],[0,1,0],[1,0,1]];
 function body(sl){switch(sl.kind){
-case 'm2-teaser':return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch"><div class="big-card" style="background:#fff2f4;border:1px solid #e3b4c0;border-radius:17px;padding:25px"><div class="eyebrow">WHAT WE CAN COMPUTE</div><div style="font-size:70px;font-weight:900;color:#9E1B32;margin:15px 0">55</div><p>Ava studied <b>2 hours</b> and completed <b>3 practice sets</b>.</p><div style="font-family:Georgia,serif;font-size:22px;color:#63243b">xᵀw + b = 55</div></div><div class="big-card" style="background:#eff5f7;border:1px solid #bed0da;border-radius:17px;padding:25px"><div class="eyebrow">WHAT WE CANNOT YET ANSWER</div><div style="font-size:37px;font-weight:850;color:#345978;margin:19px 0">P(Y &gt; 60 | x) = ?</div><p>Similar students may receive different scores. We now need <b>probability, evidence, and distributions</b>.</p><a href="../module-02/" class="btn" style="text-decoration:none;display:inline-flex;padding:13px 19px;background:#9E1B32;color:#fff;border-radius:10px;font-weight:820">Start Module 02 →</a></div></div>`;
+case 'm2-teaser':return `<div class="two-col"><div class="big-card" style="background:#fff2f4;border:1px solid #e3b4c0;border-radius:17px;padding:25px"><div class="eyebrow">WHAT WE CAN COMPUTE</div><div style="font-size:70px;font-weight:900;color:#9E1B32;margin:15px 0">55</div><p>Ava studied <b>2 hours</b> and completed <b>3 practice sets</b>.</p><div style="font-family:Georgia,serif;font-size:22px;color:#63243b">xᵀw + b = 55</div></div><div class="big-card" style="background:#eff5f7;border:1px solid #bed0da;border-radius:17px;padding:25px"><div class="eyebrow">WHAT WE CANNOT YET ANSWER</div><div style="font-size:37px;font-weight:850;color:#345978;margin:19px 0">P(Y &gt; 60 | x) = ?</div><p>Similar students may receive different scores. We now need <b>probability, evidence, and distributions</b>.</p></div></div>`;
 
 case 'ml-welcome':return `<div class="intro-stage intro-welcome"><div class="intro-main"><div class="intro-kicker">FOUNDATIONS · MODULE 01</div><div class="intro-hero">Learn patterns.<br><span>Make predictions.</span><br>Improve with data.</div><div class="intro-pill">From familiar questions to formal machine learning</div></div><div class="intro-rings"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="ring ring-three"></div><div class="ring-dot dot-one">DATA</div><div class="ring-dot dot-two">MODEL</div><div class="ring-dot dot-three">LEARN</div></div></div>`;
 case 'ml-why':return `<div class="intro-tiles">${[['✉','Inbox','Which messages look like spam?'],['♫','Music','What might you enjoy next?'],['◎','Practice','What score might follow this study pattern?']].map((c,i)=>`<div class="intro-tile" style="--delay:${i*140}ms"><div class="intro-icon">${c[0]}</div><div class="intro-label">${c[1]}</div><p>${c[2]}</p><div class="intro-micro">examples → prediction</div></div>`).join('')}</div><div class="intro-banner">A useful model discovers relationships between inputs and outcomes.</div>`;
@@ -114,13 +262,13 @@ case 'ml-bridge':return `<div class="two-col"><div class="big-card"><div class="
 sets = 3
 score = 10 * hours + 5 * sets + 20
 print(score)</pre><p>The equals sign stores a value under a name. The star means multiply. Predict the output before running the code.</p></div></div>`;
-case 'writing':return `<div class="writing-layout"><div class="writing-story"><span class="bridge-label">WRITE THIS IN A PAPER</span><p>${safe(sl.example)}</p><span class="bridge-label">YOUR TASK</span><p class="writing-task">${safe(sl.question)}</p><button class="btn" id="revealBtn">${revealed?'Hide sample wording':'Reveal sample formal writing'}</button></div><div class="writing-answer"><span class="bridge-label">A REPRODUCIBLE FORMAL STATEMENT</span>${revealed?`<p class="writing-formal">${safe(sl.formal)}</p><span class="bridge-label">LATEX SOURCE FOR A PAPER</span><pre class="writing-latex">${safe(sl.latex)}</pre><p class="writing-tip">A good method section defines every symbol and states exactly which dimensions correspond to data and parameters.</p>`:`<div class="writing-placeholder"><div>✎</div>Explain what each symbol means before writing the formula.</div>`}</div></div>`;
+case 'writing':return `<div class="writing-layout"><div class="writing-story"><span class="bridge-label">WRITE THIS IN A PAPER</span><p>${safe(sl.example)}</p><span class="bridge-label">Check your understanding</span><p class="writing-task">${safe(sl.question)}</p><button class="btn" id="revealBtn">${revealed?'Hide answer':'Reveal answer'}</button></div><div class="writing-answer"><span class="bridge-label">A REPRODUCIBLE FORMAL STATEMENT</span>${revealed?`<p class="writing-formal">${safe(sl.formal)}</p><span class="bridge-label">LATEX SOURCE FOR A PAPER</span><pre class="writing-latex">${safe(sl.latex)}</pre><p class="writing-tip">A good method section defines every symbol and states exactly which dimensions correspond to data and parameters.</p>`:`<div class="writing-placeholder"><div>✎</div>Explain what each symbol means before writing the formula.</div>`}</div></div>`;
 case 'bridge':return `<div class="tr-bridge-summary"><div class="bridge-example"><span class="bridge-label">START WITH THE EXAMPLE</span><p>${safe(sl.example)}</p></div><div class="bridge-formal"><span class="bridge-label">NOW READ THE FORMALISM</span><strong>${safe(sl.formal)}</strong><p>${safe(sl.translate)}</p></div><div class="bridge-out"><span class="bridge-label">EXPECTED OUTPUT · SAME TOY DATA</span><pre>${safe(sl.output)}</pre></div></div>`;
 
 case 'cover':return `<div class="two-col wide-left"><div class="big-card" style="background:#1d2b3c;color:white;border:0;display:flex;flex-direction:column;justify-content:center;min-height:290px"><div class="eyebrow" style="color:#f4aab8">ONE STORY · SEVEN IDEAS · REAL PYTORCH</div><div style="font-size:clamp(33px,4.5vw,65px);font-weight:900;letter-spacing:-.06em;line-height:1.07;margin:19px 0">What can a computer do with <span style="color:#ffafc0">two numbers?</span></div><div style="color:#d0dce5;font-size:18px">It can represent data, apply a model, calculate errors, and learn.</div></div><div class="big-card" style="display:grid;justify-items:center;align-content:center;text-align:center;gap:16px"><div class="big-vector"><div class="v"><b>2</b><span>hours</span></div><div class="v"><b>3</b><span>sets</span></div></div><span class="pill cran">One student becomes a model input</span></div></div>`;
 case 'goals':return `<div class="deck-grid4">${M.objectives.map((o,i)=>`<div class="big-card" style="min-height:250px"><div class="eyebrow">GOAL 0${i+1}</div><div style="font-size:36px;margin:18px 0">${['▦','▤','↗','◎'][i]}</div><div class="deck-small" style="font-weight:750;color:#33465a">${o}</div></div>`).join('')}</div>`;
-case 'story':return `<div class="two-col"><div class="student-story">${students()}</div><div class="big-card"><div class="eyebrow">WHAT WE WANT TO LEARN</div><p class="deck-large">Can study activity help us estimate a practice-test score?</p><div class="callout" style="font-size:16px">We will follow the exact same example example throughout the class.</div><div class="tiny-note" style="margin-top:18px">Three example records · One calculation we can inspect.</div></div></div>`;
-case 'question':return `<div class="two-col"><div class="big-card"><div class="eyebrow">AVA’S RECORDED INFORMATION</div><div class="big-vector"><div class="v"><b>2</b><span>study hours</span></div><div class="v"><b>3</b><span>practice sets</span></div></div></div><div class="callquote">${sl.prompt}<details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><p>Store the measurements in an ordered feature vector [2, 3]. Index 0 holds study hours and index 1 holds practice sets. Its shape is (2,).</p></details></div></div>`;
+case 'story':return `<div class="two-col"><div class="student-story">${students()}</div><div class="big-card"><div class="eyebrow">WHAT WE WANT TO LEARN</div><p class="deck-large">Can study activity help us estimate a practice-test score?</p><div class="callout" style="font-size:16px">We will follow these three study records throughout the lesson.</div><div class="tiny-note" style="margin-top:18px">Three example records · One calculation we can inspect.</div></div></div>`;
+case 'question':return `<div class="two-col"><div class="big-card"><div class="eyebrow">AVA’S RECORDED INFORMATION</div><div class="big-vector"><div class="v"><b>2</b><span>study hours</span></div><div class="v"><b>3</b><span>practice sets</span></div></div></div><div class="callquote">Which entry should come first in the record?</div></div>`;
 case 'vector':return `<div class="two-col"><div class="big-card"><div class="big-vector"><div class="v"><b>2</b><span>hours</span></div><div class="v"><b>3</b><span>sets</span></div></div><div class="chip-row" style="justify-content:center"><span class="pill blue">1 axis</span><span class="pill blue">2 entries</span><span class="pill green">shape (2,)</span></div></div><div class="big-card"><div class="eyebrow">PLAIN ENGLISH</div><p class="deck-large">A single ordered list of measurements.</p><p class="deck-small">That is a 1D tensor. A model's weights can also be a 1D tensor.</p><pre class="code-box" style="font-size:clamp(13px,1.5vw,18px)">torch.tensor([2., 3.])</pre></div></div>`;
 case 'dataset':return `<div class="two-col"><div class="big-card"><div class="chip-row" style="justify-content:center"><span class="pill blue">3 student rows</span><span class="pill blue">2 feature columns</span></div>${matrix()}<div style="text-align:center"><span class="pill green">Shape (3, 2)</span></div></div><div class="big-card"><div class="student-story">${students()}</div></div></div>`;
 case 'index':return `<div class="two-col"><div class="big-card">${matrix()}</div><div class="big-card"><div class="eyebrow">TWO USEFUL QUESTIONS</div><div class="slide-step"><div class="num">1</div><div><b>What did Ava do?</b><small>First row: [2, 3] → <code>X[0]</code></small></div></div><div style="height:13px"></div><div class="slide-step"><div class="num">2</div><div><b>How long did everyone study?</b><small>First column: [2, 4, 5] → <code>X[:, 0]</code></small></div></div></div></div>`;
@@ -152,10 +300,18 @@ pred = X @ w + b
 loss = ((pred - y)**2).mean()
 loss.backward()</pre><div class="big-card"><div class="eyebrow">WHAT EACH LINE DOES</div>${[['X','represents students and features'],['w and b','store model parameters'],['pred','computes outputs'],['loss','measures error'],['backward()','computes parameter gradients']].map((x,i)=>`<div class="slide-step" style="margin-bottom:9px"><div class="num">${i+1}</div><div><b>${x[0]}</b><small>${x[1]}</small></div></div>`).join('')}</div></div>`;
 case 'summary':return `<div class="shape-ladder">${[['1','Data'],['2','Tensors'],['3','Transforms'],['4','Predictions'],['5','Loss'],['6','Updates']].map(x=>`<div class="shape-step"><b>${x[0]}</b><strong>${x[1]}</strong></div>`).join('')}</div><div class="callquote" style="margin-top:22px">The same tensor operations connect data representation, model computation, and learning.</div>`;
-case 'office':return `<div class="two-col"><div class="mock-chat"><div class="chat-avatar"><img src="./assets/professor_portrait.png" alt="Professor portrait"><div><b style="font-size:20px">Virtual Office Hours</b><div class="tiny-note">TeachReach · Course AI office hours</div></div></div><div class="chat-line" style="background:#fbe5ea;color:#922d45"><b>Student:</b> Why does a third axis appear when we record daily activity?</div><div class="chat-line"><b>TeachReach:</b> We need to keep track of <em>who</em>, <em>which day</em>, and <em>which measurement</em>. Let’s point to each axis in Ava’s daily table.</div></div><div class="big-card"><div class="eyebrow">THE SAME MODULE CONTINUES</div><p class="deck-large">Students revisit the diagrams, run the code, practice the questions, and ask for help.</p><p class="deck-small">The agent retrieves module concepts and follows a configurable teaching process. Professor-authored explanations stay connected to the module and student questions.</p><a class="btn" style="display:inline-block;text-decoration:none;margin-top:12px" href="./office.html" target="_blank" rel="noopener">Open FAQ Virtual Office Hours ↗</a></div></div>`;
-case 'exit':return `<div class="student-story">${[['1','You have 8 students and 2 features. What shape describes the dataset?'],['2','Why does a batch of grayscale pictures have four axes?'],['3','What changes when the model learns from its mistakes?']].map(v=>`<div class="slide-step"><div class="num">${v[0]}</div><div style="font-size:clamp(18px,2vw,26px);font-weight:750">${v[1]}</div></div>`).join('')}<details class="tr-check-solution"><summary><span class="tr-show-answer">Reveal answer</span><span class="tr-hide-answer">Hide answer</span></summary><ol><li>The dataset has shape (8, 2), one row per student and one column per feature.</li><li>In NCHW layout the axes are image, channel, height and width. Grayscale gives the channel axis length 1.</li><li>Training updates the weights and bias using the loss gradient. The recorded inputs and targets stay fixed.</li></ol></details></div>`;
-case 'exercise':{let e=ex[sl.id];return `<div class="big-card"><div class="exercise-prompt">${safe(e.question)}</div>${e.type==='choice'?`<div class="exercise-choices">${e.choices.map((c,i)=>`<div class="exercise-choice"><b>${'ABCD'[i]}.</b>${safe(c)}</div>`).join('')}</div>`:'<div class="callquote">Calculate a number. Show the computation on paper.</div>'}<div style="margin-top:20px"><button class="btn" id="revealBtn">${revealed?'Hide':'Reveal'} answer</button></div>${revealed?`<div class="slide-reveal"><b>Answer: ${safe(e.answer)}</b><br>${safe(e.explanation)}</div>`:''}</div>`}
+case 'office':return `<div class="two-col"><div class="mock-chat"><div class="chat-avatar"><img src="./assets/professor_portrait.png" alt="Professor portrait"><div><b style="font-size:20px">Virtual Office Hours</b><div class="tiny-note">TeachReach · Course AI office hours</div></div></div><div class="chat-line" style="background:#fbe5ea;color:#922d45"><b>Student:</b> Why does a third axis appear when we record daily activity?</div><div class="chat-line"><b>TeachReach:</b> We need to keep track of <em>who</em>, <em>which day</em>, and <em>which measurement</em>. Let’s point to each axis in Ava’s daily table.</div></div><div class="big-card"><div class="eyebrow">THE SAME MODULE CONTINUES</div><p class="deck-large">Find the FAQ on axes and shapes. Compare its example with your own tensor.</p><p class="deck-small">If the FAQ leaves a question open, add it to the module question register.</p><a class="btn" style="display:inline-block;text-decoration:none;margin-top:12px" href="./office.html" target="_blank" rel="noopener">Open FAQ Virtual Office Hours ↗</a></div></div>`;
+case 'exit':return '';
+case 'exercise':{let e=ex[sl.id];return `<div class="big-card"><h2>Check your understanding</h2><div class="exercise-prompt">${safe(e.question)}</div>${e.type==='choice'?`<div class="exercise-choices">${e.choices.map((c,i)=>`<div class="exercise-choice"><b>${'ABCD'[i]}.</b>${safe(c)}</div>`).join('')}</div>`:'<div class="callquote">Calculate a number. Show the computation on paper.</div>'}<div style="margin-top:20px"><button class="btn" id="revealBtn">${revealed?'Hide':'Reveal'} answer</button></div>${revealed?`<div class="slide-reveal"><b>Answer: ${safe(e.answer)}</b><br>${safe(e.explanation)}</div>`:''}</div>`}
 }}
-function render(){const sl=S[idx];document.title=(idx+1)+' / '+S.length+' — '+sl.title+' · ML Foundations';$('progress').style.width=((idx+1)/S.length*100)+'%';$('count').textContent=(idx+1)+' / '+S.length;$('prev').disabled=idx===0;$('next').disabled=idx===S.length-1;$('slide').innerHTML=`<div class="slide-head"><div><div class="eyebrow">${sl.tag}</div><h1>${sl.title}</h1>${sl.sub?`<p class="subtitle">${sl.sub}</p>`:''}</div><div class="slide-top-right"><span class="corner-num">${String(idx+1).padStart(2,'0')}</span></div></div><div class="tr-code-example"><div class="tr-code-bar"><button type="button" class="tr-code-toggle" id="trCodeToggle" aria-controls="trCodeWrap" aria-expanded="${codeVisible?'true':'false'}">${codeVisible?'Hide PyTorch example':'Show PyTorch example'}</button><span class="tr-code-hint">Standalone example for this concept</span></div><div class="tr-code-wrap" id="trCodeWrap" ${codeVisible?'':'hidden'}><div class="tr-code-actions"><button type="button" class="tr-code-copy" id="trCodeCopy">Copy code</button></div><pre id="trCodeText">${safe(sl.code)}</pre></div></div><div class="slide-content">${body(sl)}</div>${FORMAL[sl.kind] ? `<div class="slide-formal"><span>READ IT ALOUD</span><p>${safe(READ_ALOUD[sl.kind])}</p><details><summary>See the notation</summary><strong>${safe(FORMAL[sl.kind])}</strong></details></div>` : ''}<div class="slide-footer"><span>ML Foundations · Module 1</span><span><b>${sl.minutes} min</b> suggested · ${sl.kind==='exercise'?'Student participation':'Live teaching'}</span></div>`;if($('trCodeToggle'))$('trCodeToggle').onclick=()=>{codeVisible=!codeVisible;$('trCodeWrap').hidden=!codeVisible;$('trCodeToggle').textContent=codeVisible?'Hide PyTorch example':'Show PyTorch example';$('trCodeToggle').setAttribute('aria-expanded',String(codeVisible));};if($('trCodeCopy'))$('trCodeCopy').onclick=async()=>{try{await navigator.clipboard.writeText(sl.code);$('trCodeCopy').textContent='Copied ✓';}catch{$('trCodeCopy').textContent='Select code to copy';}};if($('revealBtn'))$('revealBtn').onclick=()=>{revealed=!revealed;render()};if ($('copyBridge')) $('copyBridge').onclick=async()=>{try{await navigator.clipboard.writeText(sl.code);$('copyBridge').textContent='Copied ✓';}catch{$('copyBridge').textContent='Select code to copy';}};$('notes').innerHTML='<h3>Slide '+(idx+1)+' · Speaker notes</h3>'+safe(sl.note)+'<p class="tiny" style="color:#a9b8c8">Estimated discussion time: '+sl.minutes+' minutes</p>';const h='#'+(idx+1);try{history.replaceState(null,'',location.pathname+location.search+h)}catch{};}
+function render(){const sl=S[idx];document.title=(idx+1)+' / '+S.length+' — '+sl.title+' · ML Foundations';$('progress').style.width=((idx+1)/S.length*100)+'%';$('count').textContent=(idx+1)+' / '+S.length;$('prev').disabled=idx===0;$('next').hidden=idx===S.length-1;$('continueModule').hidden=idx!==S.length-1;$('slide').innerHTML=`<div class="slide-head"><div><div class="eyebrow">${sl.tag}</div><h1>${sl.title}</h1>${sl.sub?`<p class="subtitle">${sl.sub}</p>`:''}</div><div class="slide-top-right"><span class="corner-num">${String(idx+1).padStart(2,'0')}</span></div></div><div class="tr-code-example"><div class="tr-code-bar"><button type="button" class="tr-code-toggle" id="trCodeToggle" aria-controls="trCodeWrap" aria-expanded="${codeVisible?'true':'false'}">${codeVisible?'Hide PyTorch example':'Show PyTorch example'}</button><span class="tr-code-hint">Standalone example for this concept</span></div><div class="tr-code-wrap" id="trCodeWrap" ${codeVisible?'':'hidden'}><div class="tr-code-actions"><button type="button" class="tr-code-copy" id="trCodeCopy">Copy code</button></div><pre id="trCodeText">${safe(sl.code)}</pre></div></div><div class="slide-content">${body(sl)}</div>${FORMAL[sl.kind] ? `<div class="slide-formal"><span>What the notation means</span><p>${safe(interpretation[sl.kind])}</p><details><summary>See the notation</summary><strong>${safe(FORMAL[sl.kind])}</strong></details></div>` : ''}`;
+  const container = $('slide');
+  if (sl.kind === 'exit') {
+    container.append(renderLessonChecks('End-of-module questions', reviewQuestions));
+  } else if (!['exercise', 'writing'].includes(sl.kind)) {
+    const pair = sl.kind === 'bridge' ? [sl.check, sl.checkAnswer] : checks[sl.kind];
+    container.append(renderLessonChecks('Check your understanding', [pair]));
+  }
+if($('trCodeToggle'))$('trCodeToggle').onclick=()=>{codeVisible=!codeVisible;$('trCodeWrap').hidden=!codeVisible;$('trCodeToggle').textContent=codeVisible?'Hide PyTorch example':'Show PyTorch example';$('trCodeToggle').setAttribute('aria-expanded',String(codeVisible));};if($('trCodeCopy'))$('trCodeCopy').onclick=async()=>{try{await navigator.clipboard.writeText(sl.code);$('trCodeCopy').textContent='Copied ✓';}catch{$('trCodeCopy').textContent='Select code to copy';}};if($('revealBtn'))$('revealBtn').onclick=()=>{revealed=!revealed;render()};if ($('copyBridge')) $('copyBridge').onclick=async()=>{try{await navigator.clipboard.writeText(sl.code);$('copyBridge').textContent='Copied ✓';}catch{$('copyBridge').textContent='Select code to copy';}};const h='#'+(idx+1);try{history.replaceState(null,'',location.pathname+location.search+h)}catch{};}
 function jump(n){idx=Math.max(0,Math.min(S.length-1,n));revealed=false;codeVisible=false;render();$('slide').scrollTop=0;$('overview').classList.add('hidden')}
-$('next').onclick=()=>jump(idx+1);$('prev').onclick=()=>jump(idx-1);$('notesBtn').onclick=()=>$('notes').classList.toggle('hidden');$('fullBtn').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();$('outlineBtn').onclick=()=>{let el=$('overview');el.classList.toggle('hidden');if(!el.classList.contains('hidden')){el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between"><h2>Classroom slide navigator · '+S.length+' slides</h2><button class="nav" id="closeOverview">Close ×</button></div><div class="overview-grid">'+S.map((sl,i)=>`<button class="overview-card" data-slide="${i}"><span class="eyebrow">${String(i+1).padStart(2,'0')} · ${safe(sl.tag)}</span><b>${safe(sl.title)}</b><span class="muted">${sl.minutes} min</span></button>`).join('')+'</div>';$('closeOverview').onclick=()=>el.classList.add('hidden');el.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>jump(+b.dataset.slide))}};document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;const key=e.key.toLowerCase();if(key===' ' && e.target.closest('summary,button,a'))return;if(key==='arrowright'||key===' '||key==='pagedown'){e.preventDefault();jump(idx+1)}if(key==='arrowleft'||key==='pageup'){e.preventDefault();jump(idx-1)}if(key==='n')$('notes').classList.toggle('hidden');if(key==='g')$('outlineBtn').click();if(key==='f')$('fullBtn').click();if(key==='p')$('trCodeToggle')?.click();if(key==='r'&&S[idx].kind==='exercise'){revealed=!revealed;render()}if(key==='escape'){$('overview').classList.add('hidden');$('notes').classList.add('hidden')}});window.addEventListener('hashchange',()=>{const n=parseInt(location.hash.slice(1),10);if(n>=1&&n<=S.length&&n!==idx+1)jump(n-1)});const start=parseInt(location.hash.slice(1),10);const focus=new URLSearchParams(location.search).get('focus');const focusIndex=focus?S.findIndex(sl=>sl.kind===focus):-1;idx=(start>=1&&start<=S.length)?start-1:(focusIndex>=0?focusIndex:0);render();})();
+$('next').onclick=()=>jump(idx+1);$('prev').onclick=()=>jump(idx-1);$('fullBtn').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();$('outlineBtn').onclick=()=>{let el=$('overview');el.classList.toggle('hidden');if(!el.classList.contains('hidden')){el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between"><h2>Classroom slide navigator · '+S.length+' slides</h2><button class="nav" id="closeOverview">Close ×</button></div><div class="overview-grid">'+S.map((sl,i)=>`<button class="overview-card" data-slide="${i}"><span class="eyebrow">${String(i+1).padStart(2,'0')} · ${safe(sl.tag)}</span><b>${safe(sl.title)}</b></button>`).join('')+'</div>';$('closeOverview').onclick=()=>el.classList.add('hidden');el.querySelectorAll('[data-slide]').forEach(b=>b.onclick=()=>jump(+b.dataset.slide))}};document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;const key=e.key.toLowerCase();if(key===' ' && e.target.closest('summary,button,a'))return;if(key==='arrowright'||key===' '||key==='pagedown'){e.preventDefault();jump(idx+1)}if(key==='arrowleft'||key==='pageup'){e.preventDefault();jump(idx-1)}if(key==='g')$('outlineBtn').click();if(key==='f')$('fullBtn').click();if(key==='p')$('trCodeToggle')?.click();if(key==='r'&&S[idx].kind==='exercise'){revealed=!revealed;render()}if(key==='escape'){$('overview').classList.add('hidden')}});window.addEventListener('hashchange',()=>{const n=parseInt(location.hash.slice(1),10);if(n>=1&&n<=S.length&&n!==idx+1)jump(n-1)});const start=parseInt(location.hash.slice(1),10);const focus=new URLSearchParams(location.search).get('focus');const focusIndex=focus?S.findIndex(sl=>sl.kind===focus):-1;idx=(start>=1&&start<=S.length)?start-1:(focusIndex>=0?focusIndex:0);render();})();

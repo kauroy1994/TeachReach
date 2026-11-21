@@ -905,3 +905,12 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
   margin: .5rem 0; padding: .7rem 1rem; font: 500 1rem/1.55 system-ui, sans-serif;
 }
 .tr-check-solution > ol { padding-left: 2.4rem; }
+
+.lesson-checks { margin: 1rem 0; padding: clamp(1rem, 2vw, 1.6rem); background: white; border: 1px solid #ddd4d6; border-radius: 14px; }
+.lesson-checks h2 { margin: 0 0 .75rem; font-size: 1.2rem; color: #762339; }
+.lesson-checks > div + div { border-top: 1px solid #e4dcde; margin-top: 1rem; padding-top: .25rem; }
+.lesson-checks > div > p { font-size: 1.05rem; line-height: 1.5; }
+.tr-slide-footer [hidden], .deck-right[hidden] { display: none !important; }
+.tr-slide-footer a.tr-slide-next { text-decoration: none; }
+
+#lessonPanel[hidden] { display: none !important; }

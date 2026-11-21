@@ -57,20 +57,21 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 
 ## PyTorch example consistency
 
-The same example controls appear throughout both learning modules:
+The same example controls appear throughout the released modules:
 
 - **Module 01:** all **56** classroom slides have a **Show PyTorch example** button (including the Module 02 teaser and exercise/notation slides), and all **7** interactive tensor lessons provide the same Show/Hide and Copy controls.
 - **Module 02:** all **53** classroom slides have runnable, self-contained PyTorch examples; all **5** probability-lab experiments have matching Show/Hide and Copy controls with slider-aware code.
-- Classroom presentation shortcuts are identical: **F** full screen, **G** slide overview, **N** speaker notes, **P** PyTorch example, and arrow keys for navigation.
+- **Module 03:** the 17 slides trace one change in Gaussian loss from arithmetic to a PyTorch gradient.
+- Classroom presentation shortcuts are identical: **F** full screen, **G** slide overview, **P** PyTorch example, and arrow keys for navigation.
 - The shared styling for these controls lives in `courses/ml-foundations/assets/module-ui.css`. The module-specific code is kept in Module 01's `assets/slide_examples.js`, Module 02's `assets/content.js`, and Module 02's `assets/lab_examples.js`.
-- Both modules keep faculty-curated office hours, the complete notebook, exercises, the question register, and the course/home navigation.
+- All released modules include faculty-curated office hours, the complete notebook, exercises, the question register, and the course/home navigation.
 
 
 **UI design system:** [Course module interface specification](courses/ml-foundations/UI_DESIGN_SYSTEM.md). The November 21 harmonization uses identical overview shortcut cards, faculty portrait cards, footer navigation, 7-tab module headers, independent Full screen/Open in new tab controls, embedded Office Hours portrait layout, standalone resource headers, consistent notebook code panels, exercises, and question-form styling across Modules 01 and 02.
 
 ## Consistent interface across modules
 
-Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `module-ui.js`. Both use the same UA header, module tabs, low-data toggle, and accessible view controls. Slides, Explore labs, Notebooks, and Office Hours provide **Full screen** (in-page Fullscreen API) and **Open in new tab** as distinct controls. Standalone resources also show a consistent Full screen control and a link back to their module. On the slide decks, press **F** to enter/exit full screen, **G** for the slide navigator, **N** for speaker notes, and arrow keys to navigate. Module-specific lesson content, exercises, FAQs, and notebook source files remain separate.
+Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `module-ui.js`. Both use the same UA header, module tabs, low-data toggle, and accessible view controls. Slides, Explore labs, Notebooks, and Office Hours provide **Full screen** (in-page Fullscreen API) and **Open in new tab** as distinct controls. Standalone resources also show a consistent Full screen control and a link back to their module. On the slide decks, press **F** to enter/exit full screen, **G** for the slide navigator, and arrow keys to navigate. Module-specific lesson content, exercises, FAQs, and notebook source files remain separate.
 
 ## Module 03 — Calculus, Gradients, and Optimization
 
