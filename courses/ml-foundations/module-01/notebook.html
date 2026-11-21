@@ -1,0 +1,148 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Module 1 Notebook | TeachReach · The University of Alabama</title><style>
+:root{--crimson:#9E1B32;--ink:#24292d;--muted:#5F6A72;--line:#dce0e2}*{box-sizing:border-box}body{margin:0;background:#faf9f8;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.top{background:#fff;padding:14px clamp(18px,4vw,70px);border-top:6px solid var(--crimson);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.top strong{color:var(--crimson);font-size:20px}.top a,.tools a{color:#84233a;font-weight:700;text-decoration:none}.wrap{max-width:940px;margin:auto;padding:25px clamp(15px,3vw,35px) 80px}.hero{background:#9E1B32;color:#fff;padding:28px;border-radius:19px;margin:0 0 22px}.hero h1{margin:7px 0;font-size:clamp(26px,3vw,40px);line-height:1.14}.hero p{margin:7px 0 0;color:#f9dce4}.tools{display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin:12px 0 32px;padding:13px;background:#fff;border-radius:12px;border:1px solid var(--line)}.tools a{background:#fff1f4;border-radius:9px;padding:8px 12px}.nb-markdown{padding:8px 2px;margin:20px 0}.nb-markdown h1,.nb-markdown h2,.nb-markdown h3{line-height:1.2;letter-spacing:-.035em}.nb-markdown h2{font-size:clamp(23px,2.8vw,32px);margin:26px 0 9px}.nb-markdown p,.nb-markdown li{color:#414a50}.nb-code{background:#222b32;color:#eff2f7;border-radius:13px;overflow:hidden;margin:14px 0 28px;box-shadow:0 12px 24px #26252a12}.nb-code-head{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#323c45;padding:10px 15px;color:#fadce4;font-size:11px;letter-spacing:.09em;font-weight:800}.nb-code button{border:1px solid #ba8a98;border-radius:8px;background:transparent;color:#fff;padding:7px 10px;cursor:pointer}.nb-code pre{white-space:pre-wrap;overflow:auto;overflow-wrap:normal;padding:16px 19px;margin:0;font-size:13px;line-height:1.7;tab-size:4}.nb-code .nb-output{background:#f5f7f8;color:#293b46;border-top:1px solid #d4d8db}.nb-markdown code{background:#f9e5ea;color:#742036;padding:2px 5px;border-radius:4px}.nb-markdown pre{overflow:auto}table{border-collapse:collapse;display:block;overflow:auto}th,td{border:1px solid #ccc;padding:7px 10px}blockquote{border-left:4px solid var(--crimson);padding-left:12px;margin-left:0;color:#46515a}@media(max-width:660px){.wrap{padding:15px 12px 40px}.hero{padding:20px}.nb-code pre{font-size:12px;padding:12px}.tools{gap:5px}}</style></head><body><header class="top"><strong>TeachReach <small style="color:#5F6A72;font-size:12px">· THE UNIVERSITY OF ALABAMA</small></strong><a href="../../../index.html">Home</a><a href="index.html#overview">Module 01</a></header><main class="wrap"><section class="hero"><small>MACHINE LEARNING FOUNDATIONS · MODULE 01</small><h1>Read, reason, and code.</h1><p>One complete notebook. Follow Ava's study data from a feature vector to prediction, tensors, and parameter updates.</p></section><div class="tools"><a href="ML_Foundations_Module1_PyTorch.ipynb" download>Download notebook</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/ml-foundations/module-01/ML_Foundations_Module1_PyTorch.ipynb" target="_blank" rel="noopener">Run in Google Colab ↗</a><span style="color:#59646b;font-size:12px">Read every example here; run it in Colab if you choose.</span></div><section class="nb-markdown"><h1>Machine Learning Foundations — Module 1</h1>
+<h2>From everyday data to tensor operations</h2>
+<p><strong>Running example: Campus Study Coach.</strong> We use <strong>fictional students</strong> and a deliberately hand-chosen score rule to understand how tensors implement data, parameters, transformations, predictions, and learning. We focus on understanding each computation step by step.</p>
+<p><strong>Instructions:</strong> Run the cells in order (CPU is enough). After each worked example, answer the short practice question before reading the next section.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 2</span><button type="button" data-copy-code="1">Copy code</button></div><pre id="code-1"><code>import torch
+print(&#x27;PyTorch version:&#x27;, torch.__version__)
+print(&#x27;Device: CPU (no GPU required)&#x27;)</code></pre><pre class="nb-output">PyTorch version: 2.10.0+cpu
+Device: CPU (no GPU required)
+</pre></section><section class="nb-markdown"><h2>1. A 1D tensor is one student's measurements</h2>
+<p>Ava studied <strong>2 hours</strong> and completed <strong>3 practice sets</strong>. Her measurements fit into one list: one axis, two entries. A weight vector also has one axis.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 4</span><button type="button" data-copy-code="3">Copy code</button></div><pre id="code-3"><code>ava = torch.tensor([2.0, 3.0])
+weights = torch.tensor([10.0, 5.0])
+print(&#x27;Ava:&#x27;, ava.tolist(), &#x27;shape:&#x27;, tuple(ava.shape))
+print(&#x27;weights:&#x27;, weights.tolist(), &#x27;shape:&#x27;, tuple(weights.shape))
+print(&#x27;weighted contribution:&#x27;, (ava * weights).tolist())
+print(&#x27;dot product:&#x27;, torch.dot(ava, weights).item())
+assert tuple(ava.shape) == (2,)
+assert torch.dot(ava,weights).item() == 35.0</code></pre><pre class="nb-output">Ava: [2.0, 3.0] shape: (2,)
+weights: [10.0, 5.0] shape: (2,)
+weighted contribution: [20.0, 15.0]
+dot product: 35.0
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Change Ava to 3 hours and 4 sets. What is the shape? What is the weighted contribution before adding the starting score?</p>
+</section><section class="nb-markdown"><h2>2. A 2D tensor is the whole dataset</h2>
+<p>The dataset has <strong>3 rows</strong> (Ava, Ben, Cam) and <strong>2 columns</strong> (hours, practice sets). Both axes have a real-world meaning. Use indexing to ask who or what you want to select.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 7</span><button type="button" data-copy-code="6">Copy code</button></div><pre id="code-6"><code>X = torch.tensor([[2.0,3.0], [4.0,1.0], [5.0,2.0]])
+print(&#x27;data:\n&#x27;, X)
+print(&#x27;shape:&#x27;, tuple(X.shape))
+print(&#x27;Ava:&#x27;, X[0].tolist())
+print(&#x27;hours for everyone:&#x27;, X[:,0].tolist())
+assert tuple(X.shape) == (3,2)
+assert X[:,0].tolist() == [2.0,4.0,5.0]</code></pre><pre class="nb-output">data:
+ tensor([[2., 3.],
+        [4., 1.],
+        [5., 2.]])
+shape: (3, 2)
+Ava: [2.0, 3.0]
+hours for everyone: [2.0, 4.0, 5.0]
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Create a fourth fictional student with 1 hour and 4 practice sets using <code>torch.cat</code> or by reconstructing <code>X</code>. What is the new shape?</p>
+</section><section class="nb-markdown"><h2>3. A parameterized function computes predictions</h2>
+<p>Our toy rule uses <strong>10 points per study hour</strong>, <strong>5 points per practice set</strong>, and <strong>20 starting points</strong>. The <em>same</em> parameter values operate on every student. This is a demonstration of computing predictions, a starting model that we will improve through training.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 10</span><button type="button" data-copy-code="9">Copy code</button></div><pre id="code-9"><code>w = torch.tensor([10.0, 5.0])
+b = torch.tensor(20.0)
+predictions = X @ w + b
+print(&#x27;dataset:&#x27;, tuple(X.shape), &#x27;weights:&#x27;, tuple(w.shape), &#x27;bias:&#x27;, tuple(b.shape))
+print(&#x27;predicted scores:&#x27;, predictions.tolist(), &#x27;shape:&#x27;, tuple(predictions.shape))
+assert predictions.tolist() == [55.,65.,80.]
+assert tuple(predictions.shape) == (3,)</code></pre><pre class="nb-output">dataset: (3, 2) weights: (2,) bias: ()
+predicted scores: [55.0, 65.0, 80.0] shape: (3,)
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Without running code, predict the score for 1 hour and 4 practice sets. Then verify with PyTorch. Why must the weight vector have 2 entries for this dataset?</p>
+</section><section class="nb-markdown"><h2>4. Tensor transformations and broadcasting</h2>
+<p>Convert only the hours column from hours to minutes. The <em>values</em> change; the <strong>shape stays (3,2)</strong>. The model would need correspondingly adjusted weights (or retraining) to interpret minutes correctly. A scalar starting score broadcasts across every prediction.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 13</span><button type="button" data-copy-code="12">Copy code</button></div><pre id="code-12"><code>minutes_X = X.clone()
+minutes_X[:,0] = minutes_X[:,0] * 60
+print(&#x27;time in minutes:\n&#x27;, minutes_X)
+print(&#x27;shape unchanged:&#x27;, tuple(minutes_X.shape))
+raw_scores = X @ w
+print(&#x27;before bias:&#x27;, raw_scores.tolist())
+print(&#x27;after broadcasting scalar bias:&#x27;, (raw_scores + 20).tolist())
+assert tuple(minutes_X.shape)==(3,2)</code></pre><pre class="nb-output">time in minutes:
+ tensor([[120.,   3.],
+        [240.,   1.],
+        [300.,   2.]])
+shape unchanged: (3, 2)
+before bias: [35.0, 45.0, 60.0]
+after broadcasting scalar bias: [55.0, 65.0, 80.0]
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> If you switch to minutes, what weight should replace <strong>10 points per hour</strong> so the predictions stay unchanged? Verify numerically.</p>
+</section><section class="nb-markdown"><h2>5. Repeated measurements introduce a 3D tensor</h2>
+<p>Suppose we record <strong>2 students × 3 days × 2 measurements</strong>. The new day axis preserves the temporal organization. Averaging across <code>dim=1</code> means average across the 3 days, retaining the student and feature axes.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 16</span><button type="button" data-copy-code="15">Copy code</button></div><pre id="code-15"><code>logs = torch.tensor([[[1.,2.],[2.,3.],[3.,4.]],
+                     [[2.,0.],[4.,2.],[6.,4.]]])
+weekly_avg = logs.mean(dim=1)
+print(&#x27;daily logs shape:&#x27;, tuple(logs.shape))
+print(&#x27;weekly averages:\n&#x27;, weekly_avg)
+print(&#x27;weekly averages shape:&#x27;,tuple(weekly_avg.shape))
+assert tuple(logs.shape)==(2,3,2)
+assert weekly_avg.tolist()==[[2.,3.],[4.,2.]]</code></pre><pre class="nb-output">daily logs shape: (2, 3, 2)
+weekly averages:
+ tensor([[2., 3.],
+        [4., 2.]])
+weekly averages shape: (2, 2)
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Use <code>.sum(dim=1)</code> instead of <code>.mean(dim=1)</code>. What changes in the values? Does the shape change?</p>
+</section><section class="nb-markdown"><h2>6. Pictures use a 4D tensor</h2>
+<p>A toy grayscale picture has <strong>1 channel, 3 pixel rows, and 3 pixel columns</strong>. Two students' pictures form a batch with shape <strong>(2,1,3,3)</strong>. Flattening <em>each image</em> creates a 9-element feature vector without throwing away pixels, but the original spatial layout is no longer explicit.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 19</span><button type="button" data-copy-code="18">Copy code</button></div><pre id="code-18"><code>images = torch.tensor([[[[0.,1.,0.],[1.,1.,1.],[0.,1.,0.]]],
+                       [[[1.,0.,1.],[0.,1.,0.],[1.,0.,1.]]]])
+flat = images.flatten(start_dim=1)
+print(&#x27;images shape:&#x27;,tuple(images.shape))
+print(&#x27;flattened shape:&#x27;,tuple(flat.shape))
+print(&#x27;Ava flattened:&#x27;,flat[0].tolist())
+assert tuple(images.shape)==(2,1,3,3)
+assert tuple(flat.shape)==(2,9)</code></pre><pre class="nb-output">images shape: (2, 1, 3, 3)
+flattened shape: (2, 9)
+Ava flattened: [0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0]
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> What shape represents 4 students, each with a 3-channel 32×32 color picture, using (student, channel, height, width) order?</p>
+</section><section class="nb-markdown"><h2>7. 5D is one more meaningful axis</h2>
+<p>When each student uploads two picture snapshots, add a <strong>day</strong> axis between student and channel. More axes do not imply extra mathematical mystery: they encode more independent questions about the data.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 22</span><button type="button" data-copy-code="21">Copy code</button></div><pre id="code-21"><code>snapshots = torch.stack([images, images*0.5],dim=1)
+print(&#x27;snapshots:&#x27;,tuple(snapshots.shape))
+print(&#x27;axes: student, day, channel, height, width&#x27;)
+assert tuple(snapshots.shape)==(2,2,1,3,3)</code></pre><pre class="nb-output">snapshots: (2, 2, 1, 3, 3)
+axes: student, day, channel, height, width
+</pre></section><section class="nb-markdown"><h2>8. Learning also consists of tensor operations</h2>
+<p>We invent fictional desired outputs <strong>[60,70,75]</strong> and compare them with current model predictions. Mean squared error is the mean of the squared differences. PyTorch autograd calculates gradients of this loss with respect to our parameters.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 24</span><button type="button" data-copy-code="23">Copy code</button></div><pre id="code-23"><code>target = torch.tensor([60.,70.,75.])
+w_train = torch.tensor([10.,5.],requires_grad=True)
+b_train = torch.tensor(20.,requires_grad=True)
+prediction = X @ w_train + b_train
+loss = ((prediction-target)**2).mean()
+loss.backward()
+print(&#x27;current prediction:&#x27;,prediction.detach().tolist())
+print(&#x27;initial loss:&#x27;,round(loss.detach().item(),4))
+print(&#x27;weight gradient:&#x27;,[round(v,4) for v in w_train.grad.tolist()])
+print(&#x27;bias gradient:&#x27;,round(b_train.grad.item(),4))
+assert loss.detach().item() == 25.
+with torch.no_grad():
+    w_train -= 0.01*w_train.grad
+    b_train -= 0.01*b_train.grad
+updated_loss = (((X @ w_train+b_train)-target)**2).mean()
+print(&#x27;loss after one gradient step:&#x27;,round(updated_loss.detach().item(),4))
+assert updated_loss.detach().item() &lt; loss.detach().item()</code></pre><pre class="nb-output">current prediction: [55.0, 65.0, 80.0]
+initial loss: 25.0
+weight gradient: [-3.3333, -6.6667]
+bias gradient: -3.3333
+loss after one gradient step: 24.4185
+</pre></section><section class="nb-markdown"><p><strong>Try it:</strong> Change the learning rate from 0.01 to 0.001 and run the training cell from the top. Compare the new loss. Explain <em>why</em> we need a loss function before we can train parameters.</p>
+<h2>9. Shape debugger</h2>
+<p>Before running an operation, name the axes and check compatibility.</p>
+</section><section class="nb-code"><div class="nb-code-head"><span>PYTORCH · CELL 26</span><button type="button" data-copy-code="25">Copy code</button></div><pre id="code-25"><code>bad_weights = torch.tensor([10.,5.,1.])
+try:
+    X @ bad_weights
+except RuntimeError as exc:
+    print(&#x27;Expected shape mismatch:&#x27;, str(exc).split(&#x27;\n&#x27;)[0])
+print(&#x27;Correct weight shape for X:&#x27;,tuple(w.shape))
+</code></pre><pre class="nb-output">Expected shape mismatch: size mismatch, got input (3), mat (3x2), vec (3)
+Correct weight shape for X: (2,)
+</pre></section><section class="nb-markdown"><h2>Instructor / self-check answer key (ungraded)</h2>
+<ul>
+<li>One-student vector always has shape (2,) when it contains two features. For [3,4], weighted contribution is 3×10 + 4×5 = 50 before the starting bias.</li>
+<li>Four students × two features gives (4,2).</li>
+<li>With the 20-point bias, 1 hour and 4 sets gives 50.</li>
+<li>To preserve predictions when hours become minutes, use weight <code>10/60</code> points per minute.</li>
+<li>Summing daily logs, rather than averaging, yields [[6,9],[12,6]], still shape (2,2).</li>
+<li>Four RGB 32×32 images in (N,C,H,W) format yield shape (4,3,32,32).</li>
+<li>A loss is a numerical criterion that gradients can optimize; changing learning rate changes the size of the parameter update.</li>
+</ul>
+<p><strong>Course design note:</strong> The running example is instructional. It is not a recommendation to predict grades or assess real students from study habits.</p>
+</section></main><script>document.querySelectorAll('[data-copy-code]').forEach(b=>b.onclick=async()=>{let txt=document.getElementById('code-'+b.dataset.copyCode).textContent;try{await navigator.clipboard.writeText(txt);b.textContent='Copied ✓'}catch{b.textContent='Select code to copy'}})</script></body></html>

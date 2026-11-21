@@ -1,24 +1,38 @@
-# TeachReach — University of Alabama
+# TeachReach · University of Alabama
 
-A single GitHub Pages website for multiple courses and modules.
+**One course portal, every module, available from any browser.**
 
-- Portal: `index.html`
-- Course: `courses/ml-foundations/index.html`
-- Module 01: `courses/ml-foundations/module-01/index.html`
-- Lecture slides, interactive tensors, exercises, and professor-guided virtual office hours are inside Module 01.
+Student website: https://kauroy1994.github.io/TeachReach/
 
-## Publish with GitHub Pages
+## Machine Learning Foundations
 
-Go to repository **Settings → Pages → Build and deployment → Deploy from a branch → main → /(root)** and save. The permanent URL is `https://kauroy1994.github.io/TeachReach/`.
+Module 01 — **Why machine learning? Tensors, data, predictions and learning**
 
-## Update course content
+- University of Alabama–themed lecture deck with the Campus Study Coach example
+- Interactive 1D through higher-dimensional tensor explorer
+- Thirteen exercises with immediate feedback and local progress tracking
+- Complete in-browser PyTorch notebook, with an optional Google Colab link
+- Professor-curated FAQ office hours displaying Professor Roy's portrait
+- Professor-recorded audio playback when an FAQ's audio recording exists in `assets/audio/`
+- Shared question queue with student confirmation numbers after the one-time question-service deployment
 
-Add subsequent modules as sibling folders under `courses/ml-foundations/`, and link them from `courses/ml-foundations/index.html`. For another course, create a new folder under `courses/` and add it to the main portal.
+The site is **static**: no Python, backend server, GPU, paid API key, or LLM account is needed for students.
 
-## Question submission
+## Faculty operation
 
-Click **Ask a new question** to compose an email to `kroy2@ua.edu`. The page works without login or LLM access. To add a reviewed FAQ answer for everyone, edit `courses/ml-foundations/module-01/assets/faq_seed.js` and, if maintaining the structured source, `content/faq.json` together. GitHub Pages publishes the updated static FAQ automatically. Do not collect sensitive student records through public GitHub Issues.
+- **Class question register**: [Private Google Sheet](https://docs.google.com/spreadsheets/d/1i5se-ApkNFNxh1cRSx7oI1DN8K65RaNbPb2ohesbLZI/edit). Deploy the free Google Apps Script once: [question-service/SETUP.md](question-service/SETUP.md).
+- **FAQ content**: `courses/ml-foundations/module-01/assets/faq_seed.js`. Add faculty-approved explanations and change answered question status in the private Sheet.
+- **Record answers**: `courses/ml-foundations/module-01/faculty-recordings.html` records your actual voice from a browser microphone. Download files using the exact FAQ ID and upload to `courses/ml-foundations/module-01/assets/audio/`.
+- **Notebook source**: `courses/ml-foundations/module-01/ML_Foundations_Module1_PyTorch.ipynb`.
 
-## Course accessibility
+## New modules
 
-Accessible navigation, responsive layout, low-data mode, searchable 20-answer FAQ, self-check exercises, and readable formal mathematical notation. Device-local exercise progress requires no student account.
+Reuse `courses/ml-foundations/` as the permanent course landing page. Create `module-02/`, `module-03/`, etc. with the same student-facing navigation, course-specific notebook and FAQ. GitHub Pages automatically updates after commits to `main`.
+
+## Publishing and Blackboard
+
+GitHub Pages: Repository → Settings → Pages → Deploy from a branch → main / root.
+
+In Blackboard, add https://kauroy1994.github.io/TeachReach/courses/ml-foundations/module-01/ as a web link for Module 01, or the top-level TeachReach URL for the full course portal.
+
+**Theme:** UA Crimson Flame #9E1B32, Capstone Gray #828A8F, white. Course activities use locally stored practice progress and privacy-conscious shared question registration.
