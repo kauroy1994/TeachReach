@@ -41,6 +41,8 @@ function render(){
   $('slideCount').textContent=(i+1)+" / "+all.length;
   $('progressBar').style.width=((i+1)/all.length*100).toFixed(1)+"%";
   $('previous').disabled=i===0;$('next').disabled=i===all.length-1;
+  const continuation = $('nextModuleLesson');
+  if (continuation) continuation.hidden = i !== all.length - 1;
   $('sectionLabel').textContent=s.section;
   $('slideTitle').textContent=s.title;
   $('slideLead').textContent=s.lead;

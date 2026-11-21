@@ -25,9 +25,9 @@ window.TR_M3 = {
     {
       "section": "01 · The observation",
       "title": "Ava’s model predicted 55. She scored 60.",
-      "lead": "Suppose 60 is her observed score on a fictional exam. Which weight should move farther, and how could we tell?",
+      "lead": "At the end of Module 02, moving the mean from 55 to 56 lowered the Gaussian loss for Ava’s fictional score of 60. How can we produce that kind of change using the weights and bias from Module 01?",
       "math": "μ = 2(10) + 3(5) + 20 = 55",
-      "explain": "The inputs are two study hours and three practice sets. Keep the inputs and observed score fixed as you adjust the model.",
+      "explain": "Two study hours and three practice sets gave μ = 55. With σ = 10, the starting loss is 3.346524. Keep the inputs, spread, and observed score fixed while adjusting the parameters.",
       "check": "What can change after we observe the score?",
       "note": "Have students identify both weights and the bias before introducing a derivative.",
       "visual": [
