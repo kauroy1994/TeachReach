@@ -24,13 +24,17 @@ function topics(){
     b.type='button';b.onclick=()=>{state.topic=x;topics();render()};$('topicFilters').append(b);
   });
 }
-function displayStatus(message){$('voiceStatus').textContent=message}
+function displayStatus(message){$('voiceStatus').textContent=message;if($('voiceStatusAnswer'))$('voiceStatusAnswer').textContent=message}
+function setVoiceButtons(label,playing){
+  for(const id of ['voiceBtn','voiceBtnAnswer']){const b=$(id);if(b){b.disabled=false;b.textContent=label}}
+  for(const id of ['stopVoice','stopVoiceAnswer']){const b=$(id);if(b)b.disabled=!playing}
+}
 function stop({resetStatus=true}={}){
   state.playbackToken++;
   if(voiceSupported)window.speechSynthesis.cancel();
-  state.playing=false;$('stopVoice').disabled=true;
+  state.playing=false;
   $('avatarStage').classList.remove('speaking');
-  $('voiceBtn').textContent='▶ Listen to answer';
+  setVoiceButtons('▶ Listen to answer',false);
   if(resetStatus)displayStatus(state.chosen?'Select Listen to hear this explanation.':'Choose a question to begin.');
 }
 function choose(x){
@@ -42,8 +46,8 @@ function choose(x){
   $('faqCheck').textContent=x.check||'Can you apply the idea to another example?';
   $('answerTopic').textContent=x.topic||'Topic';
   render();
-  $('voiceBtn').disabled=!voiceSupported;
-  displayStatus(voiceSupported?'Listen to the explanation with your device voice.':'Read the explanation below.');
+  setVoiceButtons('▶ Listen to answer',false);
+  displayStatus(voiceSupported?'Select Listen to hear this explanation.':'Speech playback is unavailable in this browser. Try Chrome, Edge, or Safari.');
 }
 function chooseVoice(){
   const voices=window.speechSynthesis.getVoices();
@@ -69,7 +73,8 @@ function splitSpeech(text){
   return chunks;
 }
 function startSpeaking(){
-  if(!state.chosen||!voiceSupported)return;
+  if(!state.chosen)return;
+  if(!voiceSupported){displayStatus('Speech playback is unavailable in this browser. Open office hours in Chrome, Edge, or Safari.');return;}
   stop({resetStatus:false});
   const token=state.playbackToken;
   const chunks=splitSpeech(state.chosen.answer);
@@ -77,16 +82,15 @@ function startSpeaking(){
   let index=0;
   const voice=chooseVoice();
   state.playing=true;
-  $('stopVoice').disabled=false;
-  $('voiceBtn').textContent='↻ Replay explanation';
+  setVoiceButtons('↻ Replay explanation',true);
   $('avatarStage').classList.add('speaking');
   displayStatus('Reading the explanation aloud.');
   function next(){
     if(token!==state.playbackToken)return;
     if(index>=chunks.length){
-      state.playing=false;$('stopVoice').disabled=true;
+      state.playing=false;
       $('avatarStage').classList.remove('speaking');
-      $('voiceBtn').textContent='▶ Listen again';
+      setVoiceButtons('▶ Listen again',false);
       displayStatus('Finished. Choose another question or listen again.');
       return;
     }
@@ -96,12 +100,12 @@ function startSpeaking(){
     utterance.onend=()=>{if(token===state.playbackToken)next()};
     utterance.onerror=event=>{
       if(token!==state.playbackToken)return;
-      state.playing=false;$('stopVoice').disabled=true;
+      state.playing=false;
       $('avatarStage').classList.remove('speaking');
-      $('voiceBtn').textContent='▶ Listen to answer';
+      setVoiceButtons('▶ Listen to answer',false);
       displayStatus('Audio could not play. You can still read the explanation below.');
     };
-    window.speechSynthesis.speak(utterance);
+    try{window.speechSynthesis.speak(utterance);if(window.speechSynthesis.paused)window.speechSynthesis.resume()}catch(err){utterance.onerror&&utterance.onerror(err)}
   }
   next();
 }
@@ -110,7 +114,9 @@ $('clearSearch').onclick=()=>{$('faqSearch').value='';render()};
 $('refreshFaq').onclick=()=>location.reload();
 $('faqTotal').textContent=seed.length;
 $('voiceBtn').onclick=startSpeaking;
+$('voiceBtnAnswer').onclick=startSpeaking;
 $('stopVoice').onclick=()=>stop();
+$('stopVoiceAnswer').onclick=()=>stop();
 $('copyFaqCode').onclick=async()=>{
   try{await navigator.clipboard.writeText($('faqCode').textContent);$('copyFaqCode').textContent='Copied ✓';setTimeout(()=>$('copyFaqCode').textContent='Copy',1500)}
   catch{$('copyFaqCode').textContent='Select to copy'}
@@ -121,6 +127,6 @@ $('followUpBtn').onclick=()=>{
 };
 window.addEventListener('pagehide',()=>stop({resetStatus:false}));
 if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('room-embedded');
-$('voiceBtn').disabled=true;
+setVoiceButtons('▶ Listen to answer',false);
 topics();render();if(seed.length)choose(seed[0]);
 })();
