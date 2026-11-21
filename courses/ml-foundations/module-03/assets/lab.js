@@ -63,6 +63,24 @@
       (loss(mean) < loss(55) ? "The smaller distance reduces the loss." : "The larger distance increases the loss.");
     byId("diagnosis").textContent = result;
   }
+  function measureSlope() {
+    const h = Number(byId("trial").value);
+    const after = loss(55 + h);
+    const difference = after - loss(55);
+    const container = byId("trialResult");
+    container.replaceChildren();
+    for (const line of [
+      `Starting loss at 55 = ${loss(55).toFixed(7)}.`,
+      `Trial loss at ${55 + h} = ${after.toFixed(7)}.`,
+      `Change in loss = ${difference.toFixed(7)}. Divide by ${h} to get ${(difference/h).toFixed(5)} loss units per point.`
+    ]) {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = line;
+      container.append(paragraph);
+    }
+  }
+  byId("trial").addEventListener("change", measureSlope);
+  measureSlope();
   byId("mean").addEventListener("input", drawCurve);
   byId("rate").addEventListener("input", compareStep);
   drawCurve();

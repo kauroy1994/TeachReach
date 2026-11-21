@@ -48,7 +48,16 @@ function render(){
   $('slideLead').textContent=s.lead;
   $('mathBlock').textContent=s.math;
   $('explainText').textContent=s.explain||"Connect this representation to the same Campus Study Coach model introduced in Module 1.";
-  $('visualArea').innerHTML=Array.isArray(s.visual) ? cards(s.visual) : diagram(s.visual);
+  const visual = $('visualArea');
+  if (s.figure) {
+    const image = document.createElement('img');
+    image.src = s.figure.src;
+    image.alt = s.figure.alt;
+    image.style.cssText = 'display:block;width:100%;height:auto';
+    visual.replaceChildren(image);
+  } else {
+    visual.innerHTML=Array.isArray(s.visual) ? cards(s.visual) : diagram(s.visual);
+  }
   const solution = $('slideSolution');
   solution.open = false;
   solution.hidden = !s.checkAnswer;

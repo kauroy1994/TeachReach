@@ -45,7 +45,7 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 
 - 53 teaching slides covering eight probability lessons and a synthesis.
 - Five interactive browser experiments: Normal distributions, conditional probability, Bayes updates, sampling, and Gaussian likelihood.
-- Sixteen formative exercises with immediate feedback, worked answers and local progress tracking.
+- Seventeen formative exercises with immediate feedback, worked answers and local progress tracking.
 - A complete 42-cell PyTorch notebook: `courses/ml-foundations/module-02/ML_Foundations_Module2_Probability.ipynb`, readable in-browser and optionally runnable in Colab.
 - Twenty-four module-specific curated office-hour FAQs, using the same static professor portrait and the browser's built-in speech synthesis.
 - A module-specific question registration form and public pending-question table, ready for the same free Apps Script service used by Module 01.
@@ -74,7 +74,7 @@ Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `modul
 
 ## Module 03 — Calculus, Gradients, and Optimization
 
-Students derive a Gaussian loss gradient for Ava’s fictional observed score of 60 and take one step from the predicted mean of 55. The slides, loss-curve and learning-rate lab, practice exercises, and downloadable PyTorch notebook use the same starting parameters. Faculty can edit the five FAQs in `courses/ml-foundations/module-03/assets/content.js`.
+Students derive a Gaussian loss gradient for Ava’s fictional observed score of 60 and take one step from the predicted mean of 55. The slides, loss-curve and learning-rate lab, practice exercises, and downloadable PyTorch notebook use the same starting parameters. Faculty can edit the eight FAQs in `courses/ml-foundations/module-03/assets/content.js`.
 
 ## Curriculum release check
 

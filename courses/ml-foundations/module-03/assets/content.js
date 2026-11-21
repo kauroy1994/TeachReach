@@ -23,203 +23,431 @@ window.TR_M3 = {
   ],
   "slides": [
     {
-      "section": "01 · The observation",
-      "title": "Ava’s model predicted 55. She scored 60.",
-      "lead": "At the end of Module 02, moving the mean from 55 to 56 lowered the Gaussian loss for Ava’s fictional score of 60. How can we produce that kind of change using the weights and bias from Module 01?",
-      "math": "μ = 2(10) + 3(5) + 20 = 55",
-      "explain": "Two study hours and three practice sets gave μ = 55. With σ = 10, the starting loss is 3.346524. Keep the inputs, spread, and observed score fixed while adjusting the parameters.",
-      "check": "What can change after we observe the score?",
-      "note": "Have students identify both weights and the bias before introducing a derivative.",
+      "section": "01 · Score a prediction",
+      "title": "Ava’s prediction was 55. Suppose she scored 60.",
+      "lead": "Use the rule from Module 01. Ava studied two hours and completed three sets. Her fictional exam score is now known.",
+      "math": "2 × 10 + 3 × 5 + 20 = 55",
+      "explain": "The inputs and observed score stay on the page. We can edit the two weights and the starting score, called the bias. First predict what would happen if only the bias increased by one.",
       "visual": [
+        [
+          "Hours",
+          "2 × 10",
+          "20 points"
+        ],
+        [
+          "Sets",
+          "3 × 5",
+          "15 points"
+        ],
+        [
+          "Bias",
+          "+20",
+          "55 points total"
+        ]
+      ],
+      "check": "What would the model predict with bias 21? What would Ava’s observed score be?",
+      "checkAnswer": "The prediction would rise to 56. Her observed exam score stays 60. We changed the rule, not the record.",
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nprint(mean.item(), (x @ w + 21).item())",
+      "note": "Wait for both numbers before revealing. This distinguishes a prediction from its target."
+    },
+    {
+      "section": "01 · Score a prediction",
+      "title": "Which mean makes 60 more plausible?",
+      "lead": "Recall the last probability lesson. Compare two Gaussian score distributions with the same spread of 10 points. Center one at 55 and one at 56.",
+      "math": "Loss at 55 ≈ 3.346524      Loss at 56 ≈ 3.301524",
+      "explain": "The bell centered at 56 is higher at the observed 60. Module 02 called minus the natural log of that height the negative log-likelihood, or loss. A better fit here has a smaller loss.",
+      "visual": [
+        [
+          "Observed",
+          "60",
+          "same exam"
+        ],
+        [
+          "Mean 55",
+          "3.346524",
+          "starting loss"
+        ],
+        [
+          "Mean 56",
+          "3.301524",
+          "trial loss"
+        ]
+      ],
+      "check": "If we shift the mean from 55 down to 54, should the loss rise or fall?",
+      "checkAnswer": "It rises. At the same spread, 60 is farther from the center 54, so the density there is smaller.",
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nfor mean in [54, 55, 56]:\n    print(mean, round(loss(mean).item(), 6))",
+      "note": "Use the two numbers from the end of Module 02. The trial at 56 is a comparison, not the training step."
+    },
+    {
+      "section": "01 · Score a prediction",
+      "title": "Calculate the part of the loss that changes",
+      "lead": "Keep the spread fixed. Computing the Gaussian loss gives a fixed starting amount plus a penalty for missing 60. The symbol μ names the predicted mean.",
+      "math": "Penalty = (μ − 60)² ÷ (2 × 10²) = (μ − 60)² ÷ 200",
+      "explain": "At 55 the signed miss is −5. Squaring gives 25, and dividing by 200 gives 0.125. Add the same fixed amount, about 3.221524, to recover the full loss. The notebook shows where both terms come from.",
+      "visual": [
+        [
+          "Mean 55",
+          "25 / 200",
+          "penalty 0.125"
+        ],
+        [
+          "Mean 56",
+          "16 / 200",
+          "penalty 0.080"
+        ],
+        [
+          "Mean 60",
+          "0 / 200",
+          "penalty 0"
+        ]
+      ],
+      "check": "At a mean of 58, what penalty do we add?",
+      "checkAnswer": "58 − 60 = −2. Square it and divide by 200 to get 4/200 = 0.020.",
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nmeans = torch.tensor([55., 56., 58., 60.])\nprint(penalty(means))",
+      "note": "Have students do the three arithmetic operations before showing code. Squaring treats misses on either side equally."
+    },
+    {
+      "section": "02 · Measure a slope",
+      "title": "A slope answers “how much per point?”",
+      "lead": "Move the mean from 55 to 56. Compute the change in the penalty, then divide by the change in the mean. Use after minus before in both places.",
+      "math": "Average slope = (0.080 − 0.125) / (56 − 55) = −0.045",
+      "explain": "Read this as “the loss fell by 0.045 per point of mean over this move.” The fixed amount cancels in the subtraction. This calculation uses two distinct predictions.",
+      "visual": [
+        [
+          "Change in mean",
+          "+1",
+          "score point"
+        ],
+        [
+          "Change in loss",
+          "−0.045",
+          "loss units"
+        ],
+        [
+          "Ratio",
+          "−0.045",
+          "loss units per point"
+        ]
+      ],
+      "check": "From 55 to 57, the penalty changes from 0.125 to 0.045. What is the average slope?",
+      "checkAnswer": "The change is −0.080 over two score points. Divide by 2 to get −0.040 per point.",
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nm = torch.tensor(55., dtype=torch.float64)\nprint((penalty(m+2) - penalty(m)) / 2)",
+      "note": "If a student answers −0.080, ask for the size of the move on the horizontal axis.",
+      "figure": {
+        "src": "assets/average-slope.svg",
+        "alt": "Mean increases from 55 to 56. Loss penalty drops from 0.125 to 0.080. The slope triangle shows a run of +1 and a rise of −0.045."
+      }
+    },
+    {
+      "section": "02 · Measure a slope",
+      "title": "Shrink the measuring step",
+      "lead": "The curve bends, so the rate across two points can differ from the rate right at 55. Start at 55 each time. Call the trial move h.",
+      "math": "average slope = [penalty(55 + h) − penalty(55)] / h",
+      "explain": "The values approach −0.050 as h approaches zero. This limiting slope is the derivative at 55. On a graph it is the slope of the line that follows the curve’s direction right there, called the tangent.",
+      "visual": [
+        [
+          "h = 1",
+          "−0.045",
+          "one-point trial"
+        ],
+        [
+          "h = 0.1",
+          "−0.0495",
+          "tenth of a point"
+        ],
+        [
+          "h = 0.01",
+          "−0.04995",
+          "hundredth of a point"
+        ]
+      ],
+      "check": "Why do we shrink h instead of setting h equal to zero in the fraction?",
+      "checkAnswer": "At zero both differences are zero and division by zero is undefined. We examine the ratios for nonzero steps and see which value they approach.",
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nm = torch.tensor(55., dtype=torch.float64)\nfor h in [1., .1, .01]:\n    print(h, ((penalty(m+h) - penalty(m))/h).item())",
+      "note": "Ask learners to read one row aloud. Try the measuring-step control in Explore."
+    },
+    {
+      "section": "02 · Measure a slope",
+      "title": "Find the exact slope with ordinary multiplication",
+      "lead": "At 55 the miss is −5. After a trial move h the miss is −5 + h. Multiply this expression by itself before taking the difference.",
+      "math": "(−5 + h)(−5 + h) = 25 − 5h − 5h + h² = 25 − 10h + h²",
+      "explain": "Subtract the old square, 25. Divide by 200h. For nonzero h, (−10h + h²)/(200h) = (−10 + h)/200. Now let h approach zero. The result is −10/200 = −0.05.",
+      "visual": [
+        [
+          "Subtract",
+          "−10h + h²",
+          "change in squared miss"
+        ],
+        [
+          "Divide",
+          "(−10 + h)/200",
+          "average slope"
+        ],
+        [
+          "Shrink h",
+          "−10/200",
+          "exact local slope"
+        ]
+      ],
+      "check": "Where did the two copies of −5h come from?",
+      "checkAnswer": "Each factor contributes one cross product: (−5) × h and h × (−5). Together they give −10h.",
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nh = torch.tensor(0.1, dtype=torch.float64)\nprint(((penalty(55+h)-penalty(55))/h).item(), ((-10+h)/200).item())",
+      "note": "Write the four products in a 2 × 2 grid if students have not recently expanded a square."
+    },
+    {
+      "section": "02 · Measure a slope",
+      "title": "Use the same reasoning anywhere on the curve",
+      "lead": "Call the current signed miss r = μ − 60. Replacing −5 with r gives (r + h)² − r² = 2rh + h². Divide by 200h and shrink h.",
+      "math": "dL/dμ = 2r/200 = (μ − 60)/100",
+      "explain": "Read dL/dμ as “change in loss per point of predicted mean, right here.” A negative slope means a small move to the right lowers loss. At 60 the slope vanishes and the squared penalty reaches its minimum.",
+      "visual": [
+        [
+          "At 55",
+          "−0.05",
+          "raise the mean"
+        ],
+        [
+          "At 60",
+          "0",
+          "minimum loss"
+        ],
+        [
+          "At 65",
+          "+0.05",
+          "lower the mean"
+        ]
+      ],
+      "check": "At 58, which way should the mean move, and what is its local slope?",
+      "checkAnswer": "(58 − 60)/100 = −0.02. A small increase toward 60 reduces the loss.",
+      "code": "import torch\ndef penalty(mean):\n    return (mean - 60.) ** 2 / 200.\n\nmeans = torch.tensor([55., 58., 60., 65.])\nprint((means - 60)/100)",
+      "note": "Link the sign to direction before asking for a formula. This minimum is for the fixed-spread, one-observation example. For another observed score y and any fixed positive spread σ, the same cancellation gives (μ − y)/σ². For Ava, y = 60 and σ² = 100."
+    },
+    {
+      "section": "03 · Follow one weight",
+      "title": "Move just one weight",
+      "lead": "Return to the original model. Change the hours weight from 10 to 10.10. Leave the sets weight at 5 and bias at 20.",
+      "math": "New mean = 2 × 10.10 + 3 × 5 + 20 = 55.20",
+      "explain": "A weight increase of 0.10 moves the mean by 0.20 because Ava has two hours. Try the same change separately on the sets weight or on the bias. Always reset first.",
+      "visual": [
+        [
+          "Hours weight +0.10",
+          "+0.20",
+          "change in mean"
+        ],
+        [
+          "Sets weight +0.10",
+          "+0.30",
+          "three sets"
+        ],
+        [
+          "Bias +0.10",
+          "+0.10",
+          "added once"
+        ]
+      ],
+      "check": "If only the sets weight rose by 0.20, how far would the mean move?",
+      "checkAnswer": "There are three sets, so the mean would move by 3 × 0.20 = 0.60 points, from 55 to 55.60.",
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\ntrial = w.clone()\ntrial[1] += .2\nprint((x @ trial + bias).item())",
+      "note": "Separate a parameter from its feature. Study hours stay at two while points awarded per hour can change."
+    },
+    {
+      "section": "03 · Follow one weight",
+      "title": "Follow the change from one weight to the loss",
+      "lead": "An hours-weight change acts in two stages. It moves the mean, then the new mean changes the loss. Multiply the rates along that route. This multiplication is the chain rule.",
+      "math": "(−0.05 loss per mean point) × (2 mean points per unit of hours weight) = −0.10",
+      "explain": "Holding the other parameters fixed makes this a partial derivative. We write ∂L/∂w₁ for the loss slope with respect to the first weight. For a tiny increase of 0.01, expect a loss change of about −0.001.",
+      "visual": [
+        [
+          "w₁ → mean",
+          "× 2",
+          "Ava’s hours"
+        ],
+        [
+          "mean → loss",
+          "× (−0.05)",
+          "local slope"
+        ],
+        [
+          "w₁ → loss",
+          "−0.10",
+          "multiply the rates"
+        ]
+      ],
+      "check": "Why is −0.10 a rate, while −0.001 is a predicted change?",
+      "checkAnswer": "−0.10 is loss change per unit of weight near the starting model. Multiply by the actual move, 0.01, to estimate the change in loss.",
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nactual = loss(55 + 2 * .01) - loss(55)\nprint(\"Estimated:\", -.1 * .01, \"Actual:\", actual.item())",
+      "note": "A small step gives an approximation on a curved loss. The local derivative itself is exact."
+    },
+    {
+      "section": "03 · Follow one weight",
+      "title": "Collect the three partial derivatives",
+      "lead": "Repeat the calculation for the sets weight and the bias. Keep the order hours weight, sets weight, bias. The ordered list of partial derivatives is the gradient.",
+      "math": "gradient = [−0.05 × 2, −0.05 × 3, −0.05 × 1] = [−0.10, −0.15, −0.05]",
+      "explain": "The second entry has the largest magnitude because the mean changes by three points per unit change in that weight for Ava. This comparison depends on the input and its units.",
+      "visual": [
+        [
+          "Hours weight",
+          "−0.10",
+          "two hours"
+        ],
+        [
+          "Sets weight",
+          "−0.15",
+          "three sets"
+        ],
+        [
+          "Bias",
+          "−0.05",
+          "added once"
+        ]
+      ],
+      "check": "If a different student had zero practice sets, what would that student’s loss slope be for the sets weight?",
+      "checkAnswer": "Zero. Changing the sets weight cannot affect this student’s prediction because that weight is multiplied by zero.",
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nd_mean = (mean - 60)/100\nprint(\"Weights:\", d_mean * x, \"Bias:\", d_mean)",
+      "note": "Ask students to write down parameter names above the three entries so they cannot swap them."
+    },
+    {
+      "section": "04 · Update and verify",
+      "title": "Turn slopes into one update",
+      "lead": "The slopes tell us how loss responds. The learning rate sets the size of a training step. Choose 1 for this example. Subtract rate × slope from each starting parameter.",
+      "math": "new value = old value − learning rate × partial derivative",
+      "explain": "For the hours weight, 10 − 1 × (−0.10) = 10.10. Subtracting a negative raises the weight, which raises Ava’s mean toward 60. Use slopes from the same starting prediction for all three changes.",
+      "visual": [
+        [
+          "Hours weight",
+          "10 → 10.10",
+          "subtract −0.10"
+        ],
+        [
+          "Sets weight",
+          "5 → 5.15",
+          "subtract −0.15"
+        ],
+        [
+          "Bias",
+          "20 → 20.05",
+          "subtract −0.05"
+        ]
+      ],
+      "check": "At a rate of 0.5, what would the new hours weight be?",
+      "checkAnswer": "10 − 0.5 × (−0.10) = 10.05. Halving the rate halves this parameter change.",
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype)\nbias = 20.\nmean = x @ w + bias\nrate = 1.\nslope = (mean - 60)/100\nprint(w - rate * slope * x, bias - rate * slope)",
+      "note": "Have students predict the sign before entering the arithmetic. Name this simultaneous update gradient descent."
+    },
+    {
+      "section": "04 · Update and verify",
+      "title": "Recompute the prediction and the loss",
+      "lead": "Use Module 01’s rule again with the three updated values. Then use Module 02’s loss to check whether the update helped.",
+      "math": "2 × 10.10 + 3 × 5.15 + 20.05 = 55.70",
+      "explain": "The hours term adds 0.20, the sets term adds 0.45 and the bias adds 0.05. The miss shrinks from 5 to 4.30 points. The loss falls from 3.346524 to 3.313974.",
+      "visual": [
+        [
+          "Original mean",
+          "55.00",
+          "missed by 5"
+        ],
+        [
+          "Updated mean",
+          "55.70",
+          "missed by 4.30"
+        ],
+        [
+          "Loss change",
+          "−0.03255",
+          "better fit to Ava"
+        ]
+      ],
+      "check": "Why did the sets-weight increase of 0.15 add 0.45 to the prediction?",
+      "checkAnswer": "Ava completed three sets, so a change of 0.15 points per set adds 3 × 0.15 = 0.45 points.",
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nupdated = 2*10.10 + 3*5.15 + 20.05\nprint(updated, loss(updated).item())",
+      "note": "Distinguish the trial mean of 56 from the actual training result of 55.70."
+    },
+    {
+      "section": "04 · Update and verify",
+      "title": "Show PyTorch what can change",
+      "lead": "Now verify the work you did by hand. Give PyTorch the same two weights and bias. The flag requires_grad=True tells it to track how calculations depend on each parameter.",
+      "math": "forward pass: weights and bias → predicted mean → loss",
+      "explain": "The input vector, observed score, and spread are fixed. Run the model forward once. At the end, loss holds one number and PyTorch has recorded the operations that produced it.",
+      "visual": [
+        [
+          "Starting values",
+          "10, 5, 20",
+          "track these"
+        ],
         [
           "Prediction",
           "55",
-          "points"
+          "computed from them"
         ],
         [
-          "Observation",
-          "60",
-          "points"
-        ],
-        [
-          "Residual",
-          "−5",
-          "prediction minus observation"
-        ]
-      ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nprint(mu.item(), y.item())",
-      "checkAnswer": "The two weights and the bias can change. Ava’s inputs [2, 3], her observed 60 and the assumed σ = 10 stay fixed. Changing a parameter changes the predicted mean."
-    },
-    {
-      "section": "01 · The observation",
-      "title": "Give the prediction a loss",
-      "lead": "Keep the Gaussian spread from Module 02 fixed at σ = 10. Evaluate its density at the observed score and take the negative natural logarithm.",
-      "math": "L = −log p(y | μ, σ) = log(σ√(2π)) + (μ − y)²/(2σ²)",
-      "explain": "At μ = 55, the constant is about 3.221524. The five-point miss adds 25/200 = 0.125. Moving the mean closer to 60 increases the density there and reduces the loss.",
-      "check": "What part of L varies as we move the mean?",
-      "note": "Distinguish a density at 60 from the probability of observing exactly 60.",
-      "visual": [
-        [
-          "Spread",
-          "10",
-          "standard deviation"
-        ],
-        [
-          "Variance",
-          "100",
-          "squared points"
-        ],
-        [
-          "NLL",
+          "Loss",
           "3.346524",
-          "at μ = 55"
+          "computed from mean"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\nprint(loss.item())",
-      "checkAnswer": "Only (μ − 60)²/200 varies with μ. The normalization term log(10√(2π)) stays constant because the spread stays at 10."
+      "check": "Which three numerical derivatives should PyTorch produce for the starting model?",
+      "checkAnswer": "In parameter order they should be −0.10, −0.15 and −0.05. Write them down before continuing.",
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\nmean = x @ w + b\nobserved = x.new_tensor(60.)\nloss = -torch.distributions.Normal(mean, 10.).log_prob(observed)\nprint(mean.item(), loss.item())",
+      "note": "Read the lines in order. The new_tensor call makes 60 a tensor with the same number format as x."
     },
     {
-      "section": "02 · Differentiate",
-      "title": "Measure the slope at 55",
-      "lead": "A derivative measures how fast the loss changes as we move the mean a little. Differentiate while holding y and σ fixed.",
-      "math": "∂L/∂μ = 0 + 2(μ − y)·1/(2σ²) = (55 − 60)/100 = −0.05",
-      "explain": "The constant drops out. The square contributes 2(μ − y), and μ − y has derivative 1. Near 55, increasing μ by 0.01 point lowers the loss by about 0.0005.",
-      "check": "At which mean does the slope vanish? Why is that point a minimum?",
-      "note": "The second derivative is 1/100, positive everywhere. Ask students to compare signs on opposite sides of 60.",
+      "section": "04 · Update and verify",
+      "title": "Read the gradients before changing anything",
+      "lead": "Call loss.backward() to trace the recorded operations backward using the chain rule. PyTorch stores the two weight slopes in w.grad and the bias slope in b.grad.",
+      "math": "w.grad ≈ [−0.10, −0.15]     b.grad ≈ −0.05",
+      "explain": "Calling backward calculates slopes. A separate subtraction changes the parameters. The notebook checks each slope against the hand calculation and verifies the updated prediction and loss.",
       "visual": [
         [
-          "μ = 55",
-          "−0.05",
-          "loss slopes down"
+          "Compute",
+          "backward()",
+          "trace loss back to w and b"
         ],
         [
-          "μ = 60",
-          "0",
-          "minimum"
+          "Inspect",
+          "w.grad, b.grad",
+          "compare with paper"
         ],
         [
-          "μ = 65",
-          "+0.05",
-          "loss slopes up"
+          "Then update",
+          "old − rate × slope",
+          "recompute the loss"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\nh = 0.01\nprint(((nll(mu+h)-nll(mu-h))/(2*h)).item())",
-      "checkAnswer": "At μ = 60 the residual and slope are both zero. Any move away adds a positive squared residual to the same constant, so 60 minimizes the loss."
+      "check": "Immediately after backward(), before any subtraction, what is the hours weight?",
+      "checkAnswer": "It is still 10. Its gradient is now stored as −0.10. Only the update changes the weight to 10.10.",
+      "code": "import torch\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\nmean = x @ w + b\nobserved = x.new_tensor(60.)\nloss = -torch.distributions.Normal(mean, 10.).log_prob(observed)\nloss.backward()\nexpected_w = x.new_tensor([-0.10, -0.15])\nexpected_b = x.new_tensor(-0.05)\ntorch.testing.assert_close(w.grad, expected_w)\ntorch.testing.assert_close(b.grad, expected_b)\nprint(w.grad.tolist(), b.grad.item())",
+      "note": "Explain each .grad as a stored result. A learner should be able to state the weight and its slope separately."
     },
     {
-      "section": "02 · Differentiate",
-      "title": "Trace the slope back to each parameter",
-      "lead": "Increasing the first weight by one unit adds two points to Ava’s mean. Increasing the second by one adds three. Increasing the bias by one adds one.",
-      "math": "∂L/∂wⱼ = (∂L/∂μ)xⱼ     ∂L/∂b = (∂L/∂μ)·1",
-      "explain": "A partial derivative varies one parameter while the others stay fixed. The gradient collects those partial derivatives in parameter order.",
-      "check": "Why does the second weight have the largest gradient magnitude?",
-      "note": "Ask for the local slopes 2, 3 and 1 before multiplying by −0.05.",
+      "section": "04 · Update and verify",
+      "title": "Try a smaller step and a larger one",
+      "lead": "Restart at 55 each time. At rate 1 the mean gains 0.70. At rate 10 all three parameter changes are ten times as large, so the mean gains 7.00.",
+      "math": "rate 1: 55 → 55.70      rate 10: 55 → 62      rate 16: 55 → 66.20",
+      "explain": "Compare the final distance to 60 with the original distance of five. Crossing 60 can still help. Going all the way to 66.20 makes the miss larger.",
       "visual": [
         [
-          "w₁",
-          "−0.10",
-          "−0.05 × 2"
+          "Rate 1",
+          "4.30 away",
+          "loss falls"
         ],
         [
-          "w₂",
-          "−0.15",
-          "−0.05 × 3"
+          "Rate 10",
+          "2.00 away",
+          "loss falls"
         ],
         [
-          "b",
-          "−0.05",
-          "−0.05 × 1"
+          "Rate 16",
+          "6.20 away",
+          "loss rises"
         ]
       ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())",
-      "checkAnswer": "Ava completed three sets and studied two hours. Multiplying the shared mean slope −0.05 by 3 gives −0.15 for the sets weight, versus −0.10 for hours and −0.05 for the bias."
+      "check": "Restart at 55 with rate 5. What is the mean after one update? Does loss fall?",
+      "checkAnswer": "55 + 5 × 0.70 = 58.50. It is 1.50 points from 60, closer than before, so loss falls.",
+      "code": "import torch\ndef loss(mean):\n    mean = torch.tensor(mean, dtype=torch.float64)\n    model = torch.distributions.Normal(mean, 10.)\n    return -model.log_prob(mean.new_tensor(60.))\n\nfor rate in [1, 5, 10, 16]:\n    new_mean = 55 + rate * .70\n    print(rate, new_mean, loss(new_mean).item())",
+      "note": "Ask for a prediction before moving the rate slider. The factor 0.70 applies to this starting model only."
     },
     {
-      "section": "03 · Update",
-      "title": "Take one step and predict again",
-      "lead": "Use all three gradients from the original parameters. Choose a learning rate η = 1 for this worked example.",
-      "math": "θ′ = θ − η∇L     μ′ = 2(10.10) + 3(5.15) + 20.05 = 55.70",
-      "explain": "Subtracting negative gradients raises the parameters. The mean gains 0.20 points from hours, 0.45 from sets, and 0.05 from the bias. NLL falls from 3.346524 to 3.313974.",
-      "check": "Why does the model move only 0.70 points when the original gap was five?",
-      "note": "Have students add the three contributions. A gradient gives a local slope. The learning rate determines step size.",
-      "visual": [
-        [
-          "w₁′",
-          "10.10",
-          "10 − (−0.10)"
-        ],
-        [
-          "w₂′",
-          "5.15",
-          "5 − (−0.15)"
-        ],
-        [
-          "b′",
-          "20.05",
-          "20 − (−0.05)"
-        ]
-      ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())\nwith torch.no_grad():\n    print((x @ (w - dw) + b - db).item())",
-      "checkAnswer": "At rate 1, the two weights rise by 0.10 and 0.15 and the bias rises by 0.05. Their combined effect on Ava’s mean is 2(0.10) + 3(0.15) + 0.05 = 0.70 points."
-    },
-    {
-      "section": "03 · Update",
-      "title": "Ask PyTorch to check the arithmetic",
-      "lead": "Run the forward computation, call backward() on the scalar NLL, then compare the stored gradients with the hand calculation.",
-      "math": "loss.backward()     w.grad = [−0.10, −0.15]     b.grad = −0.05",
-      "explain": "Set requires_grad on the parameters before computing μ. Use retain_grad() to inspect the intermediate mean. Compare both components and the bias before changing any parameters.",
-      "check": "What goes wrong if you detach the mean before constructing the Normal distribution?",
-      "note": "The graph from the loss to the parameters is disconnected. Keep the actual forward path differentiable.",
-      "visual": [
-        [
-          "Forward",
-          "μ → L",
-          "evaluate the model"
-        ],
-        [
-          "Backward",
-          "L → μ",
-          "differentiate loss"
-        ],
-        [
-          "Compare",
-          "μ → w, b",
-          "check each partial"
-        ]
-      ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\nw = torch.tensor([10., 5.], dtype=x.dtype, requires_grad=True)\nb = torch.tensor(20., dtype=x.dtype, requires_grad=True)\ny = x.new_tensor(60.)\nsigma = x.new_tensor(10.)\nmu = x @ w + b\n\ndef nll(mean):\n    return -torch.distributions.Normal(mean, sigma).log_prob(y)\n\nloss = nll(mu)\n\nslope = (mu.detach() - y) / sigma.square()\ndw = slope * x\ndb = slope\nprint(\"Mean, weight and bias slopes:\", slope.item(), dw.tolist(), db.item())\n\nmu.retain_grad()  # Keep the intermediate slope so we can inspect it.\nloss.backward()\ntorch.testing.assert_close(mu.grad, slope)\ntorch.testing.assert_close(w.grad, dw)\ntorch.testing.assert_close(b.grad, db)\nprint(\"Autograd:\", mu.grad.item(), w.grad.tolist(), b.grad.item())\n\neta = 1.0\nwith torch.no_grad():\n    w -= eta * w.grad\n    b -= eta * b.grad\n    updated_mean = x @ w + b\n    updated_loss = nll(updated_mean)\n\nprint(\"New weights and bias:\", w.tolist(), b.item())\nprint(f\"Mean: {mu.item():.2f} -> {updated_mean.item():.2f}\")\nprint(f\"NLL: {loss.item():.6f} -> {updated_loss.item():.6f}\")\ntorch.testing.assert_close(updated_mean, x.new_tensor(55.7))\nassert updated_loss < loss",
-      "checkAnswer": "Detaching μ breaks the recorded path from the loss back to w and b. With σ fixed here, the loss then has no differentiable input and backward() cannot compute those gradients."
-    },
-    {
-      "section": "04 · Learning rates",
-      "title": "When does a larger step help?",
-      "lead": "Write e = μ − 60. Each simultaneous update multiplies this error by the same factor for Ava’s fixed features and variance.",
-      "math": "e′ = (1 − η(2² + 3² + 1)/100)e = (1 − 0.14η)e",
-      "explain": "At η = 1 the error shrinks to 86% of its size. At η = 10 it reverses sign and shrinks. At η = 16 it reverses sign and grows. The lab lets you compare these cases.",
-      "check": "Could the new mean cross 60 and still improve the loss?",
-      "note": "Yes. At η = 10, 55 becomes 62. Its distance from 60 falls from 5 to 2.",
-      "visual": [
-        [
-          "η = 1",
-          "55.7",
-          "closer"
-        ],
-        [
-          "η = 10",
-          "62",
-          "closer, across 60"
-        ],
-        [
-          "η = 16",
-          "66.2",
-          "farther away"
-        ]
-      ],
-      "code": "import torch\n\nx = torch.tensor([2., 3.], dtype=torch.float64)\ny = x.new_tensor(60.)\nfor eta in [0., 1., 100/14, 10., 100/7, 16.]:\n    trial_w = x.new_tensor([10., 5.], requires_grad=True)\n    trial_b = x.new_tensor(20., requires_grad=True)\n    errors = []\n    for _ in range(3):\n        mean = x @ trial_w + trial_b\n        trial_loss = -torch.distributions.Normal(mean, 10.).log_prob(y)\n        dw, db = torch.autograd.grad(trial_loss, (trial_w, trial_b))\n        with torch.no_grad():\n            trial_w -= eta * dw\n            trial_b -= eta * db\n            errors.append(round((x @ trial_w + trial_b - y).item(), 3))\n    print(f\"Rate {eta:.3f}: errors after three steps {errors}\")",
-      "checkAnswer": "Yes. At rate 10, the new mean is 62. Its error is +2 instead of −5. With fixed spread, the squared error term falls from 25/200 to 4/200, so the NLL decreases."
-    },
-    {
-      "section": "04 · Learning rates",
+      "section": "05 · Prepare for Module 04",
       "title": "What did one observation teach us?",
       "lead": "For Ava, every parameter combination that predicts 60 reaches the same lowest loss. A different student can receive a different prediction from those same models.",
       "math": "2w₁ + 3w₂ + b = 60   ⇒   ∇L = 0",
@@ -269,6 +497,26 @@ window.TR_M3 = {
       "explanation": "25/(2 × 100) = 0.125."
     },
     {
+      "id": "loss-difference",
+      "lesson": "loss",
+      "question": "The penalty falls from 0.125 to 0.080. What is the signed change (after minus before)?",
+      "type": "number",
+      "options": [],
+      "answer": -0.045,
+      "hint": "Subtract the starting value from the ending value.",
+      "explanation": "0.080 − 0.125 = −0.045. The negative sign records a decrease."
+    },
+    {
+      "id": "average-slope",
+      "lesson": "slope",
+      "question": "The mean rises by 2 points and the loss changes by −0.08. What is the average change per point?",
+      "type": "number",
+      "options": [],
+      "answer": -0.04,
+      "hint": "Divide the loss change by the mean change.",
+      "explanation": "−0.08/2 = −0.04 loss units per point."
+    },
+    {
       "id": "ex2",
       "lesson": "slope",
       "question": "At μ = 55, y = 60 and σ = 10, what is ∂L/∂μ?",
@@ -277,6 +525,16 @@ window.TR_M3 = {
       "answer": -0.05,
       "hint": "Divide the signed residual by σ².",
       "explanation": "−5/100 = −0.05. Raising this mean a little lowers the loss."
+    },
+    {
+      "id": "weight-trial",
+      "lesson": "chain",
+      "question": "Increase only the hours weight by 0.10. What is Ava’s new predicted mean?",
+      "type": "number",
+      "options": [],
+      "answer": 55.2,
+      "hint": "Ava studied two hours. Multiply two by the weight change.",
+      "explanation": "55 + 2 × 0.10 = 55.20."
     },
     {
       "id": "ex3",
@@ -309,16 +567,6 @@ window.TR_M3 = {
       "explanation": "2(10.10) + 3(5.15) + 20.05 = 55.70."
     },
     {
-      "id": "ex6",
-      "lesson": "update",
-      "question": "Reset the model. If y = 50 and η = 1, what is the new mean?",
-      "type": "number",
-      "options": [],
-      "answer": 54.3,
-      "hint": "The signed residual is now positive.",
-      "explanation": "The mean falls by (2² + 3² + 1) × 0.05 = 0.70 points."
-    },
-    {
       "id": "ex7",
       "lesson": "rate",
       "question": "At rate 10, does this update from 55 to 62 improve the NLL?",
@@ -330,9 +578,59 @@ window.TR_M3 = {
       "answer": 0,
       "hint": "Compare distances to 60.",
       "explanation": "The distance falls from five points to two, so the squared residual decreases."
+    },
+    {
+      "id": "ex6",
+      "lesson": "update",
+      "question": "Reset the model. If y = 50 and η = 1, what is the new mean?",
+      "type": "number",
+      "options": [],
+      "answer": 54.3,
+      "hint": "The signed residual is now positive.",
+      "explanation": "The mean falls by (2² + 3² + 1) × 0.05 = 0.70 points."
+    },
+    {
+      "id": "fresh-update",
+      "lesson": "update",
+      "type": "number",
+      "options": [],
+      "question": "A new student has one hour and two sets. Reset the weights to [10, 5], bias to 20, and σ to 10. The observed score is 45. At rate 1, what mean does one simultaneous update produce?",
+      "answer": 40.3,
+      "hint": "Start at 1 × 10 + 2 × 5 + 20 = 40. Find the mean slope, multiply it by 1, 2 and 1, then subtract the three slopes.",
+      "explanation": "The mean slope is (40 − 45)/100 = −0.05. The parameters become 10.05, 5.10 and 20.05. The new prediction is 10.05 + 2(5.10) + 20.05 = 40.30."
     }
   ],
   "faq": [
+    {
+      "id": "m3-faq-difference",
+      "topic": "Slope",
+      "question": "What does “per point” mean on the loss curve?",
+      "answer": "It tells us how much loss changes for each point the predicted mean moves over a chosen interval. Divide the vertical change by the horizontal change.",
+      "formal": "Average slope = change in loss / change in mean",
+      "code": "print((0.045 - 0.125) / (57 - 55))",
+      "check": "If loss falls by 0.06 over two points, what is the average slope?",
+      "checkAnswer": "−0.06/2 = −0.03 per point."
+    },
+    {
+      "id": "m3-faq-derivative",
+      "topic": "Slope",
+      "question": "Why do we try smaller and smaller changes?",
+      "answer": "A curved line can get steeper or flatter as you move. A shorter interval measures what happens closer to your starting point. The limiting rate gives the derivative there.",
+      "formal": "At 55: average slope = (−10 + h)/200",
+      "code": "for h in [1, .1, .01]:\n    print((-10+h)/200)",
+      "check": "As h shrinks toward zero, what number does this expression approach?",
+      "checkAnswer": "−10/200 = −0.05."
+    },
+    {
+      "id": "m3-faq-partial",
+      "topic": "Slope",
+      "question": "What am I holding fixed in a partial derivative?",
+      "answer": "To find the slope for the hours weight, vary that weight alone. Keep the sets weight, bias, inputs, observation and spread fixed. The predicted mean and loss can change as a result.",
+      "formal": "μ = 2w₁ + 3w₂ + b",
+      "code": "print(2*10.1 + 3*5 + 20)",
+      "check": "Why can the mean change if we vary only one weight?",
+      "checkAnswer": "The mean is an output of the rule. It depends on the weight we varied."
+    },
     {
       "id": "m3-faq-0",
       "question": "Why divide by 100 when the spread is 10?",
