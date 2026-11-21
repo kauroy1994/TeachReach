@@ -781,3 +781,37 @@ body.tr-slide-page .tr-bridge-summary pre{overflow-x:auto;white-space:pre-wrap;o
 .tr-module-01 #page-question{overflow-x:clip!important}
 .tr-module-01 #page-question .queue-scroll{max-width:100%;overflow-x:auto!important}
 @media(max-width:950px){body.tr-slide-page .tr-bridge-summary{grid-template-columns:1fr!important}}
+
+/* Syllabus and stage navigation shared by Modules 01 and 02. */
+.tr-module-01 .tr-course-progress,.tr-module-02 .tr-course-progress{
+ display:flex;align-items:center;gap:11px 16px;flex-wrap:wrap;
+ padding:12px 16px;margin:12px 0 20px;background:#fff;
+ border:1px solid #e8d8df;border-left:4px solid #9E1B32;border-radius:11px;
+ color:#5a6874;font-size:12px;font-weight:760
+}
+.tr-course-progress .tr-eyebrow{
+ color:#80283e;font-size:10px;font-weight:900;letter-spacing:.11em
+}
+.tr-course-progress a{
+ color:#882641!important;font-weight:850;text-decoration:none!important
+}
+.tr-course-progress a:hover{text-decoration:underline!important}
+.tr-module-01 .tr-assessment-notice,.tr-module-02 .tr-assessment-notice{
+ display:block;background:#fff4f6;border:1px solid #e5c6ce;
+ border-left:4px solid #9E1B32;padding:16px 19px;
+ margin:0 0 22px;border-radius:12px;
+ color:#583c48;font-size:14px;line-height:1.65
+}
+.tr-assessment-notice strong{color:#762339;font-weight:900}
+.tr-assessment-notice a{color:#842640!important;font-weight:850!important;text-decoration:underline!important}
+.tr-module-01 .tr-header-utils,.tr-module-02 .tr-header-utils{gap:6px 9px}
+.tr-module-01 .tr-header-utils .tr-course-link,.tr-module-02 .tr-header-utils .tr-course-link{font-size:11px!important}
+@media(max-width:1100px){
+.tr-module-01 .tr-header-utils .tr-course-link,
+.tr-module-02 .tr-header-utils .tr-course-link{padding:6px 8px;font-size:10px!important}
+}
+@media(max-width:760px){
+.tr-module-01 .tr-header-utils .tr-course-link,
+.tr-module-02 .tr-header-utils .tr-course-link{display:none!important}
+.tr-course-progress{gap:8px!important}
+}

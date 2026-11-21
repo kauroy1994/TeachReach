@@ -1,8 +1,19 @@
 # TeachReach — Common course-module interface
-University of Alabama · Machine Learning Foundations
+Kaushik Roy, University of Alabama · Machine Learning Foundations
 
 This document is the reusable UI contract for Modules 01, 02, and later modules.
 Teaching content differs by module, but navigation and instructional controls should not.
+
+## Course curriculum and navigation
+
+- Four stage pages live at `courses/ml-foundations/stage-01/` through `stage-04/`, each with the same TeachReach crimson branding, outcome cards, module list, assessment descriptions, and footer.
+- The full syllabus is at `courses/ml-foundations/syllabus.html`; the course roadmap is `courses/ml-foundations/index.html`.
+- All 16 modules have a dedicated `module-XX/` page. Existing Modules 01–02 retain their complete seven-tab teaching resources. Planned Modules 03–16 have seven navigable tabs—Overview, Class slides, Explore, Exercises, Notebook, Office hours, Ask a question—providing accurate previews without claiming that unfinished resources are functional.
+- The planned module/assessment source of truth is `courses/ml-foundations/assets/curriculum-data.js`.
+- New syllabus, stage, and module-shell pages share `courses/ml-foundations/assets/curriculum.css` and `curriculum.js`. For module-shell navigation, the existing shared `module-ui.css` is reused.
+- Each module's practice exercises are formative. A *separate*, instructor-administered in-class variant is graded at the end of that module. The public site does not automatically submit graded marks.
+- Module status labels must distinguish **available learning resources** from **planned syllabus previews**. Avoid inert actions or invented links to resources that have not been published.
+- Site attribution: **Kaushik Roy, University of Alabama**.
 
 ## Shared assets
 - `courses/ml-foundations/assets/module-ui.css`: header, overview shortcuts, resource controls, slide typography, notebook cells, practice areas, question forms, and responsive patterns.
@@ -10,7 +21,7 @@ Teaching content differs by module, but navigation and instructional controls sh
 - Each module retains its topic-specific diagrams, lesson data, examples, notebook, and FAQs.
 
 ## Module portal structure (same in both modules)
-1. Same University of Alabama TeachReach header and seven student tabs: Module overview, Class slides, Explore, Exercises, Notebook, Office hours, Ask a question. An additional Home link remains visible.
+1. Same Kaushik Roy, University of Alabama TeachReach header and seven student tabs: Module overview, Class slides, Explore, Exercises, Notebook, Office hours, Ask a question. An additional Home link remains visible.
 2. A full-width crimson introductory hero only on the Overview tab. Module-specific graphics may differ.
 3. Exactly five illustrated shortcut cards: slides, explore, exercises, notebook, office hours.
 4. A faculty portrait and a direct link to module-specific office hours.

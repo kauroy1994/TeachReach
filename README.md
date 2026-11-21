@@ -1,14 +1,28 @@
-# TeachReach · University of Alabama
+# TeachReach · Kaushik Roy, University of Alabama
 
 **One course portal, every module, available from any browser.**
 
 Student website: https://kauroy1994.github.io/TeachReach/
 
+## Complete Machine Learning Foundations syllabus
+
+The TeachReach course is **Machine Learning Foundations: From Mathematics to Modern AI**. It includes **16 modules** in four stages:
+- **Stage I — Mathematical Foundations (01–04):** linear algebra and tensors; probability; calculus and optimization; statistical learning and generalization.
+- **Stage II — Fundamental Learning Algorithms (05–08):** regression and classification; classical ML (kNN, trees, SVMs, ensembles); unsupervised learning and PCA; neural networks and backpropagation.
+- **Stage III — Foundations of Modern AI (09–13):** deep learning and representations; self-supervised learning and embeddings; sequence modeling, attention and transformers; language modeling and LLMs; generative models (VAEs, GANs, diffusion).
+- **Stage IV — Intelligent and Reliable Learning (14–16):** reinforcement learning; trustworthy ML; integrated machine-learning capstone.
+
+**Full syllabus:** `courses/ml-foundations/syllabus.html`. Stage overviews: `courses/ml-foundations/stage-01/` through `stage-04/`. Modules 01–02 are **released** and retain their original learning resources. Modules 03–16 have **dedicated, navigable syllabus-preview pages** with the same seven-section layout and transparent in-development indicators.
+
+**Every module includes formative practice exercises when released.** Students are **graded on a different instructor-administered in-class variant at the end of each module**. The website's correct-answer feedback is not a graded score. The syllabus includes a *proposed* allocation of 16 end-of-module assessments worth 80% total plus the integrated capstone worth 20%, subject to instructor confirmation.
+
+The complete syllabus also defines prerequisites, technical requirements, stage outcomes, 14 measurable course outcomes, academic integrity and assessment expectations. Instructor attribution throughout the site is **Kaushik Roy, University of Alabama**.
+
 ## Machine Learning Foundations
 
 Module 01 — **Why machine learning? Tensors, data, predictions and learning**
 
-- University of Alabama–themed lecture deck with the Campus Study Coach example
+- Kaushik Roy, University of Alabama–themed lecture deck with the Campus Study Coach example
 - Interactive 1D through higher-dimensional tensor explorer
 - Thirteen exercises with immediate feedback and local progress tracking
 - Complete in-browser PyTorch notebook, with an optional Google Colab link
