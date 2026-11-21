@@ -325,3 +325,343 @@ body.low-data .tr-module-main .hero-visual{display:none}
 /* M02 lecture now positions the PyTorch control directly under the slide title, as in M01. */
 .deck-page.tr-slide-page .deck-slide{grid-template-rows:auto auto minmax(250px,1fr) auto;align-content:start}
 .deck-page.tr-slide-page .deck-slide .tr-code-example{margin:0 0 4px}
+
+
+/* TeachReach UI harmonization: one pattern for the course portal and all resource pages. */
+.tr-module-01 .quickbar,.tr-module-02 .tr-quickbar{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;margin:24px 0 34px
+}
+.tr-module-01 .quickbar button,.tr-module-02 .tr-quickbar button{
+  min-width:0;border-radius:17px!important;border:1px solid #e6e0e2!important;
+  background:#fff!important;color:#26313a!important;
+  padding:18px!important;display:flex;gap:12px;align-items:center;
+  text-align:left;min-height:91px;box-shadow:0 8px 23px #3b27300d;
+  transition:border-color .15s,transform .15s
+}
+.tr-module-01 .quickbar button:hover,.tr-module-02 .tr-quickbar button:hover{
+  transform:translateY(-2px);border-color:#d2a2ac!important
+}
+.tr-module-01 .quickbar .quickicon,.tr-module-02 .tr-quickbar .quickicon{
+  flex:0 0 50px;width:50px;height:50px;display:grid;place-items:center;
+  background:#fff0f2;color:#9E1B32;border-radius:13px;font-size:26px
+}
+.tr-module-01 .quickbar button strong,.tr-module-02 .tr-quickbar button strong{
+  display:block;font-size:15px;font-weight:800;color:#26313a
+}
+.tr-module-01 .quickbar button small,.tr-module-02 .tr-quickbar button small{
+  display:block;margin-top:4px;color:#5F6A72;font-size:12px;line-height:1.4
+}
+.tr-module-01 .teacher-card,.tr-module-02 .tr-teacher-card{
+  display:flex;align-items:center;gap:21px;padding:22px 24px;max-width:620px;
+  background:#fff;border:1px solid #e6e0e2;border-radius:22px;margin-top:26px
+}
+.tr-module-01 .teacher-card img,.tr-module-02 .tr-teacher-card img{
+  width:78px;height:78px;flex:0 0 78px;object-fit:cover;border-radius:50%;
+  border:3px solid #f0d5db
+}
+.tr-module-01 .teacher-card b,.tr-module-02 .tr-teacher-card b{font-size:19px}
+.tr-module-01 .teacher-card p,.tr-module-02 .tr-teacher-card p{
+  color:#5F6A72;font-size:13px;line-height:1.6;margin:5px 0 9px
+}
+.tr-module-02 .tr-module-main .hero{margin:0 0 24px}
+.tr-module-01 .tr-course-footer,.tr-module-02 .tr-course-footer{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:15px;padding:22px clamp(16px,4vw,54px);
+  background:#fff;border-top:1px solid #e5e0e2;
+  color:#61717e;font-size:12px;line-height:1.6;text-align:left
+}
+.tr-course-footer strong{color:#75243a;font-weight:850;font-size:12px}
+.tr-course-footer .tr-footer-links{display:flex;gap:12px;flex-wrap:wrap}
+.tr-course-footer .tr-footer-links a{font-weight:790;color:#852a43!important;text-decoration:none}
+.tr-course-footer .tr-footer-links a:hover{text-decoration:underline}
+.tr-module-02 .steps .step{
+  border:1px solid #e3d9db!important;border-radius:17px!important;
+  padding:17px;background:white;box-shadow:none
+}
+.tr-module-02 .steps .step .step-num{
+  display:grid;place-items:center;width:35px;height:35px;
+  background:#9E1B32;color:white;border-radius:50%;
+  font-size:17px;font-weight:800
+}
+.tr-module-02 .steps .step h3{margin:16px 0 5px;color:#772432}
+/* Avoid double navigation inside an embedded professor page; retain the portrait in both modules. */
+body.room-page.room-embedded header.tr-resource-header{display:none!important}
+body.room-page.room-embedded .room-shell{
+  display:grid!important;
+  grid-template-columns:minmax(230px,.76fr) minmax(0,1.5fr)!important;
+  gap:clamp(13px,2vw,27px)!important;
+  min-height:0!important;
+  padding:clamp(12px,2vw,25px)!important;
+  max-width:1600px!important
+}
+body.room-page.room-embedded .room-left{display:block!important;min-width:0!important}
+body.room-page.room-embedded .room-right{
+  border:1px solid #e4e8eb!important;border-radius:18px!important;
+  box-shadow:0 12px 35px #202c3412!important
+}
+body.room-page.room-embedded .room-left h1{font-size:clamp(26px,2.5vw,37px)!important}
+body.room-page.room-embedded .avatar-frame{max-width:340px!important}
+body.room-page.room-embedded .avatar-stage{min-height:210px}
+body.room-page.room-embedded .avatar-stage img{animation:none!important;transform:none!important}
+/* Standard standalone page header and footer. */
+.tr-standalone-page header.tr-resource-header{
+  display:flex!important;align-items:center!important;
+  justify-content:space-between!important;flex-wrap:wrap!important;
+  gap:12px!important;height:auto!important;min-height:73px!important;
+  padding:12px clamp(15px,3.2vw,46px)!important;
+  background:white!important;border:0!important;
+  border-top:5px solid #9E1B32!important;border-bottom:1px solid #e2e5e7!important;
+  box-shadow:none!important
+}
+.tr-resource-brand{display:inline-flex!important;align-items:center!important;
+  gap:10px;text-decoration:none!important;color:#26313a!important;
+  font-weight:900!important;font-size:20px!important;letter-spacing:-.055em;white-space:nowrap
+}
+.tr-resource-brand .tr-resource-mark{
+  display:grid;place-items:center;width:37px;height:37px;
+  background:#9E1B32;color:#fff;border-radius:10px;font-weight:900;font-size:17px
+}
+.tr-resource-brand .tr-resource-label small{display:block;color:#772432;
+  font-size:9px;font-weight:850;letter-spacing:.11em;line-height:1.5
+}
+.tr-resource-brand .tr-resource-label strong{display:block;font-size:21px;line-height:1.05;color:#26313a}
+.tr-resource-brand .tr-resource-label strong span{color:#9E1B32}
+.tr-resource-nav{display:flex!important;align-items:center;gap:8px;flex-wrap:wrap}
+.tr-resource-nav a{
+  display:inline-flex;align-items:center;justify-content:center;padding:8px 11px;
+  text-decoration:none!important;color:#6a2a40!important;
+  font-size:12px!important;font-weight:790!important;border-radius:9px;
+  border:1px solid #e6cbd2!important;background:#fff!important
+}
+.tr-resource-nav a:hover{background:#fff0f2!important}
+.tr-standalone-page .tr-standalone-toolbar{
+  display:flex!important;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto
+}
+.tr-resource-footer{
+  padding:21px clamp(15px,3vw,46px);background:#fff;border-top:1px solid #e4e8eb;
+  color:#627480;font-size:12px;display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap
+}
+.tr-resource-footer a{color:#852b44;text-decoration:none;font-weight:800}
+.tr-resource-footer a:hover{text-decoration:underline}
+/* Shared slide-body geometry; the actual diagrams remain module-specific. */
+body.tr-slide-page .deck,body.tr-slide-page .deck-stage{
+  background:#faf9f7!important
+}
+body.tr-slide-page .slide,body.tr-slide-page .deck-slide{
+  max-width:1380px!important;margin-left:auto!important;margin-right:auto!important
+}
+body.tr-slide-page .slide h1,body.tr-slide-page .deck-slide-head h1{
+  font-size:clamp(29px,4vw,58px)!important;
+  font-weight:870!important;line-height:1.08!important;
+  letter-spacing:-.055em!important;color:#27313a!important
+}
+body.tr-slide-page .deck-lead,body.tr-slide-page .slide .subtitle{
+  color:#596a78!important;line-height:1.55!important;
+  font-size:clamp(14px,1.45vw,19px)!important
+}
+body.tr-slide-page .deck-stage,body.tr-slide-page .slide{
+  padding:clamp(15px,3vw,39px)!important
+}
+.tr-resource-header .tr-standalone-toolbar .tr-standalone-full{
+  min-height:38px;background:#fff!important;color:#76243b!important;
+  border:1px solid #cba3b0!important
+}
+.tr-resource-header .tr-standalone-toolbar .tr-standalone-return{display:none}
+@media(max-width:950px){
+  body.room-page.room-embedded .room-shell{display:block!important}
+  body.room-page.room-embedded .room-left{
+    display:grid!important;grid-template-columns:1fr 225px;align-items:center;gap:12px!important;
+    margin:0 0 15px!important
+  }
+  body.room-page.room-embedded .room-left h1{font-size:28px!important}
+  body.room-page.room-embedded .avatar-frame{grid-column:2;grid-row:1/4}
+  body.room-page.room-embedded .room-voice,
+  body.room-page.room-embedded .voice-notice{grid-column:1}
+}
+@media(max-width:650px){
+  body.room-page.room-embedded .room-left{display:block!important}
+  body.room-page.room-embedded .avatar-frame{display:flex!important;max-width:none!important;height:120px!important}
+  body.room-page.room-embedded .avatar-stage{height:120px!important;min-height:0!important;width:136px!important;flex:0 0 136px}
+  body.room-page.room-embedded .avatar-bottom{flex:1}
+  .tr-module-01 .quickbar,.tr-module-02 .tr-quickbar{grid-template-columns:1fr 1fr}
+  .tr-module-01 .quickbar button,.tr-module-02 .tr-quickbar button{
+    padding:12px!important;min-height:75px
+  }
+  .tr-module-01 .quickbar .quickicon,.tr-module-02 .tr-quickbar .quickicon{
+    width:35px;height:35px;flex-basis:35px;font-size:20px
+  }
+  .tr-module-01 .teacher-card,.tr-module-02 .tr-teacher-card{gap:12px;padding:15px}
+  .tr-module-01 .teacher-card img,.tr-module-02 .tr-teacher-card img{
+    width:60px;height:60px;flex-basis:60px
+  }
+  .tr-resource-brand .tr-resource-label small{font-size:8px}
+  .tr-resource-brand .tr-resource-label strong{font-size:19px}
+}
+@media(max-width:410px){
+  .tr-module-01 .quickbar,.tr-module-02 .tr-quickbar{grid-template-columns:1fr}
+}
+
+
+/* Shared exercise presentation and registration layout for both modules. */
+.tr-module-01 .practice-layout,.tr-module-02 .practice-layout{
+  display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px
+}
+.tr-module-01 .practice-menu,.tr-module-02 .exercise-menu{
+  display:grid;gap:7px;max-height:560px;overflow:auto
+}
+.tr-module-01 .practice-menu button,.tr-module-02 .exercise-menu button{
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:42px;padding:11px 13px;border-radius:10px;
+  border:1px solid #e8e2e3!important;background:#fff!important;
+  color:#45545e!important;text-align:left;line-height:1.4;
+  font-size:12px!important;font-weight:760!important
+}
+.tr-module-01 .practice-menu button.active,.tr-module-02 .exercise-menu button.active{
+  background:#fff0f2!important;color:#8b2540!important;border-color:#d9a5b4!important
+}
+.tr-module-01 .practice-menu button:hover,.tr-module-02 .exercise-menu button:hover{
+  background:#fff6f7!important;border-color:#d1adb8!important
+}
+.tr-module-01 .answers,.tr-module-02 .answer-list{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
+}
+.tr-module-01 .answers button,.tr-module-02 .answer-list button{
+  padding:15px!important;min-height:68px;border-radius:12px!important;
+  background:#fcfafa!important;border:1px solid #ddd4d9!important;
+  color:#354653!important;font-size:14px!important;font-weight:650!important
+}
+.tr-module-01 .answers button.selected,.tr-module-02 .answer-list button.selected{
+  background:#fff0f2!important;color:#772432!important;border-color:#9E1B32!important
+}
+.tr-module-01 #page-question .page-heading h1,
+.tr-module-02 [data-section="question"] .section-head h2{
+  font-size:clamp(29px,3.4vw,43px)!important;letter-spacing:-.05em;line-height:1.15
+}
+.tr-module-01 #page-question .form-card,
+.tr-module-02 [data-section="question"] .panel{
+  background:#fff;border:1px solid #e5e0e2;border-radius:20px;
+  box-shadow:0 12px 32px #43212b10
+}
+.tr-module-01 #page-question input,
+.tr-module-01 #page-question textarea,
+.tr-module-01 #page-question select,
+.tr-module-02 [data-section="question"] input,
+.tr-module-02 [data-section="question"] textarea,
+.tr-module-02 [data-section="question"] select{
+  border:1px solid #cbd5db;border-radius:9px;background:#fff;color:#26313a;
+  padding:12px;font-size:13px
+}
+.tr-module-01 #page-question input:focus-visible,
+.tr-module-02 [data-section="question"] input:focus-visible{
+  outline:3px solid #d7a1b0;outline-offset:2px
+}
+.tr-module-01 #page-question table,.tr-module-02 [data-section="question"] table{
+  width:100%;border-collapse:collapse;font-size:12px;
+}
+.tr-module-01 #page-question th,.tr-module-02 [data-section="question"] th{
+  background:#f8eff1;color:#5d3442;text-align:left;font-weight:850
+}
+.tr-module-01 #page-question th,.tr-module-01 #page-question td,
+.tr-module-02 [data-section="question"] th,.tr-module-02 [data-section="question"] td{
+  padding:11px;border-bottom:1px solid #e6e3e4
+}
+body.room-page.room-embedded .tr-resource-footer{display:none!important}
+@media(max-width:900px){
+  .tr-module-01 .practice-layout,.tr-module-02 .practice-layout{
+    grid-template-columns:1fr
+  }
+  .tr-module-01 .practice-menu,.tr-module-02 .exercise-menu{
+    display:flex;overflow-x:auto;max-height:none;flex-wrap:nowrap;gap:7px
+  }
+  .tr-module-01 .practice-menu button,.tr-module-02 .exercise-menu button{
+    min-width:175px;flex:0 0 auto
+  }
+}
+@media(max-width:600px){
+  .tr-module-01 .answers,.tr-module-02 .answer-list{
+    grid-template-columns:1fr
+  }
+}
+
+
+/* Equivalent notebook structure: crimson introduction, shared resource toolbar, neutral lesson cards. */
+.tr-standalone-page.tr-notebook-page .hero,
+.tr-standalone-page.tr-notebook-page .nb-head{
+  margin:0 0 16px!important;
+  background:linear-gradient(115deg,#9E1B32,#772432)!important;
+  color:#fff!important;border-radius:19px!important;
+  padding:clamp(23px,3vw,34px)!important
+}
+.tr-standalone-page.tr-notebook-page .hero h1,
+.tr-standalone-page.tr-notebook-page .nb-head h1{
+  font-size:clamp(28px,3.5vw,42px)!important;
+  font-weight:850!important;line-height:1.16!important;color:#fff!important
+}
+.tr-standalone-page.tr-notebook-page .tr-notebook-tools{
+  display:flex!important;flex-wrap:wrap;align-items:center;gap:10px!important;
+  background:#fff!important;padding:13px 16px!important;
+  margin:0 0 25px!important;border-radius:12px!important;
+  border:1px solid #e1dfe0!important;box-shadow:none!important
+}
+.tr-standalone-page.tr-notebook-page .tr-notebook-tools a{
+  background:#fff0f2!important;color:#75243b!important;
+  border:1px solid #ddbbc4!important;padding:9px 13px!important;
+  border-radius:9px!important;font-size:12px!important;font-weight:820!important;
+  box-shadow:none!important;text-decoration:none!important
+}
+.tr-standalone-page.tr-notebook-page .tr-notebook-tools a:hover{
+  background:#f8e2e8!important;color:#6d2136!important
+}
+.tr-standalone-page.tr-notebook-page .tr-notebook-tools span,
+.tr-standalone-page.tr-notebook-page .tr-notebook-tools .tr-tools-hint{
+  color:#5b6c78!important;font-size:12px!important;line-height:1.5
+}
+.tr-standalone-page.tr-notebook-page .nb-markdown,
+.tr-standalone-page.tr-notebook-page .nb-cell.markdown{
+  border:1px solid #e3e6e8!important;background:#fff!important;
+  padding:20px clamp(17px,2vw,24px)!important;margin:14px 0!important;
+  border-radius:14px!important;box-shadow:none!important;line-height:1.65
+}
+.tr-standalone-page.tr-notebook-page .nb-code,
+.tr-standalone-page.tr-notebook-page .nb-cell.code{
+  border:1px solid #dae0e4!important;border-radius:14px!important;
+  overflow:hidden!important;margin:14px 0 24px!important;box-shadow:none!important;
+}
+.tr-standalone-page.tr-notebook-page .nb-code-head,
+.tr-standalone-page.tr-notebook-page .nb-cell.code .nb-label{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap;gap:8px;padding:10px 14px!important;
+  color:#fae5ec!important;background:#323c45!important;
+  font-size:11px!important;font-weight:800!important;letter-spacing:.08em!important
+}
+.tr-standalone-page.tr-notebook-page .nb-code-head button,
+.tr-standalone-page.tr-notebook-page .tr-notebook-copy{
+  background:transparent!important;color:#fff!important;
+  border:1px solid #c99eaa!important;border-radius:8px!important;
+  padding:7px 10px!important;min-height:33px!important;font-size:11px!important;
+  font-weight:780!important;cursor:pointer
+}
+.tr-standalone-page.tr-notebook-page .nb-code-head button:hover,
+.tr-standalone-page.tr-notebook-page .tr-notebook-copy:hover{
+  background:#4a5a69!important;color:#fff!important
+}
+.tr-standalone-page.tr-notebook-page .nb-code pre:not(.nb-output),
+.tr-standalone-page.tr-notebook-page .nb-cell.code pre{
+  background:#222b32!important;color:#eff2f7!important;
+  padding:16px 19px!important;font-size:12px!important;
+  border-radius:0!important;overflow-x:auto!important
+}
+.tr-standalone-page.tr-notebook-page .nb-code .nb-output,
+.tr-standalone-page.tr-notebook-page .nb-cell .output{
+  background:#f5f7f8!important;color:#293b46!important;
+  border-top:1px solid #d4d8db!important;padding:12px 17px!important;
+  font-size:12px!important
+}
+
+/* Portal top strip matches Module 01's 7px UA crimson stripe. */
+.tr-module-02 .topline{height:7px!important;background:#9E1B32!important}
+
+/* Match question registration columns in Module 02 to Module 01. */
+.tr-module-02 [data-section="question"] .grid-2{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:25px}
+@media(max-width:900px){.tr-module-02 [data-section="question"] .grid-2{grid-template-columns:1fr}}

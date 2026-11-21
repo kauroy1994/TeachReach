@@ -67,7 +67,11 @@ function initEmbedControls(){
     full.type="button";full.setAttribute("aria-pressed","false");
     full.setAttribute("aria-label","Show "+(frame.title||"learning content")+" in full screen");
     const newTab=make("a","tr-view-link","↗ Open in new tab");
-    newTab.href=src;newTab.target="_blank";newTab.rel="noopener noreferrer";
+    const standaloneURL=new URL(src,location.href);
+    // The embedded view is not the full-page view: remove its embed-only layout parameter.
+    standaloneURL.searchParams.delete("embed");
+    newTab.href=standaloneURL.pathname+standaloneURL.search+standaloneURL.hash;
+    newTab.target="_blank";newTab.rel="noopener noreferrer";
     newTab.setAttribute("aria-label","Open "+(frame.title||"learning content")+" in a new tab");
     const message=make("span","tr-control-status");message.setAttribute("role","status");
     message.style.cssText="display:block;flex-basis:100%;font-size:11px;color:#75243a;line-height:1.3;text-align:right";
@@ -81,7 +85,7 @@ function initEmbedControls(){
   }
 }
 function initStandalone(){
-  const header=document.querySelector("header.top,header.topbar,header.topnav,header.room-nav");
+  const header=document.querySelector("header.tr-resource-header,header.top,header.topbar,header.topnav,header.room-nav");
   if(!header)return;
   const holder=make("div","tr-standalone-toolbar");
   const destination=module==="02"?"./index.html":"./index.html";

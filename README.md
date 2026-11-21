@@ -51,6 +51,9 @@ The same example controls appear throughout both learning modules:
 - The shared styling for these controls lives in `courses/ml-foundations/assets/module-ui.css`. The module-specific code is kept in Module 01's `assets/slide_examples.js`, Module 02's `assets/content.js`, and Module 02's `assets/lab_examples.js`.
 - Both modules keep faculty-curated office hours, the complete notebook, exercises, the question register, and the course/home navigation.
 
+
+**UI design system:** [Course module interface specification](courses/ml-foundations/UI_DESIGN_SYSTEM.md). The November 21 harmonization uses identical overview shortcut cards, faculty portrait cards, footer navigation, 7-tab module headers, independent Full screen/Open in new tab controls, embedded Office Hours portrait layout, standalone resource headers, consistent notebook code panels, exercises, and question-form styling across Modules 01 and 02.
+
 ## Consistent interface across modules
 
 Modules 01 and 02 share `courses/ml-foundations/assets/module-ui.css` and `module-ui.js`. Both use the same UA header, module tabs, low-data toggle, and accessible view controls. Slides, Explore labs, Notebooks, and Office Hours provide **Full screen** (in-page Fullscreen API) and **Open in new tab** as distinct controls. Standalone resources also show a consistent Full screen control and a link back to their module. On the slide decks, press **F** to enter/exit full screen, **G** for the slide navigator, **N** for speaker notes, and arrow keys to navigate. Module-specific lesson content, exercises, FAQs, and notebook source files remain separate.

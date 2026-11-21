@@ -37,7 +37,11 @@ async function showNotebook(){
    const source=Array.isArray(cell.source)?cell.source.join(""):String(cell.source||"");
    const wrap=document.createElement("section");wrap.className="nb-cell "+(cell.cell_type==="code"?"code":"markdown");
    if(cell.cell_type==="code"){
-      const header=document.createElement("div");header.className="nb-label";header.textContent="PYTHON · CELL "+(i+1);
+      const header=document.createElement("div");header.className="nb-label";
+      const title=document.createElement("span");title.textContent="PYTORCH · CELL "+(i+1);
+      const copy=document.createElement("button");copy.type="button";copy.className="tr-notebook-copy";copy.textContent="Copy code";
+      copy.onclick=async()=>{try{await navigator.clipboard.writeText(source);copy.textContent="Copied ✓"}catch{copy.textContent="Select the code to copy"}};
+      header.append(title,copy);
       const pre=document.createElement("pre");pre.textContent=source;wrap.append(header,pre);
    }else{wrap.innerHTML=renderMarkdown(source)}
    frag.append(wrap);
