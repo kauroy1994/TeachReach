@@ -1,0 +1,211 @@
+[
+  {
+    "id": "ex1",
+    "lesson": "one-student",
+    "level": 1,
+    "question": "A student studied 3 hours and completed 4 practice sets. How many numbers are in the feature vector?",
+    "type": "choice",
+    "choices": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": "2",
+    "hint": "Count the measurements per student, not the number of students.",
+    "explanation": "Two measurements describe one student: [3, 4]. A 1D tensor with 2 entries has shape (2,).",
+    "tag": "shape"
+  },
+  {
+    "id": "ex2",
+    "lesson": "class-dataset",
+    "level": 1,
+    "question": "We record 5 students, each with 2 features. Which tensor shape describes the table?",
+    "type": "choice",
+    "choices": [
+      "(2,)",
+      "(5, 2)",
+      "(2, 5)",
+      "(5, 2, 1)"
+    ],
+    "answer": "(5, 2)",
+    "hint": "First count students (rows), then measurements per student (columns).",
+    "explanation": "Five rows (students) and two columns (features) give shape (5, 2).",
+    "tag": "shape"
+  },
+  {
+    "id": "ex3",
+    "lesson": "prediction",
+    "level": 2,
+    "question": "Our rule gives 10 points per hour + 5 per practice set + 20. What score does a student with 1 hour and 4 practice sets get?",
+    "type": "number",
+    "answer": 50,
+    "hint": "Start at 20, add 1 × 10, then add 4 × 5.",
+    "explanation": "20 + 10 + 20 = 50. This is a hand-chosen illustrative rule, not a valid actual grading model.",
+    "tag": "compute"
+  },
+  {
+    "id": "ex4",
+    "lesson": "transforms",
+    "level": 2,
+    "question": "Converting the hours column of a (3, 2) dataset from hours to minutes changes the tensor shape to what?",
+    "type": "choice",
+    "choices": [
+      "(3, 2)",
+      "(3, 1)",
+      "(2, 3)",
+      "(180, 2)"
+    ],
+    "answer": "(3, 2)",
+    "hint": "Changing values does not necessarily change the number of rows or columns.",
+    "explanation": "Multiplying the values in one column by 60 changes their units, not the number of students or features.",
+    "tag": "transform"
+  },
+  {
+    "id": "ex5",
+    "lesson": "daily-logs",
+    "level": 2,
+    "question": "Two students × three days × two features has shape (2, 3, 2). If you average across days, what shape remains?",
+    "type": "choice",
+    "choices": [
+      "(2, 2)",
+      "(3, 2)",
+      "(2, 3)",
+      "(2,)"
+    ],
+    "answer": "(2, 2)",
+    "hint": "Remove only the day axis; keep students and features.",
+    "explanation": "The day axis disappears after mean(dim=1), leaving 2 students × 2 features.",
+    "tag": "reduction"
+  },
+  {
+    "id": "ex6",
+    "lesson": "image-work",
+    "level": 2,
+    "question": "Two grayscale 3×3 images have shape (2, 1, 3, 3). After flatten(start_dim=1), what shape results?",
+    "type": "choice",
+    "choices": [
+      "(2, 9)",
+      "(2, 3)",
+      "(1, 18)",
+      "(18,)"
+    ],
+    "answer": "(2, 9)",
+    "hint": "Keep the first (student) axis. Multiply channel × height × width for each image.",
+    "explanation": "Each image contains 1 × 3 × 3 = 9 pixels, so the result is two rows of nine values.",
+    "tag": "flatten"
+  },
+  {
+    "id": "ex7",
+    "lesson": "training",
+    "level": 2,
+    "question": "Predictions [55, 65, 80] and targets [60, 70, 75] have mean squared error equal to what?",
+    "type": "number",
+    "answer": 25,
+    "hint": "Each error is ±5. Square each error, then take the average.",
+    "explanation": "All squared errors equal 25, so the mean is also 25.",
+    "tag": "loss"
+  },
+  {
+    "id": "ex8",
+    "lesson": "prediction",
+    "level": 3,
+    "question": "Can a (3, 2) dataset be multiplied by a length-3 weight vector using X @ w?",
+    "type": "choice",
+    "choices": [
+      "Yes, always",
+      "No: weight length should be 2",
+      "No: datasets must be 1D",
+      "Only with a scalar bias"
+    ],
+    "answer": "No: weight length should be 2",
+    "hint": "Each student row contains two features. Each feature needs a matching weight.",
+    "explanation": "Matrix multiplication (3, 2) @ (2,) is valid, producing (3,). The requested (3, 2) @ (3,) is not compatible.",
+    "tag": "matmul"
+  },
+  {
+    "id": "ex9",
+    "lesson": "daily-logs",
+    "level": 3,
+    "question": "If you have 4 students, 7 days, and 3 measurements per day, what is the rank of the tensor?",
+    "type": "choice",
+    "choices": [
+      "3",
+      "4",
+      "7",
+      "84"
+    ],
+    "answer": "3",
+    "hint": "Rank counts axes, not numbers of elements.",
+    "explanation": "Student, day, and measurement are three independent axes; shape is (4, 7, 3), rank 3.",
+    "tag": "rank"
+  },
+  {
+    "id": "ex10",
+    "lesson": "image-work",
+    "level": 3,
+    "question": "If we record 2 daily image snapshots per student, adding time to (2, 1, 3, 3), what is the new 5D shape under (student, day, channel, height, width)?",
+    "type": "choice",
+    "choices": [
+      "(2, 2, 1, 3, 3)",
+      "(2, 1, 3, 3)",
+      "(4, 1, 3, 3)",
+      "(2, 1, 2, 3)"
+    ],
+    "answer": "(2, 2, 1, 3, 3)",
+    "hint": "Add one axis of length two for days, after students.",
+    "explanation": "Five axes: 2 students, 2 days, 1 grayscale channel, 3 pixel rows, 3 pixel columns.",
+    "tag": "higher-rank"
+  },
+  {
+    "id": "ex11",
+    "lesson": "class-dataset",
+    "level": 3,
+    "question": "A paper states X ∈ ℝ^(n×d). What do n and d usually represent for tabular data?",
+    "type": "choice",
+    "choices": [
+      "n = features; d = examples",
+      "n = examples; d = features",
+      "n = model outputs; d = errors",
+      "n = epochs; d = batches"
+    ],
+    "answer": "n = examples; d = features",
+    "hint": "Remember which axis corresponds to rows and which corresponds to columns.",
+    "explanation": "In this convention, n identifies the number of examples and d identifies the number of features. Papers should explicitly define their axis conventions.",
+    "tag": "formal"
+  },
+  {
+    "id": "ex12",
+    "lesson": "prediction",
+    "level": 3,
+    "question": "With X of shape (3,2) and w of shape (2,), what shape does X @ w have?",
+    "type": "choice",
+    "choices": [
+      "(3,)",
+      "(2,)",
+      "(3,2)",
+      "(2,3)"
+    ],
+    "answer": "(3,)",
+    "hint": "The inner feature dimension is contracted. One prediction remains for each example.",
+    "explanation": "The matrix–vector multiplication sums over two features and produces one number for each of three students.",
+    "tag": "formal"
+  },
+  {
+    "id": "ex13",
+    "lesson": "training",
+    "level": 3,
+    "question": "Which operation tells PyTorch to compute derivatives of the loss with respect to w and b?",
+    "type": "choice",
+    "choices": [
+      "X.flatten()",
+      "loss.backward()",
+      "X.reshape()",
+      "pred.mean()"
+    ],
+    "answer": "loss.backward()",
+    "hint": "Look for the operation that triggers automatic differentiation.",
+    "explanation": "loss.backward() traces differentiable operations backward and populates parameter gradients.",
+    "tag": "code"
+  }
+]

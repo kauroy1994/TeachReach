@@ -1,0 +1,400 @@
+[
+  {
+    "id": "faq-vector",
+    "lesson_id": "one-student",
+    "topic": "1D",
+    "question": "Why is one student represented as a 1D tensor?",
+    "answer": "Start with Ava. We record 2 study hours and 3 practice sets, so her measurements are [2, 3]. It is one list with one axis: the feature position. Each position names a different measurement. There are two values, but that does not make it a 2D tensor. In machine learning, one example is often a feature vector.",
+    "formal": "x ∈ ℝ²; x = [2, 3]ᵀ; shape(x) = (2,); rank(x) = 1.",
+    "code": "ava = torch.tensor([2., 3.])\nprint(ava.shape)  # torch.Size([2])",
+    "check": "What does index 0 represent in Ava’s feature vector?",
+    "aliases": [
+      "one dimensional",
+      "one student features",
+      "vector",
+      "1d tensor"
+    ],
+    "slide_kind": "vector",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-dataset",
+    "lesson_id": "class-dataset",
+    "topic": "2D",
+    "question": "Why does a dataset with three students become 2D?",
+    "answer": "Imagine three rows in a spreadsheet. Ava has [2,3], Ben [4,1], and Cam [5,2]. Stack these rows to form a table with three students and two features per student. The first axis chooses a student; the second chooses a measurement. Notice that dataset size and tensor rank are not the same thing.",
+    "formal": "X ∈ ℝ³ˣ²; Xᵢⱼ is feature j of student i. shape(X) = (3, 2).",
+    "code": "X = torch.tensor([[2.,3.], [4.,1.], [5.,2.]])\nprint(X.shape)  # [3, 2]",
+    "check": "If we record 10 students with 2 features each, what is X.shape?",
+    "aliases": [
+      "dataset shape",
+      "two dimensional",
+      "2d",
+      "table",
+      "students and features"
+    ],
+    "slide_kind": "dataset",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-rank",
+    "lesson_id": "one-student",
+    "topic": "Foundations",
+    "question": "What is the difference between tensor rank and shape?",
+    "answer": "Rank counts how many axes a tensor has. Shape tells us the length of each axis. Ava’s list has rank 1 and shape (2,). The entire class table has rank 2 and shape (3,2). A batch with one million rows can still have rank 2. In this course, “rank” means number of axes, not matrix rank from linear algebra.",
+    "formal": "rank(X) = len(shape(X)); for X ∈ ℝ³ˣ², rank(X)=2 and shape(X)=(3,2).",
+    "code": "print(X.ndim)   # 2\nprint(X.shape)  # torch.Size([3, 2])",
+    "check": "Can a rank-2 tensor contain 100,000 values?",
+    "aliases": [
+      "rank",
+      "ndim",
+      "dimensions",
+      "axes",
+      "shape"
+    ],
+    "slide_kind": "dataset",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-index",
+    "lesson_id": "class-dataset",
+    "topic": "2D",
+    "question": "How do I select one row or one column from a dataset?",
+    "answer": "In our three-student table, X[0] selects Ava’s entire row: her two measurements. X[:,0] means “every row, first column,” so it returns the study hours [2,4,5]. Python indexing begins at zero. A colon means all indices along that axis.",
+    "formal": "For X ∈ ℝ³ˣ², X[0,:] ∈ ℝ² and X[:,0] ∈ ℝ³.",
+    "code": "print(X[0])    # tensor([2., 3.])\nprint(X[:, 0]) # tensor([2., 4., 5.])",
+    "check": "What would X[:,1] return?",
+    "aliases": [
+      "indexing",
+      "slicing",
+      "rows",
+      "columns",
+      "select",
+      "colon"
+    ],
+    "slide_kind": "index",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-params",
+    "lesson_id": "prediction",
+    "topic": "Models",
+    "question": "What are model weights and the bias?",
+    "answer": "A parameterized function uses adjustable numbers to turn inputs into outputs. In our invented score rule, each study hour contributes 10 points, each practice set 5, and we add 20 baseline points. The two multipliers are weights; the starting term is a bias. They are hand-picked for demonstration. A trained model would estimate them from examples.",
+    "formal": "ŷ = wᵀx + b; w = [10, 5]ᵀ, b = 20.",
+    "code": "w = torch.tensor([10., 5.])\nb = torch.tensor(20.)",
+    "check": "Which number changes the prediction even if both input features are zero?",
+    "aliases": [
+      "weights",
+      "coefficient",
+      "parameter",
+      "bias",
+      "function"
+    ],
+    "slide_kind": "rule",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-score",
+    "lesson_id": "prediction",
+    "topic": "Models",
+    "question": "Why does Ava get a predicted score of 55?",
+    "answer": "Ava studied 2 hours and completed 3 practice sets. Multiply each measurement by its matching weight: 2 × 10 = 20 and 3 × 5 = 15. Add the 20-point starting value. The prediction is 20 + 15 + 20 = 55. This is an arithmetic illustration, not a real educational prediction.",
+    "formal": "ŷₐᵥₐ = [2,3] · [10,5] + 20 = 55.",
+    "code": "ava = torch.tensor([2.,3.])\nw = torch.tensor([10.,5.])\nprint(torch.dot(ava,w) + 20)  # 55",
+    "check": "What would change if Ava completed one additional practice set?",
+    "aliases": [
+      "55",
+      "predicted score",
+      "ava",
+      "dot product",
+      "input to output"
+    ],
+    "slide_kind": "score",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-matmul",
+    "lesson_id": "prediction",
+    "topic": "Models",
+    "question": "How does one matrix multiplication predict scores for everyone?",
+    "answer": "The class table has three rows, each containing two features. The weight vector contains two multipliers. Matrix–vector multiplication computes one weighted sum per row, producing three numbers. Adding the scalar bias 20 gives [55,65,80]. This is called vectorization: one operation applies the same rule to the entire class.",
+    "formal": "X ∈ ℝ³ˣ², w ∈ ℝ², b ∈ ℝ; ŷ = Xw + b·1₃ ∈ ℝ³.",
+    "code": "pred = X @ torch.tensor([10.,5.]) + 20\nprint(pred)  # tensor([55.,65.,80.])",
+    "check": "Why must the weight vector have length 2, rather than 3?",
+    "aliases": [
+      "matrix multiplication",
+      "matmul",
+      "@",
+      "vectorization",
+      "Xw"
+    ],
+    "slide_kind": "batch",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-broadcast",
+    "lesson_id": "prediction",
+    "topic": "Models",
+    "question": "What does broadcasting mean in our model?",
+    "answer": "After multiplying the data table by the weight vector, we have one score per student: [35,45,60]. We want to add the same 20-point starting value to each. PyTorch broadcasts the scalar across all three values. It is not multiplying matrices, and it does not require us to type [20,20,20] ourselves.",
+    "formal": "z = Xw ∈ ℝ³; ŷᵢ = zᵢ + b for i=1,2,3.",
+    "code": "raw = X @ torch.tensor([10.,5.])\nprint(raw + 20)  # [55.,65.,80.]",
+    "check": "Does adding a scalar bias change the number of predictions?",
+    "aliases": [
+      "broadcast",
+      "scalar",
+      "bias addition"
+    ],
+    "slide_kind": "broadcast",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-transform",
+    "lesson_id": "transforms",
+    "topic": "Transforms",
+    "question": "If we convert hours to minutes, what changes?",
+    "answer": "Ava’s 2 hours become 120 minutes. The class still has three students and two features, so shape stays (3,2). But the numerical meaning changes! A model that expected hours cannot safely keep using the same 10-points-per-hour weight on values expressed in minutes. We must convert the corresponding weight or retrain.",
+    "formal": "h_minutes = 60·h_hours; w_minutes = w_hours / 60 for equivalent predictions.",
+    "code": "minutes = X.clone()\nminutes[:,0] *= 60\nprint(minutes.shape)  # [3,2]",
+    "check": "What should happen to the hours weight after converting hours to minutes?",
+    "aliases": [
+      "transform",
+      "unit change",
+      "minutes",
+      "preprocessing",
+      "elementwise"
+    ],
+    "slide_kind": "transform",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-3d",
+    "lesson_id": "daily-logs",
+    "topic": "3D",
+    "question": "Why are daily logs a 3D tensor?",
+    "answer": "Now each student reports measurements every day. We need to identify (1) which student, (2) which day, and (3) which measurement. For two students observed over three days with two features per day, the shape is (2,3,2). You can visualize this as two small tables stacked together. Each table has three rows (days) and two columns (measurements).",
+    "formal": "L ∈ ℝ²ˣ³ˣ²; Lᵢₜⱼ is feature j on day t for student i.",
+    "code": "logs = torch.tensor([[[1.,2.],[2.,3.],[3.,4.]],\n                     [[2.,0.],[4.,2.],[6.,4.]]])\nprint(logs.shape)  # [2,3,2]",
+    "check": "If a third student joins, which axis length changes?",
+    "aliases": [
+      "3d",
+      "sequence",
+      "time series",
+      "daily logs",
+      "stack of tables"
+    ],
+    "slide_kind": "sequence",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-mean",
+    "lesson_id": "daily-logs",
+    "topic": "3D",
+    "question": "What does mean(dim=1) do to the daily tensor?",
+    "answer": "Axis 1 represents days (axis numbers start at zero). Averaging across days converts each student’s three daily records into one average record. We keep students and features but remove the day axis: shape changes from (2,3,2) to (2,2). For Ava, the averages are 2 study hours and 3 practice sets per day.",
+    "formal": "Aᵢⱼ = (1/3) Σₜ₌₁³ Lᵢₜⱼ; A ∈ ℝ²ˣ².",
+    "code": "avg = logs.mean(dim=1)\nprint(avg)  # [[2.,3.],[4.,2.]]",
+    "check": "What shape would mean(dim=0) produce instead?",
+    "aliases": [
+      "reduction",
+      "average",
+      "mean dim",
+      "aggregate",
+      "dimension 1"
+    ],
+    "slide_kind": "reduce",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-4d",
+    "lesson_id": "image-work",
+    "topic": "Images",
+    "question": "Why does a batch of images have four axes?",
+    "answer": "An individual grayscale picture is a 2D grid of pixel values. In our PyTorch convention, we also store a channel axis and a batch axis. Two tiny grayscale pictures of size 3 by 3 therefore have (student, channel, height, width) = (2,1,3,3). The number 4 refers to axes, not to picture size.",
+    "formal": "I ∈ ℝᴺˣᶜˣᴴˣᵂ; N=2, C=1, H=W=3.",
+    "code": "images = torch.zeros((2,1,3,3))\nprint(images.shape)  # [2,1,3,3]",
+    "check": "What shape would four RGB 32×32 images have in NCHW layout?",
+    "aliases": [
+      "image",
+      "4d",
+      "4d tensor",
+      "nchw",
+      "channel",
+      "grayscale"
+    ],
+    "slide_kind": "photo",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-flat",
+    "lesson_id": "image-work",
+    "topic": "Images",
+    "question": "What is flattening, and does it erase image information?",
+    "answer": "Flattening lists pixels from each picture in one long row. Our 2 images × 1 channel × 3 rows × 3 columns become 2 images × 9 pixel features. No numerical pixel value disappears; however, the explicit row-and-column structure is no longer visible in the shape. This matters when choosing between a simple dense model and a convolutional model.",
+    "formal": "flatten: ℝ²ˣ¹ˣ³ˣ³ → ℝ²ˣ⁹ (rearrangement, not averaging).",
+    "code": "flat = images.flatten(start_dim=1)\nprint(flat.shape)  # [2,9]",
+    "check": "How many features would one flattened RGB 32×32 image contain?",
+    "aliases": [
+      "flatten",
+      "reshape",
+      "pixels",
+      "image feature vector"
+    ],
+    "slide_kind": "flatten",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-5d",
+    "lesson_id": "image-work",
+    "topic": "Images",
+    "question": "What would a 5D tensor mean?",
+    "answer": "Suppose we save two image snapshots per student instead of one. We now need student, time, channel, height, and width: five axes. With two students, two times, one grayscale channel, and 3×3 images, the tensor has shape (2,2,1,3,3). Higher tensor rank simply reflects additional kinds of indexing.",
+    "formal": "V ∈ ℝ²ˣ²ˣ¹ˣ³ˣ³; axes = (student, time, channel, height, width).",
+    "code": "clips = torch.stack([images,images*0.5],dim=1)\nprint(clips.shape)  # [2,2,1,3,3]",
+    "check": "Which axis would change if we collected three snapshots instead of two?",
+    "aliases": [
+      "5d",
+      "higher order",
+      "video",
+      "time snapshots"
+    ],
+    "slide_kind": "video",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-learning",
+    "lesson_id": "training",
+    "topic": "Training",
+    "question": "What makes this a learning system rather than a fixed formula?",
+    "answer": "So far we chose the model weights manually and applied the same rule. Learning starts when we also have target outputs and adjust the parameters to reduce a loss measuring prediction error. PyTorch can track how a loss depends on the weights and calculate gradients. An optimizer then uses those gradients to update the model. Simply computing predictions is inference; changing parameters from evidence is training.",
+    "formal": "θ = (w,b); ŷ = fθ(X); θ_new = θ − η∇θ L(θ).",
+    "code": "loss.backward()\nwith torch.no_grad():\n    w -= 0.01*w.grad\n    b -= 0.01*b.grad",
+    "check": "If we never update the weights or bias, has the model learned?",
+    "aliases": [
+      "learning",
+      "training",
+      "inference",
+      "parameters",
+      "optimizer"
+    ],
+    "slide_kind": "training",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-mse",
+    "lesson_id": "training",
+    "topic": "Training",
+    "question": "How do we compute mean squared error in this example?",
+    "answer": "Our predicted toy scores are [55,65,80], while fictional targets are [60,70,75]. The errors are [−5,−5,+5]. Squaring gives [25,25,25]. Averaging the three squared errors gives 25. The square means errors in either direction are penalized, and larger errors have stronger effect.",
+    "formal": "MSE = (1/n) Σᵢ₌₁ⁿ (ŷᵢ−yᵢ)² = (25+25+25)/3 = 25.",
+    "code": "y = torch.tensor([60.,70.,75.])\nloss = ((pred-y)**2).mean()\nprint(loss.item())  # 25.0",
+    "check": "What would happen to the loss if one error were doubled?",
+    "aliases": [
+      "loss",
+      "mean squared error",
+      "mse",
+      "target",
+      "squared error"
+    ],
+    "slide_kind": "loss",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-gradient",
+    "lesson_id": "training",
+    "topic": "Training",
+    "question": "What is a gradient, and how do the weights change?",
+    "answer": "Think of the loss as measuring how poorly our current model fits the three examples. A gradient tells us how the loss changes for a small change in each parameter. PyTorch uses backward() to compute those derivatives from the recorded operations. With a small learning rate, we subtract a fraction of each gradient. In our numerical toy example, one update reduces mean squared error from 25 to approximately 24.42.",
+    "formal": "∇w L = [−3.333, −6.667]; ∂L/∂b = −3.333; η = 0.01; θ_new = θ−η∇θL.",
+    "code": "loss.backward()\nprint(w.grad, b.grad)\nwith torch.no_grad():\n    w -= 0.01*w.grad\n    b -= 0.01*b.grad",
+    "check": "If a parameter’s gradient is negative, which direction does gradient descent move it?",
+    "aliases": [
+      "gradient",
+      "autograd",
+      "backpropagation",
+      "backward",
+      "gradient descent"
+    ],
+    "slide_kind": "gradient",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-shape-bug",
+    "lesson_id": "prediction",
+    "topic": "Debugging",
+    "question": "Why does X @ w fail if my weights have the wrong length?",
+    "answer": "Our dataset has two features in every row, so each output needs one weight per feature. X has shape (3,2): three examples and two measurements each. A length-3 weight vector does not match the two feature slots. Matrix multiplication checks these inner dimensions; use a length-2 weight vector to produce three predictions.",
+    "formal": "For X ∈ ℝⁿˣᵈ and w ∈ ℝᵈ, Xw ∈ ℝⁿ. Here d=2, n=3.",
+    "code": "X = torch.zeros((3,2))\nw = torch.zeros(2)  # not 3\nprint((X@w).shape)  # [3]",
+    "check": "If X has shape (8,5), what must w.shape be?",
+    "aliases": [
+      "shape mismatch",
+      "inner dimension",
+      "matrix multiply fail",
+      "error",
+      "debugging"
+    ],
+    "slide_kind": "batch",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-notation",
+    "lesson_id": "prediction",
+    "topic": "Reading papers",
+    "question": "How do I read X ∈ ℝⁿˣᵈ and ŷ = Xw + b?",
+    "answer": "Read X ∈ ℝⁿˣᵈ as “X is a real-valued table with n rows and d columns.” In our story n=3 students and d=2 features. Read w ∈ ℝᵈ as “one weight per feature.” Then ŷ = Xw + b means “compute a weighted sum for each student, and add the shared bias.” In formal papers, symbols compress a concrete computational story. Always annotate axes and dimensions before manipulating the equation.",
+    "formal": "X ∈ ℝⁿˣᵈ; w ∈ ℝᵈ; b ∈ ℝ; ŷ = Xw + b·1ₙ ∈ ℝⁿ.",
+    "code": "X.shape    # (n,d) = (3,2)\nw.shape    # (d,) = (2,)\n(X@w).shape # (n,) = (3,)",
+    "check": "Why does the n axis remain in the prediction vector?",
+    "aliases": [
+      "math notation",
+      "formalism",
+      "read papers",
+      "textbook",
+      "symbol",
+      "n d"
+    ],
+    "slide_kind": "batch",
+    "approved": true,
+    "origin": "seed"
+  },
+  {
+    "id": "faq-dot",
+    "lesson_id": "prediction",
+    "topic": "Models",
+    "question": "What is the difference between elementwise multiplication and a dot product?",
+    "answer": "Elementwise multiplication makes a new list of products. For Ava, [2,3] × [10,5] becomes [20,15]. The dot product then adds those products into a single number: 20+15=35. Adding the bias gives 55. In PyTorch, the star operator multiplies element by element, while torch.dot or @ contracts the matching feature axis.",
+    "formal": "x ⊙ w = [20,15] ∈ ℝ²; xᵀw = Σⱼ xⱼwⱼ = 35 ∈ ℝ.",
+    "code": "print(ava*w)            # [20.,15.]\nprint(torch.dot(ava,w)) # 35.",
+    "check": "Which of these operations produces a scalar?",
+    "aliases": [
+      "elementwise",
+      "dot product",
+      "*",
+      "@",
+      "multiply"
+    ],
+    "slide_kind": "score",
+    "approved": true,
+    "origin": "seed"
+  }
+]
