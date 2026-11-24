@@ -134,11 +134,22 @@ async def check_module(page, route, report):
                 continue
             await frame.scroll_into_view_if_needed()
             handle = await frame.element_handle()
+            # Firefox can finish loading the requested resource before it announces
+            # the iframe navigation to Playwright. Check the rendered document.
+            try:
+                await page.wait_for_function("""frame => {
+                    const doc = frame.contentDocument;
+                    return doc && doc.readyState === "complete" &&
+                           doc.location.pathname === new URL(frame.src).pathname &&
+                           doc.getElementById("tr-global-nav") !== null;
+                }""", arg=handle)
+            except BrowserError as exc:
+                report(route, name + " iframe", f"Could not render {source}: {exc}")
+                continue
             child = await handle.content_frame()
             if child is None:
                 report(route, name, "visible iframe has no document")
                 continue
-            await child.wait_for_url(lambda u: u != "about:blank", wait_until="load")
             await measure(child, route, name + " iframe", report)
 
 

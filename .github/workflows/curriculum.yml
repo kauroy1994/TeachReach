@@ -17,7 +17,9 @@ jobs:
           CHROME_BIN="$(command -v google-chrome)" python scripts/check_lesson_navigation.py http://127.0.0.1:8080
   browser-layout:
     runs-on: ubuntu-24.04
-    container: mcr.microsoft.com/playwright/python:v1.56.0-noble
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble
+      options: --user 1001
     strategy:
       fail-fast: false
       matrix:
