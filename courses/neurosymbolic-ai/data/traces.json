@@ -1,0 +1,354 @@
+[
+  {
+    "n": 1,
+    "title": "Find the items in Ava’s requests",
+    "slide": 3,
+    "steps": [
+      {
+        "label": "Row 1 · Ava",
+        "value": "C1 passes the name check."
+      },
+      {
+        "label": "Row 2 · Bo",
+        "value": "T2 belongs to Bo’s row."
+      },
+      {
+        "label": "Row 3 · Ava",
+        "value": "M1 passes the name check."
+      }
+    ],
+    "walkthrough": "The loop opens each pair into two names, person and item. The double equals sign asks whether the person in this row is Ava. Only the indented print line runs when the names match, so the two matching items appear on separate lines.",
+    "change": "Replace this line:\n    if person == \"Ava\":\nwith:\n    if person == \"Bo\":\nWhat will print?",
+    "expected": "T2\n\nOnly the second row names Bo. The loop prints the item from that row."
+  },
+  {
+    "n": 2,
+    "title": "Follow the person and camera through the rule",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Request",
+        "value": "Ava and Bo each requested C1."
+      },
+      {
+        "label": "Eligible people",
+        "value": "Only Ava appears in the set."
+      },
+      {
+        "label": "Available items",
+        "value": "C1 matches Ava’s request."
+      }
+    ],
+    "walkthrough": "Each pass through the loop picks up one person and the item that person requested. The word in checks whether a value belongs to a set. The word and requires both checks to pass on that same row before Python prints its two names.",
+    "change": "Replace this line:\neligible = {\"Ava\"}\nwith:\neligible = {\"Bo\"}\nWhat will print?",
+    "expected": "Bo C1\n\nBoth people requested C1, but the revised eligible set contains only Bo. Camera C1 still passes the availability check."
+  },
+  {
+    "n": 3,
+    "title": "Use the camera as the link between two records",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Person",
+        "value": "Ava requested C1."
+      },
+      {
+        "label": "Shared name",
+        "value": "C1 is a key in the location list."
+      },
+      {
+        "label": "Location",
+        "value": "That key leads to Cabinet7."
+      }
+    ],
+    "walkthrough": "The loop reads a person and a camera from a request. The condition checks whether the location dictionary has an entry for that camera. Looking up location[item] follows the matching key to its cabinet.",
+    "change": "Replace this line:\nrequests = [(\"Ava\", \"C1\")]\nwith:\nrequests = [(\"Ava\", \"C2\")]\nWhat will print?",
+    "expected": "Ava C2 Cabinet2\n\nThe request now supplies C2 as the lookup key. The location dictionary already maps C2 to Cabinet2."
+  },
+  {
+    "n": 4,
+    "title": "Name the evidence still needed",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Rule requires",
+        "value": "requested, eligible, available"
+      },
+      {
+        "label": "File supports",
+        "value": "requested, eligible"
+      },
+      {
+        "label": "Set difference",
+        "value": "available"
+      }
+    ],
+    "walkthrough": "The two sets collect names without counting duplicates. The minus sign removes from required every name already present in supported. Sorting the names that remain makes the printed list reproducible.",
+    "change": "Replace this line:\nsupported = {\"requested\", \"eligible\"}\nwith:\nsupported = {\"available\"}\nWhat will print?",
+    "expected": "['eligible', 'requested']\n\nOnly availability has support in this version. Sorting the two remaining requirements places eligible before requested."
+  },
+  {
+    "n": 5,
+    "title": "Build one photo score from two visible cues",
+    "slide": 2,
+    "steps": [
+      {
+        "label": "Rim contribution",
+        "value": "0.6 × 1 = 0.6"
+      },
+      {
+        "label": "Center contribution",
+        "value": "0.3 × 1 = 0.3"
+      },
+      {
+        "label": "After offset and floor",
+        "value": "max(0, 0.6 + 0.3 − 0.1) = 0.8"
+      }
+    ],
+    "walkthrough": "A one marks a visible cue and a zero marks an absent cue in the input. Multiplying each input by its weight gives its contribution to the score. The code adds those contributions, subtracts the offset, applies a floor of zero and prints two decimal places.",
+    "change": "Replace this line:\nrim, dark_center = 1, 1\nwith:\nrim, dark_center = 0, 0\nWhat will print?",
+    "expected": "0.00\n\nBoth weighted contributions become zero. The total of −0.1 lies below the floor, so the displayed score is zero."
+  },
+  {
+    "n": 6,
+    "title": "Check for the right photo before scoring it",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Reserved item",
+        "value": "C1"
+      },
+      {
+        "label": "Photos on file",
+        "value": "C2 has score 0.92."
+      },
+      {
+        "label": "First check",
+        "value": "C1 has no photo entry."
+      }
+    ],
+    "walkthrough": "The dictionary pairs each photographed camera with its score. The first condition asks if the reserved camera is missing from that dictionary. Python evaluates the score comparison only when it has found a photo for the reserved camera.",
+    "change": "Replace this line:\nphotos = {\"C2\": 0.92}\nwith:\nphotos = {\"C2\": 0.92, \"C1\": 0.75}\nWhat will print?",
+    "expected": "Suggest pickup review\n\nC1’s new photo lands exactly on the cutoff. The comparison asks whether the score is below 0.75. Equality reaches the final branch and sends the case for review."
+  },
+  {
+    "n": 7,
+    "title": "Measure how far a score falls below the rule’s target",
+    "slide": 2,
+    "steps": [
+      {
+        "label": "Score",
+        "value": "0.2"
+      },
+      {
+        "label": "Shortfall",
+        "value": "0.8 − 0.2 = 0.6"
+      },
+      {
+        "label": "Squared penalty",
+        "value": "0.6 × 0.6 = 0.36"
+      }
+    ],
+    "walkthrough": "The loop tries each score in turn. The expression max(0.0, 0.8 - score) keeps the distance below 0.8 and assigns zero shortfall to scores at or above 0.8. The double asterisk raises that shortfall to a power, so ** 2 squares it.",
+    "change": "Replace this line:\nfor score in (0.2, 0.8, 0.9):\nwith:\nfor score in (0.4, 0.6, 1.0):\nWhat will print?",
+    "expected": "score 0.4, penalty 0.16\nscore 0.6, penalty 0.04\nscore 1.0, penalty 0.00\n\nThe two positive shortfalls are 0.4 and 0.2. At 1.0, the score already exceeds the target and the shortfall is zero."
+  },
+  {
+    "n": 8,
+    "title": "Compare both ways to share the cameras",
+    "slide": 3,
+    "steps": [
+      {
+        "label": "Ava C1 · Ben C2",
+        "value": "0.9 + 0.2 = 1.1"
+      },
+      {
+        "label": "Ava C2 · Ben C1",
+        "value": "0.7 + 0.8 = 1.5"
+      },
+      {
+        "label": "Best feasible total",
+        "value": "1.5"
+      }
+    ],
+    "walkthrough": "The list of pairs keeps only assignments to different cameras. The total function looks up Ava’s score for her camera and Ben’s score for his, then adds them. Passing that function to max tells Python to compare assignments by their totals.",
+    "change": "Replace this line:\nben = {\"C1\": .8, \"C2\": .2}\nwith:\nben = {\"C1\": .8, \"C2\": .9}\nWhat will print?",
+    "expected": "Ava C1, Ben C2, total 1.8\n\nThe original winning pair still totals 1.5, but assigning C1 to Ava and C2 to Ben now totals 0.9 + 0.9 = 1.8."
+  },
+  {
+    "n": 9,
+    "title": "Score a passage by its overlapping words",
+    "slide": 2,
+    "steps": [
+      {
+        "label": "Query",
+        "value": "camera, c1, pickup"
+      },
+      {
+        "label": "Passage P1",
+        "value": "Matches c1 and pickup → 2."
+      },
+      {
+        "label": "Passage P2",
+        "value": "Matches camera and pickup → 2."
+      }
+    ],
+    "walkthrough": "The split call cuts a sentence into words at spaces, and set keeps each different word once. The ampersand finds the words that occur in both the query and the passage. Their count is the passage’s score, so text about the wrong camera can still tie for first.",
+    "change": "Replace this line:\nquery = set(\"camera c1 pickup\".split())\nwith:\nquery = set(\"c1 west\".split())\nWhat will print?",
+    "expected": "P1 2\nP2 0\n\nP1 contains both c1 and west. P2 contains neither word."
+  },
+  {
+    "n": 10,
+    "title": "Check the camera in each proposed claim",
+    "slide": 2,
+    "steps": [
+      {
+        "label": "Desk claim",
+        "value": "C1 · pickup_at · West Desk"
+      },
+      {
+        "label": "Matching evidence",
+        "value": "D8 matches all three entries."
+      },
+      {
+        "label": "Deadline claim",
+        "value": "H3 names C2, so it cannot support C1’s deadline."
+      }
+    ],
+    "walkthrough": "Each proposed claim is an ordered group of three values. The loop tests it against every stored fact and collects IDs only when all three values agree. Joining those IDs shows the supporting sources, while an empty match yields the fallback message.",
+    "change": "Replace this line:\n           \"H3\": (\"C2\", \"pickup_deadline\", \"noon\")}\nwith:\n           \"H3\": (\"C1\", \"pickup_deadline\", \"noon\")}\nWhat will print?",
+    "expected": "pickup_at D8\npickup_deadline H3\n\nChanging the camera in H3 makes the item, relationship and value all agree with the deadline claim."
+  },
+  {
+    "n": 11,
+    "title": "Follow one reservation through a state change",
+    "slide": 2,
+    "steps": [
+      {
+        "label": "Before",
+        "value": "available, oriented"
+      },
+      {
+        "label": "Reserve requires",
+        "value": "available is present."
+      },
+      {
+        "label": "After",
+        "value": "oriented, reserved"
+      }
+    ],
+    "walkthrough": "The state is a set of facts about this case. The subset check asks whether every required fact is present before the action runs. The minus sign removes available, the vertical bar adds reserved, and oriented carries over.",
+    "change": "Replace this line:\nstate = {\"oriented\", \"available\"}\nwith:\nstate = {\"oriented\"}\nWhat will print?",
+    "expected": "['oriented']\n\nThe required available fact is missing, so the update is skipped and the original state prints."
+  },
+  {
+    "n": 12,
+    "title": "Find the missing citation in a correct verdict",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Computed verdict",
+        "value": "Active reservation + completed orientation → eligible."
+      },
+      {
+        "label": "Required sources",
+        "value": "P1, R4, T7"
+      },
+      {
+        "label": "Draft sources",
+        "value": "P1, R4, D8 · T7 is missing."
+      }
+    ],
+    "walkthrough": "The two lookups recover both each fact and its source ID. The code computes eligibility and first compares it with the draft’s verdict. If those agree, subtracting the draft’s source IDs from the required set identifies any missing citation.",
+    "change": "Replace this line:\ndraft = {\"eligible\": True, \"sources\": {\"P1\", \"R4\", \"D8\"}}\nwith:\ndraft = {\"eligible\": False, \"sources\": {\"P1\", \"R4\", \"T7\"}}\nWhat will print?",
+    "expected": "Revise the verdict.\n\nAll three sources are present, but the draft says Ava is ineligible. The first decision branch detects that mismatch."
+  },
+  {
+    "n": 13,
+    "title": "Compare event time with entry time",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "ID check E12",
+        "value": "Happened at minute 2. Entered at minute 8."
+      },
+      {
+        "label": "Handoff E13",
+        "value": "Happened at minute 5. Entered at minute 5."
+      },
+      {
+        "label": "Orders",
+        "value": "Events: E12, E13. Entries: E13, E12."
+      }
+    ],
+    "walkthrough": "Positions in a Python row start at zero. Sorting by column 2 arranges rows by event time, and sorting by column 3 arranges them by entry time. The program prints only the IDs so you can compare the two sequences directly.",
+    "change": "Replace this line:\nrows = [(\"E12\", \"check\", 2, 8), (\"E13\", \"handoff\", 5, 5)]\nwith:\nrows = [(\"E12\", \"check\", 2, 8), (\"E13\", \"handoff\", 5, 9)]\nWhat will print?",
+    "expected": "E12 then E13\nE12 then E13\n\nOnly the handoff’s entry time changed. With 8 before 9, the order of the entries now agrees with the event order."
+  },
+  {
+    "n": 14,
+    "title": "Ask where two causal models disagree",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Quiet · no extra clerk",
+        "value": "Models A and B both give 4 minutes."
+      },
+      {
+        "label": "Busy · extra clerk",
+        "value": "Both give 8 minutes."
+      },
+      {
+        "label": "Busy · no extra clerk",
+        "value": "A gives 10 minutes. B gives 8."
+      }
+    ],
+    "walkthrough": "Each function takes the same two inputs, desk load and the extra-clerk decision. For each input pair the loop runs both functions and prints their predictions side by side. The first two rows recreate the observations, while the last row compares the models on another staffing choice.",
+    "change": "Replace this line:\nfor busy, extra in [(0, 0), (1, 1), (1, 0)]:\nwith:\nfor busy, extra in [(0, 1)]:\nWhat will print?",
+    "expected": "2 4\n\nOn a quiet shift with the extra clerk, model A computes 4 + 0 − 2 = 2. Staffing does not enter model B’s equation, so it returns 4. These are model predictions for the proposed situation."
+  },
+  {
+    "n": 15,
+    "title": "Put each send in the right comparison set",
+    "slide": 4,
+    "steps": [
+      {
+        "label": "Sent and eligible",
+        "value": "R1"
+      },
+      {
+        "label": "Sent without eligibility",
+        "value": "R5"
+      },
+      {
+        "label": "Eligible but missed",
+        "value": "R4"
+      }
+    ],
+    "walkthrough": "The ampersand keeps IDs found in both sets, and the minus sign keeps IDs found only in the set on its left. Counting correct sends and dividing by all sends gives precision. Dividing the same count by all eligible requests gives recall.",
+    "change": "Replace this line:\nsent = {\"R1\", \"R5\"}\nwith:\nsent = {\"R1\", \"R4\", \"R5\"}\nWhat will print?",
+    "expected": "unnecessary review: ['R5']\nmissed: []\nprecision: 0.6666666666666666\nrecall: 1.0\n\nR1 and R4 are both caught, so recall reaches 2/2. R5 is still an unnecessary review, which leaves precision at 2/3."
+  },
+  {
+    "n": 16,
+    "title": "Trace ticket T17 back to both sources",
+    "slide": 3,
+    "steps": [
+      {
+        "label": "K8 · note",
+        "value": "Score 0.92 clears 0.80. Check at minute 12."
+      },
+      {
+        "label": "H4 · scan",
+        "value": "Handoff at minute 18."
+      },
+      {
+        "label": "T17 · audit",
+        "value": "12 < 18 → in order."
+      }
+    ],
+    "walkthrough": "The first condition checks the required records, the note score and a possible tie. If these checks pass, comparing the minutes decides between in order and reversed. The final line prints the ticket, finding and source IDs together so a clerk can check the original entries.",
+    "change": "Replace this line:\nscan_id, handoff = \"H4\", 18\nwith:\nscan_id, handoff = \"H4\", 12\nWhat will print?",
+    "expected": "T17 needs review K8 H4\n\nBoth observations now carry minute 12. The recorded times do not establish which event came first, and the report retains both source IDs for review."
+  }
+]

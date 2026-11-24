@@ -125,3 +125,5 @@ def check():
 
 if __name__ == "__main__":
     check()
+    from check_neurosymbolic import check as check_cs691
+    check_cs691()

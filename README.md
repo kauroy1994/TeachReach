@@ -1,12 +1,18 @@
 # TeachReach · Kaushik Roy, University of Alabama
 
-**One course portal, every module, available from any browser.**
+**Course materials by Kaushik Roy, University of Alabama.**
 
 Student website: https://kauroy1994.github.io/TeachReach/
 
-## Complete Machine Learning Foundations syllabus
+## CS 691 · Neurosymbolic Artificial Intelligence
 
-The TeachReach course is **Machine Learning Foundations: From Mathematics to Modern AI**. It includes **16 modules** in four stages:
+All 16 modules are available in [the course roadmap](courses/neurosymbolic-ai/). The four stages cover symbolic knowledge, neural–symbolic architectures, language models grounded in evidence, and evaluation and applications. The [syllabus](courses/neurosymbolic-ai/syllabus.html) links the original course description and research readings.
+
+Edit the CS 691 instructional material under `courses/neurosymbolic-ai/data/`, then run `python3 scripts/build_neurosymbolic.py`. Run `python3 scripts/check_curriculum.py` to check both courses. Each CS 691 module embeds its course's Google Form with its module already selected.
+
+## CS 483/583 · Machine Learning Foundations syllabus
+
+The machine learning course is **Machine Learning Foundations: From Mathematics to Modern AI**. It includes **16 modules** in four stages:
 - **Stage I — Mathematical Foundations (01–04):** linear algebra and tensors; probability; calculus and optimization; statistical learning and generalization.
 - **Stage II — Fundamental Learning Algorithms (05–08):** regression and classification; classical ML (kNN, trees, SVMs, ensembles); unsupervised learning and PCA; neural networks and backpropagation.
 - **Stage III — Foundations of Modern AI (09–13):** deep learning and representations; self-supervised learning and embeddings; sequence modeling, attention and transformers; language modeling and LLMs; generative models (VAEs, GANs, diffusion).

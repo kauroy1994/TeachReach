@@ -1,0 +1,370 @@
+[
+  {
+    "n": 1,
+    "title": "Facts and predicates",
+    "goal": "Turn a lending request into named facts and say exactly which questions those facts can answer.",
+    "prereq": "Start here. You can work through the examples by reading a short lending record, even if you have never studied logic.",
+    "slides": [
+      {
+        "title": "What can the desk tell Ava?",
+        "text": "Ava sends a campus equipment desk a note asking for camera C1. A learned language model might help identify the item in a note. A symbolic system can then ask precise questions about the named item and the desk’s records. A neurosymbolic system connects those two kinds of work. We begin at the desk, after someone has read the note.",
+        "example": "Our fictional desk records “Ava requested C1.” A request and a handoff are different events. What would you need to know to say Ava has the camera?",
+        "code": "requests = [(\"Ava\", \"C1\")]\nprint((\"Ava\", \"C1\") in requests)",
+        "out": "True",
+        "q": "If the membership test prints True, what has the desk established?",
+        "a": "It has found an entry for Ava’s request for C1. To say she has received the camera, we would also need evidence of a handoff."
+      },
+      {
+        "title": "Give each claim a name",
+        "text": "A predicate names a property or relationship and tells us which positions to fill. Available(item) takes one item. Requested(person, item) takes a person and an item, in that order. Filling all the positions gives a statement we can ask about or record as a fact.",
+        "example": "Requested(Ava, C1) says who requested which item. In Python we can keep the predicate name and its values together in a tuple, an ordered group in parentheses. Quotation marks mark names as text.",
+        "code": "fact = (\"Requested\", \"Ava\", \"C1\")\npredicate, person, item = fact\nprint(person, predicate.lower(), item)",
+        "out": "Ava requested C1",
+        "q": "The note says “C1 was requested by Ava.” Which position should C1 occupy in Requested?",
+        "a": "C1 is the second argument, the item. The wording of the note changed, but Ava still fills the person position."
+      },
+      {
+        "title": "Ask a question with a blank",
+        "text": "A record can answer more than a yes-or-no question. In Requested(Ava, x), x is a variable, a placeholder for an item. Look for records whose person is Ava and read the item from each match.",
+        "example": "With two requests by Ava and one by Bo, “What did Ava request?” has two answers. Each answer names an item that makes the statement match a record. The Python loop visits each person–item pair.",
+        "code": "requests = [(\"Ava\", \"C1\"), (\"Bo\", \"T2\"), (\"Ava\", \"M1\")]\nfor person, item in requests:\n    if person == \"Ava\":\n        print(item)",
+        "out": "C1\nM1",
+        "q": "How would you answer “Who requested C1?” with these same records?",
+        "a": "Fix the item as C1 and read the person from each match. Only the first row has that item, so the answer in this record is Ava."
+      },
+      {
+        "title": "Leave room for an unknown",
+        "text": "A desk record can be incomplete. In an open-world reading of the record, a missing fact leaves the corresponding claim unknown. A recorded negative claim can provide evidence against it. Python’s membership test answers a narrower question about what is in a collection.",
+        "example": "C1 has an available label, and T2 has an unavailable label. Nothing in the record settles M1’s status. The Python dictionary pairs each recorded item with its status. Its get method supplies a default for a missing key.",
+        "code": "status = {\"C1\": \"available\", \"T2\": \"unavailable\"}\nfor item in [\"C1\", \"T2\", \"M1\"]:\n    print(item, status.get(item, \"unknown\"))",
+        "out": "C1 available\nT2 unavailable\nM1 unknown",
+        "q": "A note says that Bo requested M1. What does that change about M1’s availability?",
+        "a": "It adds a request. Availability is a separate claim, so M1’s availability remains unknown until there is evidence about that claim."
+      }
+    ],
+    "lab": [
+      {
+        "label": "One request",
+        "input": "The record contains Requested(Ava, C1) and Available(C1).",
+        "q": "Which item did Ava request? What evidence would establish a completed loan?",
+        "a": "Ava requested C1. Availability says the item is available in the record. A recorded handoff to Ava would establish the completed transfer."
+      },
+      {
+        "label": "Second borrower",
+        "input": "Keep both original facts and add Requested(Bo, C1).",
+        "q": "What does the query Requested(person, C1) return now?",
+        "a": "It returns both Ava and Bo. Each name fills the blank in a different matching fact. Neither request alone gives an order for allocating C1."
+      },
+      {
+        "label": "Explicit status",
+        "input": "The record contains Requested(Ava, C1) and Unavailable(C1). It says nothing about C2.",
+        "q": "What can the desk tell Ava about C1 and C2?",
+        "a": "The desk has a recorded reason to report C1 unavailable. C2’s status is unknown. It would need a status record for C2 before offering it as an available alternative."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Translate “Bo requests tripod T2” into a predicate and explain the two positions.",
+        "hint": "Reuse the same relationship used for Ava.",
+        "a": "Requested(Bo, T2). Bo is the requester in the first position and T2 is the item in the second."
+      },
+      {
+        "q": "A record contains Requested(Ava, C1), Requested(Ava, C2), and Requested(Bo, C2). Which question returns Ava and Bo as its answers?",
+        "hint": "Keep one item fixed and leave the requester blank.",
+        "a": "Ask Requested(person, C2). The second and third facts match C2. Reading their person positions gives Ava and Bo."
+      },
+      {
+        "q": "A clerk finds no record of Returned(Ava, C1) and concludes that Ava still has C1. Give two different histories consistent with the missing record.",
+        "hint": "Think about what has been recorded separately from what happened.",
+        "a": "Ava might still have C1, or she might have returned it before the clerk entered the return. A missing return record alone cannot distinguish those histories."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Why give a statement an awkward name like Requested(Ava, C1)?",
+        "a": "Imagine that Ava writes “Could I borrow C1?” and Bo writes “I’d like to check out C1.” Once a reader confirms that both students are requesting the camera, the desk can use the same relationship to record both requests. The desk can then ask one precise question about the requester and item. The names alone do not decide whether a new note actually expresses a request."
+      },
+      {
+        "q": "Does False in a Python membership test settle whether something happened?",
+        "a": "It settles whether that exact entry occurs in the collection you checked. If the log is incomplete, an event can have happened without an entry. Say “I found no matching entry” until you know the log covers every event relevant to your question."
+      }
+    ],
+    "bridge": "Writing one fact for Ava works. How could the desk state a policy once so it applies to Ava, Bo, and the next borrower?"
+  },
+  {
+    "n": 2,
+    "title": "Quantifiers and rules",
+    "goal": "Read statements about every borrower or at least one borrower, then apply a rule to the right person and item.",
+    "prereq": "You can read Requested(Ava, C1), match a variable to a record, and distinguish a missing record from an explicit negative.",
+    "slides": [
+      {
+        "title": "Say who a statement covers",
+        "text": "First-order logic lets us make statements about individual things and relationships among them. The domain is the collection of individuals under discussion. A quantifier tells us whether the claim must hold for every individual in that domain or for at least one. “Every borrower on this list completed camera orientation” asks about each listed person. The list fixes the domain for this check.",
+        "example": "For this example the list is complete and each person has an explicit yes or no for orientation. Ava has yes and Bo has no. Python’s all returns True only if every value it checks is true.",
+        "code": "completed = {\"Ava\": True, \"Bo\": False}\nprint(all(completed.values()))",
+        "out": "False",
+        "q": "Which single record is enough to disprove “every listed borrower completed orientation”?",
+        "a": "Bo’s explicit no is a counterexample. Ava’s yes establishes the claim for Ava only."
+      },
+      {
+        "title": "Find a witness",
+        "text": "“At least one borrower on the list completed orientation” needs one matching person. The symbol ∃ means “there exists.” The symbol ∀ means “for every.” The same record can make the first claim true and the second one false.",
+        "example": "Ava is a witness, a specific individual who satisfies the condition. Python’s items() supplies a name and its recorded value together. The loop prints each name with a yes.",
+        "code": "completed = {\"Ava\": True, \"Bo\": False}\nfor person, yes in completed.items():\n    if yes:\n        print(person)",
+        "out": "Ava",
+        "q": "If Bo also completes orientation, is Ava still a witness? How many witnesses are there?",
+        "a": "Yes. The claim allows any positive number of witnesses. With both records set to yes, Ava and Bo each provide one."
+      },
+      {
+        "title": "Apply an if–then policy",
+        "text": "A rule gives a conclusion that follows when its conditions hold. At our fictional desk, anyone who completes camera orientation meets the eligibility requirement for camera loans. Write ∀p (Oriented(p) → Eligible(p)). Read the arrow as “if the statement on the left holds, the statement on the right follows.”",
+        "example": "Starting from one recorded orientation, substitute Ava for p on both sides. Oriented(Ava) gives Eligible(Ava). The set below represents the names with a confirmed orientation. The loop applies the same rule to every name in it.",
+        "code": "oriented = {\"Ava\"}\neligible = set()\nfor person in oriented:\n    eligible.add(person)\nprint(sorted(eligible))",
+        "out": "['Ava']",
+        "q": "Someone tells you Bo is eligible. Does the arrow also establish that Bo completed orientation?",
+        "a": "No. This rule gives a sufficient route to eligibility. Another policy might grant eligibility by a different route. Reasoning backwards from Eligible(Bo) would require more information."
+      },
+      {
+        "title": "Keep names aligned across conditions",
+        "text": "For the camera requests in this example, the desk marks a request ready for review when the requester is eligible and the requested item is available. The conditions are joined by “and.” The same person and item must keep their identities throughout one application of the rule.",
+        "example": "Requested(p, i) and Eligible(p) and Available(i) together give Ready(p, i). For Ava’s C1 request, check Ava’s eligibility and C1’s availability. A different person’s eligibility cannot fill Ava’s position.",
+        "code": "requests = [(\"Ava\", \"C1\"), (\"Bo\", \"C1\")]\neligible = {\"Ava\"}\navailable = {\"C1\"}\nfor person, item in requests:\n    if person in eligible and item in available:\n        print(person, item)",
+        "out": "Ava C1",
+        "q": "C2 is also available. Can the rule mark Ava’s C2 request ready using just these records?",
+        "a": "No. The request list ties Ava to C1. Available(C2) cannot supply the missing Requested(Ava, C2)."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Counterexample",
+        "input": "The complete two-person roster has Oriented(Ava) confirmed and Oriented(Bo) explicitly false.",
+        "q": "Does the evidence establish orientation for everyone on the roster, for at least one person, or for both?",
+        "a": "The existential claim holds with Ava as its witness. Bo’s explicit no is a counterexample to the universal claim."
+      },
+      {
+        "label": "Names do not match",
+        "input": "Requested(Ava, C1), Eligible(Bo) and Available(C1) are the only relevant records. The ready rule requires the same requester throughout.",
+        "q": "Does any request qualify as ready for review?",
+        "a": "The only request fixes p as Ava. Eligible(Bo) cannot establish Eligible(Ava), so the rule yields no ready request from these records."
+      },
+      {
+        "label": "Two eligible requests",
+        "input": "Requested(Ava, C1), Requested(Bo, C1), Eligible(Ava), Eligible(Bo) and Available(C1) all hold in the snapshot.",
+        "q": "Does the ready rule select one winner?",
+        "a": "It derives Ready(Ava, C1) and Ready(Bo, C1). Both requests meet the conditions for review. The rule contains no tie-breaker and makes no allocation."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "A complete list marks Ava yes, Bo yes, and Lin no for orientation. Give a witness and a counterexample for the relevant quantified claims.",
+        "hint": "Try “someone is oriented” and “everyone is oriented.”",
+        "a": "Ava (or Bo) witnesses the first claim. Lin’s explicit no disproves the second."
+      },
+      {
+        "q": "Requested(Ava, C2), Eligible(Ava), and Available(C1) are recorded. Trace each variable in the ready rule.",
+        "hint": "Start with the request, then test its two names.",
+        "a": "The request fixes p = Ava and i = C2. Eligibility matches Ava. Availability is known for C1 only, so this rule cannot conclude Ready(Ava, C2)."
+      },
+      {
+        "q": "Compare “every borrower requested some camera” with “some camera was requested by every borrower.” Give a two-request example that separates them.",
+        "hint": "Let each borrower request a different camera and use a complete list of requests.",
+        "a": "If Ava requested only C1 and Bo requested only C2, each borrower has a camera they requested. There is no single camera both requested. The order of the two quantifiers changes what must be shared."
+      }
+    ],
+    "faq": [
+      {
+        "q": "If a borrower is missing from the orientation log, does that disprove the claim that everyone completed orientation?",
+        "a": "It depends on what the log records. A complete checked roster with an explicit no supplies a counterexample. A missing entry in a partial log gives an unknown. First identify the set of people in the claim, then check what counts as evidence about each person."
+      },
+      {
+        "q": "Why keep both Requested and Ready in the model?",
+        "a": "Ava can ask for C1 even while it is unavailable. Requested captures her action. Ready captures a conclusion that also depends on eligibility and availability. Keeping both lets the desk explain which condition a pending request still needs."
+      }
+    ],
+    "bridge": "We can apply a rule to named items. How could the desk recognize C1 as a piece of equipment when its inventory describes it only as a camera?"
+  },
+  {
+    "n": 3,
+    "title": "Ontologies and knowledge graphs",
+    "goal": "Represent an inventory as a graph, use a class hierarchy to infer an item’s type, and follow a path to answer a request.",
+    "prereq": "You can read a rule as an if–then statement and keep an individual’s identity fixed when matching several facts.",
+    "slides": [
+      {
+        "title": "Read a fact as an edge",
+        "text": "A graph has nodes for things and edges for relationships. In our knowledge graph, each edge carries a label with a defined meaning. A triple lists a starting node (subject), the relationship (predicate), and the ending node (object).",
+        "example": "The triple (Ava, requested, C1) draws a directed edge from Ava to C1. The general logical notation from Module 01 was Requested(Ava, C1). These are two ways to record the same relationship.",
+        "code": "triple = (\"Ava\", \"requested\", \"C1\")\nsubject, relation, obj = triple\nprint(subject, \"—\", relation, \"→\", obj)",
+        "out": "Ava — requested → C1",
+        "q": "Which triple would record that C1 is stored in Cabinet7?",
+        "a": "Use (C1, storedIn, Cabinet7). The edge starts at the item and ends at the place where it is stored."
+      },
+      {
+        "title": "Distinguish an item from a class",
+        "text": "An individual is one particular thing, such as the camera numbered C1. A class is a category, such as Camera. A type edge connects an individual to a class it belongs to. Several individuals can have the same type.",
+        "example": "C1 and C2 can both be cameras while occupying different shelves. A query for cameras matches each item whose type edge points to Camera.",
+        "code": "types = [(\"C1\", \"Camera\"), (\"C2\", \"Camera\"), (\"T2\", \"Tripod\")]\nfor item, category in types:\n    if category == \"Camera\":\n        print(item)",
+        "out": "C1\nC2",
+        "q": "The desk moves C1 to a different cabinet. What type edge should change?",
+        "a": "None for that move. C1 is still a Camera. Its location edge is the one affected."
+      },
+      {
+        "title": "Let a class carry meaning",
+        "text": "An ontology specifies a vocabulary of classes and relationships and statements about their meanings. Our small inventory ontology says that Camera is a subclass of Equipment. That says every member of Camera is also a member of Equipment.",
+        "example": "Combine C1 has type Camera with Camera is a subclass of Equipment. You can now infer that C1 has type Equipment. This code takes one step through a hierarchy with one parent per class in the example.",
+        "code": "item, category = \"C1\", \"Camera\"\nparent = {\"Camera\": \"Equipment\", \"Tripod\": \"Equipment\"}\nprint(item, \"has type\", parent[category])",
+        "out": "C1 has type Equipment",
+        "q": "If all you know is that item E7 is Equipment, can this hierarchy tell you it is a Camera?",
+        "a": "No. Camera membership implies Equipment membership. Equipment can also contain tripods or other kinds of item."
+      },
+      {
+        "title": "Follow a path with a shared node",
+        "text": "To find where staff store a requested item, follow the requested edge from the person to the item. Keep that item as the starting point of the storedIn edge. Two facts answer a question that neither fact answers alone.",
+        "example": "Ava requested C1. C1 is stored in Cabinet7 and C2 is stored elsewhere. Matching the intermediate item keeps C2’s storage location out of the answer about C1.",
+        "code": "requests = [(\"Ava\", \"C1\")]\nlocation = {\"C1\": \"Cabinet7\", \"C2\": \"Cabinet2\"}\nfor person, item in requests:\n    if item in location:\n        print(person, item, location[item])",
+        "out": "Ava C1 Cabinet7",
+        "q": "Suppose the location for C1 is missing but Cabinet2 is recorded for C2. What can the path answer?",
+        "a": "It still identifies Ava’s requested item as C1. It supplies no location for that item. The edge from C2 cannot complete a path through C1."
+      }
+    ],
+    "lab": [
+      {
+        "label": "One class step",
+        "input": "C1 has type Camera. Camera is a subclass of Equipment.",
+        "q": "Which type for C1 follows by the subclass rule?",
+        "a": "C1 has type Equipment. The rule applies to individual members of Camera, and C1 is one of them."
+      },
+      {
+        "label": "A longer hierarchy",
+        "input": "C1 has type MirrorlessCamera. MirrorlessCamera is a subclass of Camera. Camera is a subclass of Equipment.",
+        "q": "What extra work is needed to reach Equipment for C1?",
+        "a": "Apply the membership rule twice. The first application gives C1 type Camera. That newly inferred type supplies the starting point for the second application, which gives C1 type Equipment."
+      },
+      {
+        "label": "A broken path",
+        "input": "The graph says Ava requested C1, Bo requested C2, and C2 is stored in Cabinet2.",
+        "q": "For whose request can staff find the item’s storage cabinet?",
+        "a": "Bo’s path runs through C2 to Cabinet2. Ava’s reaches C1 and stops. A storedIn edge beginning at C1 would let the desk answer her location question."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Encode “Ava requested C1, a camera stored in Cabinet7” as three triples.",
+        "hint": "Choose an edge for the request, one for the type and one for the location.",
+        "a": "(Ava, requested, C1), (C1, type, Camera), and (C1, storedIn, Cabinet7). Reusing C1 allows another query to connect the three facts."
+      },
+      {
+        "q": "The inventory adds a projector P3 without linking the Projector class to Equipment. Which general statement would support the inference that any projector is equipment?",
+        "hint": "One statement about the class can cover P3 and future projectors.",
+        "a": "Record Projector as a subclass of Equipment. From P3 has type Projector, the class rule then yields P3 has type Equipment."
+      },
+      {
+        "q": "Design a graph query that returns everyone who requested an item stored in Cabinet7. Which name has to match twice?",
+        "hint": "Work backward from the cabinet or forward from a request.",
+        "a": "Match (person, requested, item) and (item, storedIn, Cabinet7). The same item fills the end of the first edge and the start of the second. Return the matching person."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Is the knowledge graph the same thing as the ontology?",
+        "a": "The lending graph can record Ava’s request and C1’s location. The ontology supplies terms such as Camera and Equipment and a statement connecting their meanings. A system may store both kinds of statements in the same graph. Together they let you ask both what the desk recorded about this item and what follows from its category."
+      },
+      {
+        "q": "If I draw an edge between two nodes, does the reverse edge hold too?",
+        "a": "Read the edge label in its declared direction. From Ava requested C1 you can look backward to find who requested C1. That operation still answers the original relationship. Claiming that C1 requested Ava would introduce a different statement."
+      }
+    ],
+    "bridge": "A graph gives us connected facts, and a class rule can add a new one. How can the desk show exactly which facts and rule applications support its answer?"
+  },
+  {
+    "n": 4,
+    "title": "Inference and proof traces",
+    "goal": "Derive a conclusion from a small set of rules and reconstruct the evidence and intermediate steps that support it.",
+    "prereq": "You can apply an if–then rule, match the same names across its conditions, and distinguish an observed type from an inferred type.",
+    "slides": [
+      {
+        "title": "Make one inference",
+        "text": "Inference means obtaining a conclusion from premises using a rule. A premise is a statement a step depends on. For this fictional camera desk, rule R1 says that an oriented borrower is eligible. A recorded fact can supply R1’s premise.",
+        "example": "The orientation register confirms Oriented(Ava). Apply R1 to Ava, keeping her name fixed. We can add Eligible(Ava) to our working set of facts and retain the original record.",
+        "code": "facts = {(\"Oriented\", \"Ava\")}\nif (\"Oriented\", \"Ava\") in facts:\n    facts.add((\"Eligible\", \"Ava\"))\nprint(sorted(facts))",
+        "out": "[('Eligible', 'Ava'), ('Oriented', 'Ava')]",
+        "q": "If R1 is applied twice to the same record, how many distinct eligibility facts about Ava exist?",
+        "a": "One. Both applications yield the same claim, Eligible(Ava). A set keeps one copy."
+      },
+      {
+        "title": "Use one conclusion in the next rule",
+        "text": "Forward chaining starts with available facts and adds the conclusions of rules whose conditions hold. A new conclusion can help another rule apply. Our second rule, R2, combines a request, the borrower’s eligibility, and the item’s availability to mark that request ready for review.",
+        "example": "For this cell, the request is Ava’s request for C1. We shorten the four conditions to words because the person and item stay fixed here. Python’s issubset asks whether every required condition is present.",
+        "code": "facts = {\"requested\", \"oriented\", \"available\"}\nif \"oriented\" in facts:\n    facts.add(\"eligible\")\nif {\"requested\", \"eligible\", \"available\"}.issubset(facts):\n    facts.add(\"ready\")\nprint(\"ready\" in facts)",
+        "out": "True",
+        "q": "Suppose R2 is checked before R1 and just once. Which conclusion would the program miss?",
+        "a": "It would miss ready because eligible has not yet been added. A general forward-chaining procedure revisits affected rules until no new facts follow, assuming a finite set of possible facts in this example."
+      },
+      {
+        "title": "Save the reasons along with the answer",
+        "text": "A proof trace records a conclusion, the rule that produced it, and the supporting premises. To audit Ready(Ava, C1), work backward from that conclusion. Each branch should reach a recorded premise or another justified step.",
+        "example": "Here each short name refers to Ava and C1 as on the previous slide. The dictionary stores the rule and the exact premises for each derived claim. The trace for ready points to eligible, whose own trace leads to the orientation record.",
+        "code": "trace = {\"ready\": (\"R2\", [\"requested\", \"eligible\", \"available\"]),\n         \"eligible\": (\"R1\", [\"oriented\"])}\nfor claim in [\"ready\", \"eligible\"]:\n    rule, premises = trace[claim]\n    print(claim, rule, \" + \".join(premises))",
+        "out": "ready R2 requested + eligible + available\neligible R1 oriented",
+        "q": "Which original records must a clerk inspect at the leaves of this trace?",
+        "a": "The request by Ava for C1, Ava’s orientation record, and the availability record for C1. Eligible is an intermediate conclusion justified by R1."
+      },
+      {
+        "title": "Find the first missing premise",
+        "text": "A clerk asks why Ava’s request did not reach ready for review. Check the conditions for R2. Suppose the desk can establish the request and eligibility, but has no availability record for C1. A useful explanation names the missing evidence.",
+        "example": "The minus sign between two Python sets takes the set difference. Here it finds the requirements that have no support in the current records. The output tells the clerk which record to look for.",
+        "code": "required = {\"requested\", \"eligible\", \"available\"}\nsupported = {\"requested\", \"eligible\"}\nmissing = required - supported\nprint(sorted(missing))",
+        "out": "['available']",
+        "q": "Return to the complete proof on the preceding slide. If its C1 availability record was out of date, which conclusion needs checking?",
+        "a": "Inspect the availability premise and recompute any conclusion that used it. The rule application could have been valid for the recorded inputs even though one input was inaccurate."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Complete chain",
+        "input": "The desk has recorded Requested(Ava, C1), Oriented(Ava), and Available(C1). R1 derives eligibility from orientation. R2 requires a request, eligibility and availability.",
+        "q": "Build the shortest chain to Ready(Ava, C1) using these rules.",
+        "a": "R1 uses Oriented(Ava) to derive Eligible(Ava). R2 combines that intermediate conclusion with Requested(Ava, C1) and Available(C1) to derive Ready(Ava, C1)."
+      },
+      {
+        "label": "Wrong item",
+        "input": "Replace Available(C1) with Available(C2) and keep the other records and rules from the complete chain.",
+        "q": "Which step still works, and which premise prevents the next one?",
+        "a": "R1 still derives Eligible(Ava). Ava requested C1, so R2 requires Available(C1). The availability record for C2 cannot supply it."
+      },
+      {
+        "label": "Independent evidence",
+        "input": "Ava’s orientation record has been withdrawn. The desk separately verifies Eligible(Ava) directly. Requested(Ava, C1) and Available(C1) remain recorded.",
+        "q": "Can the desk still justify ready? Which trace survives?",
+        "a": "Yes. R2 can use the directly verified Eligible(Ava) with the request and availability. A trace through R1 has lost its orientation premise. The direct eligibility record gives a separate route."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "A trace lists R2, Requested(Ava, C1), Eligible(Ava), and Available(C2). Identify the precise error.",
+        "hint": "Compare the item supplied to R2 with the one in the request.",
+        "a": "R2 needs Available(C1) for this request. The supplied C2 fact has a different item, so the recorded premises do not justify Ready(Ava, C1)."
+      },
+      {
+        "q": "A rule engine checks R2 before R1 and finds no new ready request on its first check. Describe a stopping rule that works for this finite example.",
+        "hint": "A rule that failed early might gain a premise later in the pass.",
+        "a": "Keep applying the rules in passes. Stop only when an entire pass adds no new fact. After R1 supplies Eligible(Ava), a later pass gives R2 its missing premise."
+      },
+      {
+        "q": "A message to Ava says “The system approved your loan.” The trace ends in Ready(Ava, C1). Rewrite the message using only what the trace supports.",
+        "hint": "Read the defined meaning of Ready and include the supporting evidence.",
+        "a": "“Your request for C1 is ready for desk review. We found your request, your camera orientation record, and C1’s availability record.” The trace has no completed approval or handoff step."
+      }
+    ],
+    "faq": [
+      {
+        "q": "How does a proof help if someone typed in the wrong fact?",
+        "a": "It gives the desk a place to check. If a clerk challenges availability, follow Ready(Ava, C1) to the exact C1 record used by R2. A valid deduction tells us what follows from those premises. Checking the premises against the inventory is a separate task."
+      },
+      {
+        "q": "Is a list of rule names enough to explain a decision?",
+        "a": "R1 and R2 could both be used for many borrowers and cameras. A useful trace identifies Ava, C1, the input records, and the intermediate Eligible(Ava) that connects the two steps. That lets a reviewer replay this particular decision."
+      }
+    ],
+    "bridge": "So far each proof starts with a recorded fact. Suppose the desk receives a photograph of camera C1. What could a model tell us about the lens cap, and how should a rule use that answer?"
+  }
+]

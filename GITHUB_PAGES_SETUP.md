@@ -9,4 +9,4 @@ Your repository contains all source files; you can edit website text through Git
 
 Before publishing curriculum changes, run `python3 scripts/check_curriculum.py` from the repository root. Correct any reported differences between the catalog and the student pages.
 
-**Asynchronous office hours.** Review the pending table on the module’s “Ask a question” tab. Add the answer to the module FAQ, then mark the row answered or remove it in the private register. Refresh the page to see the updated queue. See [question register setup](question-service/SETUP.md) for the shared service.
+**Asynchronous office hours.** Students submit a module-specific Google Form from each released lesson. Review the linked private response sheet for that course, post the answer in the module FAQ, and remove the answered entry from the register. CS 691 students may leave a reply address for a manual notification. See the [question register setup](question-service/SETUP.md).

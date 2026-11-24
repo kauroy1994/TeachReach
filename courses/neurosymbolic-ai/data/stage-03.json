@@ -1,0 +1,370 @@
+[
+  {
+    "n": 9,
+    "title": "Finding evidence in text and graphs",
+    "goal": "Find the records needed to answer where Ava should pick up camera C1, and explain why each record belongs in the answer.",
+    "prereq": "You can read a graph edge as a statement about two things. You have used a score to rank choices and a rule to check whether a choice is allowed.",
+    "slides": [
+      {
+        "title": "What would count as evidence?",
+        "text": "Ava asks, “Where do I pick up the camera I reserved?” The desk has hundreds of records. Retrieval means selecting some of those records for the question at hand. First work out what you need to know. Here you need the camera Ava reserved and its pickup location.",
+        "example": "A reservation record names Ava and C1. A pickup record names C1 and a desk. The shared camera ID lets you connect the two records even when the second one never mentions Ava.",
+        "code": "reservations = {\"Ava\": \"C1\", \"Ben\": \"C2\"}\npickup_desks = {\"C1\": \"West Desk\", \"C2\": \"East Desk\"}\ncamera = reservations[\"Ava\"]\nprint(camera, pickup_desks[camera])",
+        "out": "C1 West Desk",
+        "q": "If you kept only the reservation record, which part of Ava’s question could you answer?",
+        "a": "You could identify C1 as her camera. Finding the desk still requires a record about C1’s pickup location."
+      },
+      {
+        "title": "Rank passages by words they share",
+        "text": "A passage is a short piece of text. One simple retrieval score counts distinct words that occur in both a query and a passage. In Python, split() separates words at spaces and a set keeps one copy of each word. The & operator keeps the words shared by two sets.",
+        "example": "For the query “camera C1 pickup”, P1 names C1 and pickup. P2 names a different camera and mentions pickup. Both passages earn two points. Counting words alone cannot settle which camera Ava requested.",
+        "code": "query = set(\"camera c1 pickup\".split())\npassages = {\"P1\": \"c1 pickup west\", \"P2\": \"camera c2 pickup east\"}\nfor record, passage in passages.items():\n    words = set(passage.split())\n    print(record, len(query & words))",
+        "out": "P1 2\nP2 2",
+        "q": "If you added “camera” to P1, would a score of three prove that Ava reserved C1?",
+        "a": "No. It would give P1 three matching words. Evidence connecting Ava to C1 still has to come from a reservation record."
+      },
+      {
+        "title": "Follow a relation in the right direction",
+        "text": "A graph lookup asks for a particular kind of link. Write a link as an ordered triple containing its starting point, the relation name and its endpoint. To find a pickup desk, first follow Ava’s reserves link to a camera. Start the next lookup at that camera and follow pickup_at.",
+        "example": "C1 has separate links for storage and pickup. Reading the relation name matters because a camera can be stored in a vault and collected at a public desk.",
+        "code": "edges = [(\"Ava\", \"reserves\", \"C1\"), (\"C1\", \"stored_at\", \"Vault\"),\n         (\"C1\", \"pickup_at\", \"West Desk\")]\nfor person, relation, camera in edges:\n    if (person, relation) == (\"Ava\", \"reserves\"):\n        for item, link, place in edges:\n            if (item, link) == (camera, \"pickup_at\"):\n                print(camera, place)",
+        "out": "C1 West Desk",
+        "q": "Suppose Ava reserves C2 and the only pickup link is still for C1. What does this lookup return?",
+        "a": "It prints no desk. The second link must begin at C2 to complete a path from Ava’s reservation."
+      },
+      {
+        "title": "Carry record IDs into the answer",
+        "text": "A record ID is a name you can use to find the same record again. Keep each ID with the value it supplied. Another person can then inspect every link in your answer. If one link is missing, say which question remains open.",
+        "example": "R4 establishes Ava’s reservation and D8 establishes the desk for C1. Either record alone leaves a piece missing.",
+        "code": "reservations = {\"Ava\": (\"C1\", \"R4\")}\ndesks = {\"C1\": (\"West Desk\", \"D8\")}\ncamera, reservation_id = reservations[\"Ava\"]\nif camera in desks:\n    desk, desk_id = desks[camera]\n    print(f\"{camera} at {desk} [{reservation_id}, {desk_id}]\")\nelse:\n    print(f\"Pickup desk unknown for {camera}\")",
+        "out": "C1 at West Desk [R4, D8]",
+        "q": "Another student says the pickup location is East Desk and cites only R4. Which part can you check with R4?",
+        "a": "R4 identifies Ava’s reserved item. To settle the disagreement about location, inspect D8, which gives West Desk for that item."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Same words, different item",
+        "input": "Q = “camera C1 pickup”. P1 = “C1 pickup west”. P2 = “camera C2 pickup east”. Ignore case and count shared words.",
+        "q": "Which passage wins on this score? Which mentions the intended item?",
+        "a": "The score ties at two. P1 shares C1 and pickup. P2 shares camera and pickup. Only P1 mentions C1."
+      },
+      {
+        "label": "One changed edge",
+        "input": "R4 says Ava reserves C2. D8 says C1 pickup_at West Desk. D9 says C2 pickup_at East Desk.",
+        "q": "Where does the path end, and which records did you use?",
+        "a": "It ends at East Desk. R4 leads from Ava to C2 and D9 leads from C2 to East Desk. D8 describes C1."
+      },
+      {
+        "label": "A missing relation",
+        "input": "R4 says Ava reserves C1. S2 says C1 stored_at Vault. There is no pickup_at record for C1.",
+        "q": "What can the desk tell Ava?",
+        "a": "It can confirm the C1 reservation from R4. The pickup location is unknown. S2 would answer a question about storage."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Mia reserves tripod T2. T2 is stored in Room 1 and collected in Room 4. Write the two graph links needed for “Where do I collect my tripod?”",
+        "hint": "Use the item ID as the endpoint of the first link and the starting point of the second.",
+        "a": "Mia → reserves → T2 and T2 → pickup_at → Room 4. Following both produces Room 4. The storage link answers a different question."
+      },
+      {
+        "q": "For the query “pickup lens L2”, P1 says “lens L2 collection” and P2 says “pickup lens L3”. Compute both scores and propose a way to distinguish them.",
+        "hint": "Count shared words ignoring case. Then look for an identifier that names a single item.",
+        "a": "Each scores two. P1 matches lens and L2. P2 matches pickup and lens. Require the requested item ID before ranking, then inspect whether “collection” describes pickup."
+      },
+      {
+        "q": "Kai reserves C1 and T2. Both have pickup links. Why could a working graph lookup still give a misleading one-desk answer?",
+        "hint": "Ask how many valid paths begin at Kai and what the question names.",
+        "a": "Both paths may be valid. If Kai asks specifically for the camera, restrict the item to a camera before following pickup_at. If the item is unspecified, give both item–desk pairs or ask which item Kai means."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Why retrieve records when the desk already has a graph?",
+        "a": "A graph helps when the fact you want has a named relation, such as pickup_at. Some instructions may exist only in a note. Retrieving the note lets a student read its wording and decide whether it applies."
+      },
+      {
+        "q": "Does an empty graph result mean the item has no pickup desk?",
+        "a": "An empty result means the records you searched do not give a complete path. The campus could still have a pickup desk whose record is missing. Report what you searched and which link you still need."
+      }
+    ],
+    "bridge": "You can now find the records behind an answer. How can you tell whether a sentence a language model writes actually follows from those records?"
+  },
+  {
+    "n": 10,
+    "title": "Checking a language model’s claims",
+    "goal": "Break a generated answer into individual claims and classify each claim using records for the correct item and time.",
+    "prereq": "You can retrieve the record IDs for a question and follow a link such as C1 → pickup_at → West Desk.",
+    "slides": [
+      {
+        "title": "A fluent sentence can contain two claims",
+        "text": "A large language model (LLM) generates text by repeatedly predicting a next piece of text from the pieces that precede it. The input can include a question and retrieved records. Grounding means tying what the answer says to evidence. To check a sentence, first find the individual statements a reader could verify.",
+        "example": "A prompt is the text supplied to a model. The code assembles a question, instructions and two retrieved records into a prompt. Suppose the model replies, “Pick up C1 at West Desk before noon.” Circle the two claims in that draft. Which record, if any, supports each one?",
+        "code": "question = \"Where and by when may I collect C1?\"\nrecords = {\"D8\": \"C1 pickup is at West Desk.\",\n           \"H3\": \"C2 pickup ends at noon.\"}\nlines = [\"Answer from the records. Cite IDs. Say what is unknown.\", question]\nfor record_id, passage in records.items():\n    lines.append(f\"[{record_id}] {passage}\")\nprint(\"\\n\".join(lines))",
+        "out": "Answer from the records. Cite IDs. Say what is unknown.\nWhere and by when may I collect C1?\n[D8] C1 pickup is at West Desk.\n[H3] C2 pickup ends at noon.",
+        "q": "In the sample reply, which claim follows from the prompt’s records and which would require more evidence?",
+        "a": "D8 gives C1’s pickup desk. H3 gives a deadline for C2, so the time for C1 remains unknown. A supported reply could say, “Collect C1 at West Desk [D8]. I do not have a pickup deadline for C1.”"
+      },
+      {
+        "title": "Find support at the level of one claim",
+        "text": "A claim is supported when the evidence establishes what the claim says. Compare the item, relation and value together. A citation is a reference to a source. It helps the reader check your work only when the named source actually supports that claim.",
+        "example": "In this snapshot D8 gives C1’s pickup location. H3 gives a deadline for C2. Citing H3 for C1 would quietly switch items.",
+        "code": "records = {\"D8\": (\"C1\", \"pickup_at\", \"West Desk\"),\n           \"H3\": (\"C2\", \"pickup_deadline\", \"noon\")}\nclaims = [(\"C1\", \"pickup_at\", \"West Desk\"),\n          (\"C1\", \"pickup_deadline\", \"noon\")]\nfor claim in claims:\n    ids = [key for key, fact in records.items() if fact == claim]\n    print(claim[1], \", \".join(ids) or \"no matching source\")",
+        "out": "pickup_at D8\npickup_deadline no matching source",
+        "q": "Would searching only for the word “noon” catch the item mix-up?",
+        "a": "No. H3 contains “noon” but its item is C2. A claim about C1 needs evidence about C1."
+      },
+      {
+        "title": "Tell a contradiction from a gap",
+        "text": "A contradicted claim conflicts with something the evidence establishes. An unknown claim has insufficient evidence either way. Suppose our fictional desk assigns each camera exactly one pickup location for a given day, and D8 is current for today. Under that assumption, West Desk rules out East Desk for C1 today.",
+        "example": "For C2, today’s desk is missing. The same candidate answer “East Desk” has a different status because the available evidence differs.",
+        "code": "today = {\"C1\": \"West Desk\"}\nfor item, candidate in [(\"C1\", \"West Desk\"), (\"C1\", \"East Desk\"),\n                        (\"C2\", \"East Desk\")]:\n    if item not in today:\n        status = \"unknown\"\n    elif today[item] == candidate:\n        status = \"supported\"\n    else:\n        status = \"contradicted\"\n    print(item, candidate, status)",
+        "out": "C1 West Desk supported\nC1 East Desk contradicted\nC2 East Desk unknown",
+        "q": "What changes if several desks can serve C1 and D8 lists just one of them?",
+        "a": "West Desk remains supported. East Desk becomes unknown unless another record excludes it. One listed option no longer rules out other options."
+      },
+      {
+        "title": "Make time part of the claim",
+        "text": "A useful source must cover the time in the question. A note can be accurate about Monday and irrelevant to Tuesday. When a draft omits that distinction, add the date to both the claim and the lookup.",
+        "example": "Monday’s D8 and Tuesday’s D10 give different pickup locations for C1. The word “where” alone does not choose between them.",
+        "code": "desks = {(\"C1\", \"Monday\"): (\"West Desk\", \"D8\"),\n         (\"C1\", \"Tuesday\"): (\"East Desk\", \"D10\")}\nitem, day = \"C1\", \"Tuesday\"\nlocation, source = desks[(item, day)]\nprint(f\"On {day}, collect {item} at {location} [{source}].\")",
+        "out": "On Tuesday, collect C1 at East Desk [D10].",
+        "q": "A user forwards Monday’s answer without the date. Why should Tuesday’s desk avoid reusing it?",
+        "a": "Monday’s record establishes the location only for Monday. Tuesday’s record gives East Desk. Omitting the day hides which claim the citation supports."
+      }
+    ],
+    "lab": [
+      {
+        "label": "A supported location",
+        "input": "For Monday, D8 assigns C1 to West Desk and D9 assigns C2 to East Desk. The draft says “C1 pickup is at West Desk on Monday.”",
+        "q": "Which record supports this claim?",
+        "a": "D8 matches the camera, location and day. D9 is about another camera."
+      },
+      {
+        "label": "A contradicted location",
+        "input": "For Monday each camera has one desk. D8 assigns C1 to West Desk. The draft says “C1 pickup is at East Desk on Monday.”",
+        "q": "Which verdict follows, and why?",
+        "a": "Contradicted. With one desk for that camera and day, the current West Desk assignment excludes East Desk."
+      },
+      {
+        "label": "A plausible deadline",
+        "input": "D8 assigns C1 to West Desk on Monday. H3 gives C2 a noon deadline. The draft says “Pick up C1 at West Desk by noon on Monday.”",
+        "q": "Which part can you publish?",
+        "a": "West Desk for C1 on Monday is supported by D8. The noon deadline for C1 is unknown. H3 concerns C2."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Split “Mia may collect T2 at Room 4 tomorrow without showing ID” into claims. Which one needs policy evidence?",
+        "hint": "Separate permission, place and ID requirements. Keep the day attached to each claim.",
+        "a": "Check Mia’s permission to collect T2 tomorrow, T2’s pickup room tomorrow, and whether the relevant policy permits collection without ID. The last claim requires an applicable ID policy, and the first may also require checking eligibility rules."
+      },
+      {
+        "q": "There is exactly one current due date per loan. L2 lists Friday for Ava’s C1 loan. L3 lists Thursday for Ben’s C2 loan. Classify “Ava’s C1 is due Thursday” and “Ava owes a late fee.”",
+        "hint": "What does L2 exclude? What do neither of these records discuss?",
+        "a": "The Thursday due-date claim is contradicted by Ava’s Friday date in L2. The fee claim is unknown. Neither record gives a fee assessment, and L3 belongs to a different loan."
+      },
+      {
+        "q": "A correct answer says “Room 4” but cites an old record for Room 1. Would a check that compares only the answer text to an answer key catch the defect? Design a stronger check.",
+        "hint": "Try to reproduce the answer using only the cited record, the item and the date.",
+        "a": "A text-only check could accept Room 4. Fetch the cited ID and compare its item, relation, date and value with the claim. The old Room 1 record fails that check. Supply the current Room 4 record if available."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Where does the language model actually run in these examples?",
+        "a": "The first example builds the prompt you could give an LLM. The lesson then supplies a sample draft and its individual claims. The Python cells run the evidence checks. Holding the draft fixed lets two students inspect the same mistake. In a working system, a model could receive the question and retrieved passages and produce the draft."
+      },
+      {
+        "q": "Can a checker always decide support by comparing strings?",
+        "a": "Our records use agreed names, so equality is enough for these examples. Real sources might say “collect” where a draft says “pick up”. Someone must map those expressions to the same meaning and check details such as item and date before trusting the match."
+      }
+    ],
+    "bridge": "You checked a sentence against a record of what is true now. What changes when a model proposes several actions, each of which can change what is true next?"
+  },
+  {
+    "n": 11,
+    "title": "Building and checking a plan",
+    "goal": "Trace a plan from its starting facts to a goal, find the first step that cannot run, and repair the order when possible.",
+    "prereq": "You can check a claim against a record for the correct item and time. You can read a rule with two required facts.",
+    "slides": [
+      {
+        "title": "A goal describes the result you want",
+        "text": "A plan is an ordered sequence of actions intended to reach a goal. The state is the collection of facts currently true in our small model. A goal states what should be true at the end. We will plan for one student, Ava, and one camera, C1, so each short name in the state refers to that pair or item.",
+        "example": "Suppose Ava has completed orientation and C1 is available. Her goal is to have C1 issued to her. For this exercise the starting state is fully specified. An omitted fact, such as issued, starts false.",
+        "code": "state = {\"oriented\", \"available\"}\ngoal = {\"issued\"}\nprint(\"goal reached\" if goal.issubset(state) else \"goal open\")",
+        "out": "goal open",
+        "q": "If the starting state already included issued, how many actions would be needed for this particular goal?",
+        "a": "Zero. The empty sequence already ends in a state that satisfies the goal."
+      },
+      {
+        "title": "Describe when an action can run",
+        "text": "A precondition is a fact an action requires before it can run. An effect is a change the action makes. In this desk model, reserving C1 requires available. It removes available and adds reserved for Ava. Other state facts carry forward. The difference and union operations on sets implement those two changes.",
+        "example": "The camera becomes unavailable to other borrowers as soon as Ava reserves it. Keeping it available after the reservation would allow a second borrower to claim the same item.",
+        "code": "state = {\"oriented\", \"available\"}\nrequired = {\"available\"}\nif required.issubset(state):\n    state = (state - {\"available\"}) | {\"reserved\"}\nprint(sorted(state))",
+        "out": "['oriented', 'reserved']",
+        "q": "Which fact from the start survives the reservation, and why?",
+        "a": "Oriented survives because reserve neither removes it nor changes whose orientation the model tracks."
+      },
+      {
+        "title": "Stop at the first unmet condition",
+        "text": "The issue action requires both reserved and oriented. It removes reserved and adds issued. To check a proposed plan, read the actions left to right. Inspect a step’s preconditions in the current state before applying its effects. The first failed step tells you what went wrong.",
+        "example": "A sample language-model plan proposes issue followed by reserve. Both are actions the desk knows. Their order prevents execution from this starting state.",
+        "code": "actions = {\"reserve\": ({\"available\"}, {\"available\"}, {\"reserved\"}),\n           \"issue\": ({\"reserved\", \"oriented\"}, {\"reserved\"}, {\"issued\"})}\nstate = {\"available\", \"oriented\"}\nfor action in [\"issue\", \"reserve\"]:\n    needs, removes, adds = actions[action]\n    missing = needs - state\n    if missing:\n        print(action, \"needs\", \", \".join(sorted(missing)))\n        break\n    state = (state - removes) | adds",
+        "out": "issue needs reserved",
+        "q": "Does seeing reserve later in the plan satisfy the missing condition at step one?",
+        "a": "No. Step one sees only the starting facts. A later action cannot establish a fact that an earlier action already needed."
+      },
+      {
+        "title": "Choose an order that reaches the goal",
+        "text": "Planning searches for actions that could reach a goal. Verification checks a particular proposed sequence. With just two distinct actions, try both possible orders and verify each. A sequence succeeds only when every action runs and the final state includes the goal.",
+        "example": "Reserving first supplies the missing fact for issue. If Ava has yet to complete orientation, swapping these two actions cannot repair the missing orientation.",
+        "code": "from itertools import permutations\nactions = {\"reserve\": ({\"available\"}, {\"available\"}, {\"reserved\"}),\n           \"issue\": ({\"reserved\", \"oriented\"}, {\"reserved\"}, {\"issued\"})}\nfor order in permutations(actions):\n    state = {\"available\", \"oriented\"}\n    for name in order:\n        needs, removes, adds = actions[name]\n        if not needs.issubset(state):\n            break\n        state = (state - removes) | adds\n    else:\n        if \"issued\" in state:\n            print(\" then \".join(order))",
+        "out": "reserve then issue",
+        "q": "Would the one-step sequence reserve pass a check that tests only whether every step ran?",
+        "a": "Yes, reserve can run. A separate final check rejects it for this goal because the ending state contains reserved and still lacks issued."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Start with orientation",
+        "input": "Start with available and oriented. Reserve needs available, exchanges available for reserved. Issue needs reserved and oriented, exchanges reserved for issued. Try reserve then issue.",
+        "q": "Which states do you visit?",
+        "a": "Start with available and oriented. Reserve leaves oriented and reserved. Issue leaves oriented and issued. The goal is reached."
+      },
+      {
+        "label": "Reverse the proposed order",
+        "input": "Use the same two actions and start with available and oriented. Try issue then reserve.",
+        "q": "What is the first missing fact?",
+        "a": "Issue checks for reserved and oriented. Only oriented is present. Stop at issue with reserved missing. The second action never runs."
+      },
+      {
+        "label": "Change the starting facts",
+        "input": "Start with available only. Reserve needs available and creates reserved. Issue needs reserved and oriented. Try both orders.",
+        "q": "Can reordering these two actions reach issued?",
+        "a": "No. Issue first lacks both reserved and oriented. Reserve first supplies reserved, but neither action adds oriented. The desk needs evidence of orientation or an authorized action that completes it."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "A projector is available. Its checkout requires a reservation and an ID check. Reserve requires available. Check ID has no preconditions and adds id_checked. Give two valid orders ending with checkout.",
+        "hint": "Look for two actions that do not depend on one another.",
+        "a": "Check ID → reserve → checkout and reserve → check ID → checkout both work. The final action needs both earlier effects. Neither earlier action requires the other’s result."
+      },
+      {
+        "q": "After reserve, a student’s model lists both available and reserved. Which action description would you inspect, and how could the mistake affect a second borrower?",
+        "hint": "Track the removed facts as well as the added ones.",
+        "a": "Inspect the effects of reserve. For this single-unit camera, reserve should remove available and add reserved. Leaving available in the state would let a second borrower pass the availability test."
+      },
+      {
+        "q": "A proposed plan reaches issued in the simulation. When Ava arrives, a clerk finds that C1 has been sent for repair. What did the verification establish and what should happen now?",
+        "hint": "Separate the assumed starting facts from observations at the desk.",
+        "a": "Verification established that the plan works under its starting facts and action definitions. Refresh the state to include the repair and remove availability as appropriate. Then check whether a feasible plan exists, perhaps for a different item if Ava agrees."
+      }
+    ],
+    "faq": [
+      {
+        "q": "How does planning differ from the inference rules I used earlier?",
+        "a": "An inference rule lets you conclude something about the facts you already have. Planning asks which actions could change the world so a desired fact becomes true. Here, a rule can say whether issue may run. Performing the modeled issue action changes reserved to issued."
+      },
+      {
+        "q": "Why keep a symbolic checker when a language model can suggest a sensible order?",
+        "a": "A model can propose an order from a written request. A checker can follow the declared action rules and name the first missing requirement. If the rules omit an important desk requirement, the checker cannot catch that omission. Its conclusion depends on the model of the desk."
+      }
+    ],
+    "bridge": "You can verify a proposed action sequence. How should the desk explain a decision to Ava when some requirements have evidence and others are still unknown?"
+  },
+  {
+    "n": 12,
+    "title": "Answering with evidence and knowing when to stop",
+    "goal": "Answer an eligibility question using a stated desk rule, cite the evidence for each requirement, and explain exactly what would resolve a missing or conflicting record.",
+    "prereq": "You can retrieve records, check a language-model draft one claim at a time, and identify the preconditions needed to issue a camera.",
+    "slides": [
+      {
+        "title": "What decision is Ava asking for?",
+        "text": "In Module 02, Eligible(Ava) meant that Ava met the borrower qualification. “May I collect C1 now?” also depends on the particular camera. In this exercise, rule P1 allows a person to collect a camera exactly when they have an active reservation for it and a completed camera orientation. Those requirements tell us which records to retrieve.",
+        "example": "A reservation for C2 cannot fill the reservation requirement for C1. Orientation is recorded for a person and an equipment category, so Ava’s camera orientation applies to this camera.",
+        "code": "records = {(\"Ava\", \"reservation\", \"C1\"): (\"active\", \"R4\"),\n           (\"Ava\", \"orientation\", \"camera\"): (\"complete\", \"T7\"),\n           (\"Ben\", \"reservation\", \"C1\"): (\"expired\", \"R2\")}\nneeded = [(\"Ava\", \"reservation\", \"C1\"), (\"Ava\", \"orientation\", \"camera\")]\nfor key in needed:\n    print(key[1], *records[key])",
+        "out": "reservation active R4\norientation complete T7",
+        "q": "Why is a camera location record unnecessary for this eligibility decision?",
+        "a": "P1 asks about Ava’s reservation and orientation. A location record would help direct her after eligibility is settled, but it cannot establish either required fact."
+      },
+      {
+        "title": "Apply the rule and cite the whole reason",
+        "text": "An evidence-based decision needs both the facts and the rule connecting them to the conclusion. R4 states that Ava’s reservation for C1 is active. T7 states that Ava completed camera orientation. P1 explains why those two facts together make Ava eligible.",
+        "example": "A reader can challenge any of the three pieces. A missing fact and a missing rule leave different gaps in the explanation.",
+        "code": "records = {\"R4\": \"active\", \"T7\": \"complete\"}\nif records[\"R4\"] == \"active\" and records[\"T7\"] == \"complete\":\n    print(\"Eligible under P1. Active reservation [R4].\")\n    print(\"Camera orientation complete [T7].\")",
+        "out": "Eligible under P1. Active reservation [R4].\nCamera orientation complete [T7].",
+        "q": "Suppose R4 and T7 both check out, but P1 is an expired policy. Can the same explanation establish eligibility today?",
+        "a": "No. The facts still describe Ava, but the conclusion requires the rule that currently governs today’s collection. Retrieve the current policy and apply its requirements."
+      },
+      {
+        "title": "Ask for the particular evidence you lack",
+        "text": "Abstaining means withholding a conclusion the evidence cannot establish. Make that response actionable by naming the unresolved requirement. A missing orientation record calls for a lookup. An explicit current record that orientation is incomplete establishes a failed requirement under P1. These situations warrant different answers.",
+        "example": "Here R4 already confirms an active reservation. The three cases vary only what you learn about orientation. Python’s None marks missing information.",
+        "code": "for orientation in [None, \"incomplete\", \"complete\"]:\n    if orientation is None:\n        print(\"Need a current camera orientation record.\")\n    elif orientation == \"incomplete\":\n        print(\"Cannot issue under P1: orientation incomplete.\")\n    else:\n        print(\"Eligible under P1.\")",
+        "out": "Need a current camera orientation record.\nCannot issue under P1: orientation incomplete.\nEligible under P1.",
+        "q": "What should you do if two equally current orientation records disagree and the desk has no rule for choosing one?",
+        "a": "Report the conflict, identify both records and request a corrected or authoritative status. Choosing the first record returned would make the decision depend on search order."
+      },
+      {
+        "title": "Check the proposed answer end to end",
+        "text": "Combine the pieces in sequence. Retrieve the two records, apply P1, compare the derived verdict to the supplied language-model draft, and publish a conclusion with its evidence. A fluent draft can still guess the verdict correctly by chance. Its citations also have to cover the evidence that the rule requires.",
+        "example": "The sample draft proposes “eligible” and cites P1, R4 and D8. The verdict matches the rule, but D8 concerns the desk location. Run the check to see which source is missing. Then replace D8 with the ID it requests and run it again.",
+        "code": "facts = {(\"Ava\", \"C1\"): (\"active\", \"R4\"),\n         (\"Ava\", \"camera orientation\"): (\"complete\", \"T7\")}\nreservation, rid = facts[(\"Ava\", \"C1\")]\ntraining, tid = facts[(\"Ava\", \"camera orientation\")]\nrequired_ids = {\"P1\", rid, tid}\neligible = reservation == \"active\" and training == \"complete\"\ndraft = {\"eligible\": True, \"sources\": {\"P1\", \"R4\", \"D8\"}}\nif draft[\"eligible\"] != eligible:\n    print(\"Revise the verdict.\")\nelif not required_ids.issubset(draft[\"sources\"]):\n    print(\"Missing source:\", \", \".join(sorted(required_ids - draft[\"sources\"])))\nelse:\n    print(\"Verdict and required sources match.\")",
+        "out": "Missing source: T7",
+        "q": "Does adding T7 automatically make every sentence in a longer draft safe to publish?",
+        "a": "No. It supplies the missing source for orientation. A new assertion about pickup time, fees or any other claim would need its own check. The code checks only the specified verdict and required IDs."
+      }
+    ],
+    "lab": [
+      {
+        "label": "A complete record",
+        "input": "P1 requires an active reservation and completed camera orientation. R4 confirms Ava’s active C1 reservation. T7 confirms her camera orientation.",
+        "q": "Write one sentence Ava could use to understand the decision.",
+        "a": "Ava is eligible to collect C1 under P1 because her C1 reservation is active [R4] and she completed camera orientation [T7]."
+      },
+      {
+        "label": "An explicit failed requirement",
+        "input": "P1 applies. R4 confirms an active C1 reservation. T8 explicitly says Ava’s camera orientation is incomplete today.",
+        "q": "Give the verdict and the explanation.",
+        "a": "C1 cannot be issued under P1 while orientation is incomplete [T8], even though the reservation is active [R4]. Unlike a missing record, T8 establishes which requirement failed."
+      },
+      {
+        "label": "Two incompatible records",
+        "input": "R4 confirms an active C1 reservation. T7 says complete and T8 says incomplete for the same student, equipment and time. Both have equal authority in this exercise.",
+        "q": "Can the desk decide under P1? What can it tell Ava?",
+        "a": "R4 settles the reservation. T7 and T8 disagree on orientation, which P1 requires. Withhold the eligibility verdict and ask the desk to reconcile those two records."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Lia’s active R8 is for C2, and T9 confirms camera orientation. Draft an answer to “Can I collect C1?” Assume the reservation records you retrieved may be incomplete.",
+        "hint": "An active reservation for one item does not settle the status of another item.",
+        "a": "T9 confirms Lia’s camera orientation. R8 covers C2. Eligibility for C1 under P1 remains unknown until the desk checks for a current C1 reservation in Lia’s name."
+      },
+      {
+        "q": "A draft says “Eligible under P1 because the reservation is active [R4] and orientation is complete [T7]. Pickup closes at 5.” The cited reservation and training records match. Edit the answer.",
+        "hint": "Check how many independent claims are present and which records cover each.",
+        "a": "Keep the eligibility sentence with P1, R4 and T7. Omit the closing-time claim or retrieve a current hours record for the correct desk and day before including it."
+      },
+      {
+        "q": "Create a two-case test for a desk system that always answers “no” when it cannot find an orientation record. Keep the other requirement satisfied.",
+        "hint": "Use a missing record in one case and an explicit negative record in the other.",
+        "a": "Give both cases an active reservation. In case one, omit orientation evidence and expect “unknown; check orientation.” In case two, supply a current orientation-incomplete record and expect “cannot issue under P1.” A system that answers no twice fails the first case."
+      }
+    ],
+    "faq": [
+      {
+        "q": "How does this example connect learning with symbolic reasoning?",
+        "a": "A language model can interpret a question or draft an answer in ordinary language. Retrieval supplies records about the named people and items. P1 specifies the relationship between those records and eligibility. The final check asks whether the draft’s decision and references agree with that reasoning."
+      },
+      {
+        "q": "Can the desk be helpful when it abstains?",
+        "a": "Yes. Tell Ava what is known, which requirement is unresolved and what record would settle it. “Your C1 reservation is active [R4]. I still need your camera orientation status to apply P1” gives her a concrete next step."
+      }
+    ],
+    "bridge": "The records justify whether Ava may collect C1 at this moment. How would you use an ordered history of events to figure out where a checkout was delayed, and what further evidence would you need to explain its cause?"
+  }
+]

@@ -1,0 +1,378 @@
+[
+  {
+    "n": 5,
+    "title": "From a photograph to a symbolic claim",
+    "goal": "Explain what a learned score measures and decide which claim the desk can record from it.",
+    "prereq": "You can write a fact about a named object and trace a conclusion to its evidence. We now ask where a fact might come from when the evidence is a photograph.",
+    "slides": [
+      {
+        "title": "What can the desk see?",
+        "text": "Ava returns camera C1. The lending desk has a record of the return and a photograph of the camera. The record identifies the item. To tell whether the lens cap is visible, someone must interpret the image. A perception model is a program that learns to recognize patterns in examples.",
+        "example": "Returned(Ava, C1) and CapVisible(C1) answer different questions. A return receipt supplies evidence for the first. The desk still needs evidence about the cap.",
+        "code": "receipt = {(\"Returned\", \"Ava\", \"C1\")}\nreturn_fact = (\"Returned\", \"Ava\", \"C1\")\ncap_fact = (\"CapVisible\", \"C1\")\nprint(return_fact in receipt, cap_fact in receipt)",
+        "out": "True False",
+        "q": "What does the second False tell us about the cap?",
+        "a": "The receipt contains no such statement. The cap might be present, missing, or outside the photograph. We need another source to distinguish those possibilities."
+      },
+      {
+        "title": "How two visual cues become a score",
+        "text": "A feature is a number describing an input. For this small example, record 1 when a cue is visible and 0 otherwise. A neural unit multiplies each feature by a weight, adds a starting offset called a bias, and applies a function. Our function, ReLU, keeps a positive total and replaces a negative total with zero. We will learn how a weight is fitted in Module 07.",
+        "example": "Use two cues, a circular rim and a dark center. With both visible, the example unit gives 0.6 × 1 + 0.3 × 1 − 0.1 = 0.8. The weights here are supplied for the calculation. A high score means that the cues resemble those associated with caps in this example.",
+        "code": "rim, dark_center = 1, 1\nweighted_total = 0.6 * rim + 0.3 * dark_center - 0.1\nscore = max(0.0, weighted_total)\nprint(f\"{score:.2f}\")",
+        "out": "0.80",
+        "q": "If glare hides the dark center, what score will the same unit give?",
+        "a": "Keep the rim at 1 and change the center to 0. The total is 0.6 + 0 − 0.1 = 0.5, so ReLU returns 0.5."
+      },
+      {
+        "title": "Decide which claim crosses the boundary",
+        "text": "A threshold is a cutoff chosen for an action. In our desk example, a score of at least 0.75 creates CapCandidate for that item. The name tells the next rule that a detector proposed the claim. A staff inspection would give a separate fact, CapConfirmed.",
+        "example": "C1 scores 0.80 and becomes a candidate. A score of 0.74 sends an item to inspection. The desk can still learn that the cap is present on either item.",
+        "code": "scores = {\"C1\": 0.80, \"C2\": 0.74, \"C3\": 0.75}\nfor item, score in scores.items():\n    action = \"CapCandidate\" if score >= 0.75 else \"Inspect\"\n    print(item, action)",
+        "out": "C1 CapCandidate\nC2 Inspect\nC3 CapCandidate",
+        "q": "Would raising the cutoff to 0.81 establish that C1 has lost its cap?",
+        "a": "No. C1's photo and score stay the same. The higher cutoff changes the desk's action to inspection."
+      },
+      {
+        "title": "Check the cutoff against inspected photographs",
+        "text": "A label is a reference answer for a particular example. Staff inspected four returns and recorded whether a cap was visible in each photograph. Compare the proposed candidates with these labels. Every incorrect proposal or missed cap tells us something the score alone cannot tell us.",
+        "example": "At 0.75, the desk proposes C1 and C2. Staff see a cap on C1 and C3. C2 is a false positive, a proposed cap absent from its reference label. C3 is a false negative, a labeled cap the detector missed.",
+        "code": "# Each row holds item, score and staff label.\nrows = [(\"C1\", .80, True), (\"C2\", .78, False),\n        (\"C3\", .70, True), (\"C4\", .30, False)]\nfor item, score, label in rows:\n    proposed = score >= .75\n    if proposed != label:\n        print(item, \"false positive\" if proposed else \"false negative\")",
+        "out": "C2 false positive\nC3 false negative",
+        "q": "What changes on these four photographs if the cutoff falls from 0.75 to 0.70?",
+        "a": "C3 now becomes a candidate, so its miss disappears. C2 still crosses the cutoff and is still a false positive. This small check describes these four cases."
+      }
+    ],
+    "lab": [
+      {
+        "label": "At the boundary",
+        "input": "The cutoff is 0.75 inclusive. C1 and C2 score 0.750 and 0.749.",
+        "q": "For which items should the desk record CapCandidate?",
+        "a": "Only CapCandidate(C1). Compare the unrounded scores. C1 meets the cutoff exactly, while C2 falls just below it."
+      },
+      {
+        "label": "Glare on the lens",
+        "input": "The rim cue is 1. The dark-center cue changes from 1 to 0. The weights are 0.6 and 0.3, the bias is −0.1, and the cutoff is 0.75.",
+        "q": "How does glare change the proposed fact?",
+        "a": "The score falls from 0.8 to 0.5. C1 moves from candidate to inspection. Glare changed the visible evidence even if the physical cap stayed in place."
+      },
+      {
+        "label": "An independent inspection",
+        "input": "C1 scores 0.82. A staff member checks the same photo and reports that the circular object is a reflection.",
+        "q": "How should this photo appear in an evaluation?",
+        "a": "Record the score, the candidate, and the staff label separately. At a 0.75 cutoff this is a false positive. Retaining both sources makes the error count reproducible."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "A delivery note records that Ava returned C2. Write one fact justified by the note and one question it leaves open.",
+        "hint": "Separate the item identifier from its physical condition.",
+        "a": "Returned(Ava, C2) is justified. Whether C2 has a visible lens cap remains open until someone checks the item or its photograph."
+      },
+      {
+        "q": "With the two-cue unit, find the score when the rim is absent and the dark center is visible. What action follows at 0.75?",
+        "hint": "Use rim = 0 and center = 1 before applying ReLU.",
+        "a": "The total is 0 + 0.3 − 0.1 = 0.2. ReLU keeps 0.2. The item goes to inspection."
+      },
+      {
+        "q": "A detector scores three photos 0.9, 0.7 and 0.6. Their labels are cap present, cap absent and cap present. Compare cutoffs of 0.7 and 0.8 inclusive.",
+        "hint": "For each cutoff, first list the proposed photos. Then compare that list with the first and third labels.",
+        "a": "At 0.7 the first two are candidates, so the second is a false positive and the third a false negative. At 0.8 only the first is a candidate. The false positive disappears, while the third photo is still missed."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Does a score of 0.80 mean an 80% chance that the photo shows a cap?",
+        "a": "Our number comes from adding weighted cues and applying ReLU. That calculation supplies a ranking. To interpret a score as a probability, we would need a model designed for that use and evidence that, among comparable photos assigned about 0.80, roughly eight in ten actually show a cap."
+      },
+      {
+        "q": "Why keep the candidate if a person can inspect the photograph?",
+        "a": "It can help route work. The desk can show candidate items together, send uncertain cases to inspection, and later compare suggestions with independent labels. Keeping the item, score and evidence source lets staff reconstruct each suggestion."
+      }
+    ],
+    "bridge": "C1 now has a proposed cap fact. How can a rule combine it with Ava’s reservation without accidentally using another camera’s photograph?"
+  },
+  {
+    "n": 6,
+    "title": "Connecting a neural detector to rules",
+    "goal": "Follow a photograph through a detector and a rule, then locate the first broken link in an incorrect recommendation.",
+    "prereq": "You can turn visual features into a score, apply a cutoff, and distinguish a proposed fact from a confirmed one. You can match names in a rule.",
+    "slides": [
+      {
+        "title": "Give the rule a named input",
+        "text": "A hybrid system can let a learned component interpret an image and let a symbolic rule decide how to use the result. The two components need an agreement about the meaning of the data they exchange. Here the detector supplies an item ID and a score for a visible cap. A short adapter tests the cutoff and writes a named fact.",
+        "example": "The photograph belongs to C1. Its rim and dark-center cues give a score of 0.80. The adapter writes CapCandidate(C1). Carrying the item ID matters when several cameras arrive together.",
+        "code": "item, rim, dark_center = \"C1\", 1, 1\nscore = max(0.0, 0.6 * rim + 0.3 * dark_center - 0.1)\ncandidates = set()\nif score >= 0.75:\n    candidates.add((\"CapCandidate\", item))\nprint(sorted(candidates))",
+        "out": "[('CapCandidate', 'C1')]",
+        "q": "What would the rule lose if the adapter supplied only the word 'candidate'?",
+        "a": "It could no longer connect the photograph to a particular item. A candidate for C1 could be paired with a reservation for C2."
+      },
+      {
+        "title": "Match the same camera in both facts",
+        "text": "The fictional desk groups items for a pickup review. Its rule says that if a person reserved an item and the detector proposed a visible cap on that same item, suggest a pickup review for that person and item. A review suggestion invites staff to examine the case.",
+        "example": "Reserved(Ava, C1) and CapCandidate(C1) match on C1. Reserved(Ben, C2) cannot use C1's photo. The repeated item name in the rule is the link.",
+        "code": "reservations = [(\"Ava\", \"C1\"), (\"Ben\", \"C2\")]\ncap_candidates = {\"C1\"}\nfor person, item in reservations:\n    if item in cap_candidates:\n        print(\"SuggestPickupReview\", person, item)",
+        "out": "SuggestPickupReview Ava C1",
+        "q": "If Ben changes his reservation to C1 as well, how many suggestions follow?",
+        "a": "Two. Both reservations now match C1. The rule can suggest two reviews for one camera. Allocating that camera to a single borrower requires a separate decision."
+      },
+      {
+        "title": "Leave a trail back to the photograph",
+        "text": "A proof trace lists the facts and rule behind a derived statement. Add provenance, the origin of each input, so staff can inspect it. The reservation has a record ID. The candidate should retain the photograph ID, detector score and cutoff that produced it.",
+        "example": "Start at Ava's review suggestion and work backward. The rule used her reservation R17 for C1. The matching candidate came from photo P9 of C1, scored 0.80 against a cutoff of 0.75.",
+        "code": "reservation = (\"R17\", \"Ava\", \"C1\")\nphoto = (\"P9\", \"C1\", 0.80)\nreservation_id, person, item = reservation\nphoto_id, photo_item, score = photo\ncutoff = 0.75\nif item == photo_item and score >= cutoff:\n    print(f\"Review {person} {item} via reservation {reservation_id}\")\n    print(f\"Photo {photo_id} scored {score:.2f} against {cutoff:.2f}\")",
+        "out": "Review Ava C1 via reservation R17\nPhoto P9 scored 0.80 against 0.75",
+        "q": "A later inspection finds that P9 shows a reflection. Which part of the trace should change first?",
+        "a": "Keep P9, its original score and the rule that produced the suggestion. Add the inspector’s finding to the same photo record. Staff can now dismiss this suggestion. A program would need an explicit rule giving the inspection priority before it could dismiss the suggestion automatically."
+      },
+      {
+        "title": "Diagnose a missing recommendation",
+        "text": "Suppose Ava's review never appears. Test each boundary in sequence. Did her reservation arrive? Did a photo of her item arrive? Did its score meet the cutoff? A missing input and a low score can produce the same empty queue, but each calls for a different fix.",
+        "example": "The desk received Ava's C1 reservation and a photo of C2 scoring 0.92. The high score concerns C2. Asking for a C1 photograph addresses the first missing piece.",
+        "code": "reserved_item = \"C1\"\nphotos = {\"C2\": 0.92}\nif reserved_item not in photos:\n    reason = \"Missing photo for \" + reserved_item\nelif photos[reserved_item] < 0.75:\n    reason = \"Inspect low-scoring photo\"\nelse:\n    reason = \"Suggest pickup review\"\nprint(reason)",
+        "out": "Missing photo for C1",
+        "q": "What would the program report if a C1 photograph arrived and scored 0.68?",
+        "a": "It would report 'Inspect low-scoring photo'. The identifier now matches, but 0.68 falls below 0.75. Taking another C2 photo would not address that result."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Crossed identifiers",
+        "input": "Ava reserved C1, Ben reserved C2, and a photo of C2 scores 0.88. The cutoff is 0.75.",
+        "q": "Whose review appears, and which item does it name?",
+        "a": "Ben's review for C2 appears. The C2 candidate matches his reservation. Ava's C1 still lacks a matching candidate."
+      },
+      {
+        "label": "One source changes",
+        "input": "R17 records Ava and C1. A photo originally scored 0.78. A corrected crop scores 0.71 under the same cutoff of 0.75.",
+        "q": "What happens when the adapter and rule run again on the corrected crop?",
+        "a": "The corrected crop falls below the cutoff. With no other candidate for C1, Ava's suggestion disappears. R17 stays available as a reservation record."
+      },
+      {
+        "label": "A correct rule with poor evidence",
+        "input": "Ava reserved C1, and the C1 photo scores 0.88. Staff later label the image as cap absent.",
+        "q": "Can the matching rule have executed correctly? Where would you investigate?",
+        "a": "Yes. It matched C1 and applied the stated cutoff. Inspect the image, features and detector label. The rule trace explains the recommendation even when a premise is unreliable."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Fill the missing variable in the rule 'Reserved(person, item) AND CapCandidate(?) implies SuggestPickupReview(person, item)'. Give a case that explains your choice.",
+        "hint": "Look for the identifier shared by the photo and reservation.",
+        "a": "Use item. If Ava reserved C1 and only C2 has a candidate, using a different variable would let the C2 photo trigger a C1 review."
+      },
+      {
+        "q": "Ava reserved C1 and C3. Photos score C1 = 0.75, C2 = 0.97 and C3 = 0.74. List her reviews at an inclusive 0.75 cutoff.",
+        "hint": "Filter the photos first, then match the item names in Ava's two reservations.",
+        "a": "C1 and C2 clear the cutoff. Only C1 is in Ava's reservations, so the rule suggests one review for Ava and C1."
+      },
+      {
+        "q": "Write the minimum evidence you would request to reproduce a disputed review for C2.",
+        "hint": "Think about both inputs, the adapter, and the matching rule.",
+        "a": "Ask for the reservation and its item ID, the photo and its item ID, the recorded score and cutoff, and the rule version used to join them. These let you check whether each premise was available and whether the identifiers matched."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Which part of this pipeline learned anything?",
+        "a": "The detector is the component whose weights can be fitted from examples. The desk supplies the cutoff, the meaning of CapCandidate, and the review rule. A review can change when either the detector or the rule changes. The trace helps distinguish them."
+      },
+      {
+        "q": "If the system shows a proof trace, can I accept the conclusion?",
+        "a": "Read the conclusion carefully. The trace shows why the inputs supported a review suggestion. It also gives you the records to inspect if the photograph was mislabeled or the reservation is stale. The premises determine how much confidence the conclusion deserves."
+      }
+    ],
+    "bridge": "So far, the rule acts after the detector produces a score. Can knowledge from the desk also influence the weights the detector learns?"
+  },
+  {
+    "n": 7,
+    "title": "Teaching a model with examples and constraints",
+    "goal": "Fit one neural weight by hand and explain precisely how adding a desk rule changes the chosen value.",
+    "prereq": "You can run a neural detector and use rules on its output. We now make a smaller detector so that every possible change to its weight is visible.",
+    "slides": [
+      {
+        "title": "Give a training example a cost",
+        "text": "To train a model, choose a measure of how poorly its output fits the available evidence. This measure is called a loss. For a small experiment, use one feature x, equal to 1 when a photograph has a visible circular rim. Our new unit scores a photo with max(0, w × x), where w is the adjustable weight. A cap-absent label has target 0.",
+        "example": "Photo A shows a reflection with a rim but no cap. Start with w = 0.2. The unit predicts 0.2. Subtract the label 0 and square the difference. Its label loss is 0.04. Squaring makes errors in either direction cost something.",
+        "code": "x, target = 1, 0\nw = 0.2\nscore = max(0.0, w * x)\nlabel_loss = (score - target) ** 2\nprint(f\"score {score:.2f}, label loss {label_loss:.2f}\")",
+        "out": "score 0.20, label loss 0.04",
+        "q": "If we changed the weight to 0.4, would this label alone favor the change?",
+        "a": "No. Photo A would score 0.4 and the label loss would become 0.16. This label favors a smaller score."
+      },
+      {
+        "title": "Turn a rule into a soft penalty",
+        "text": "The desk also has photo B. A staff member independently verified its cap, and B has the same rim feature as A. In this teaching example, the desk wants a verified cap to score at least 0.8 during training. Charge a penalty for the amount the score falls short. A soft constraint allows a violation and assigns it a cost.",
+        "example": "With w = 0.2, B scores 0.2. The shortfall is 0.8 − 0.2 = 0.6 and its square is 0.36. A score of 0.9 already meets the requirement, so use zero shortfall there.",
+        "code": "for score in (0.2, 0.8, 0.9):\n    shortfall = max(0.0, 0.8 - score)\n    penalty = shortfall ** 2\n    print(f\"score {score:.1f}, penalty {penalty:.2f}\")",
+        "out": "score 0.2, penalty 0.36\nscore 0.8, penalty 0.00\nscore 0.9, penalty 0.00",
+        "q": "Why would squaring (0.8 − score) on its own misrepresent this rule?",
+        "a": "It would penalize 0.9 even though 0.9 satisfies 'at least 0.8'. Taking the positive shortfall first makes every satisfying score cost zero."
+      },
+      {
+        "title": "Fit one weight and repeat the prediction",
+        "text": "The training objective is the quantity we choose to minimize. Add A's label loss and B's rule penalty with equal weight. Try five candidate weights, measure the objective for each, and keep the lowest-cost one. This is a simple training algorithm called grid search. Both photos have x = 1, so a single weight gives them the same score.",
+        "example": "Compare the starting w = 0.2 with w = 0.4. At 0.2 the costs add to 0.04 + 0.36 = 0.40. At 0.4 they add to 0.16 + 0.16 = 0.32. The model accepts a larger label error on A in exchange for a larger reduction in B’s penalty.",
+        "code": "weights = [0.0, 0.2, 0.4, 0.6, 0.8]\ndef costs(w):\n    score_a = max(0.0, w * 1)\n    score_b = max(0.0, w * 1)\n    return score_a ** 2, max(0.0, 0.8 - score_b) ** 2\n\nlabel_only = min(weights, key=lambda w: costs(w)[0])\nfitted = min(weights, key=lambda w: sum(costs(w)))\nprint(f\"label alone {label_only:.1f}; both terms {fitted:.1f}\")\nprint(f\"updated score on B {max(0.0, fitted * 1):.1f}\")",
+        "out": "label alone 0.0; both terms 0.4\nupdated score on B 0.4",
+        "q": "Does the fitted model now satisfy the verified-cap rule on B?",
+        "a": "No. Its new score is 0.4, still below 0.8. The combined cost fell, but the soft rule allows a remaining violation. The identical feature values limit what this unit can learn."
+      },
+      {
+        "title": "Test how strongly the knowledge counts",
+        "text": "A penalty weight controls how much the rule matters relative to the label. Multiplying the penalty by three makes each unit of rule violation cost three times as much as before. The model still has to assign A and B the same score because it sees the same input for both.",
+        "example": "With a triple penalty, w = 0.6 costs 0.36 + 3 × 0.04 = 0.48. At w = 0.4 the total is 0.16 + 3 × 0.16 = 0.64. The training rule changes which weight the program keeps.",
+        "code": "weights = [0.0, 0.2, 0.4, 0.6, 0.8]\nfor strength in (0, 1, 3):\n    def objective(w):\n        score = max(0.0, w)\n        return score ** 2 + strength * max(0.0, 0.8 - score) ** 2\n    fitted = min(weights, key=objective)\n    print(f\"strength {strength}, fitted weight {fitted:.1f}\")",
+        "out": "strength 0, fitted weight 0.0\nstrength 1, fitted weight 0.4\nstrength 3, fitted weight 0.6",
+        "q": "What additional evidence might let the model distinguish A from B?",
+        "a": "Inspect the photos for a second cue that differs, such as readable cap lettering. Measure that cue consistently and evaluate on separate labeled photos. A new feature helps only if it carries relevant information."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Train with labels alone",
+        "input": "A has rim = 1 and cap target 0. Candidate weights are 0, 0.2, 0.4, 0.6 and 0.8. The rule penalty weight is zero.",
+        "q": "Which weight minimizes the objective?",
+        "a": "Weight 0 gives score 0 and label loss 0. Every larger candidate has a positive label loss. B carries no weight in this objective."
+      },
+      {
+        "label": "Compare two updates",
+        "input": "Use equal costs, A's target 0 and B's verified minimum 0.8. Both have rim = 1. Compare candidate weights 0.4 and 0.6.",
+        "q": "Which candidate better fits the combined evidence?",
+        "a": "At 0.4 the total is 0.16 + 0.16 = 0.32. At 0.6 it is 0.36 + 0.04 = 0.40. The lower total selects 0.4."
+      },
+      {
+        "label": "Inspect a changed input",
+        "input": "Keep the fitted weight 0.4. A fresh photo C has rim = 0 and independently verified cap presence.",
+        "q": "What does this unit predict, and what penalty does the same rule assign?",
+        "a": "The score is max(0, 0.4 × 0) = 0. The shortfall is 0.8, giving a penalty of 0.64. Any weight multiplied by this zero feature gives zero, so a weight change alone cannot fix this case."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "A different desk sets its minimum score for a verified cap to 0.6. What is the squared-shortfall penalty at scores 0.4 and 0.7?",
+        "hint": "Apply max(0, minimum − score) before squaring.",
+        "a": "At 0.4 the shortfall is 0.2 and the penalty is 0.04. At 0.7 the minimum is already met, giving zero penalty."
+      },
+      {
+        "q": "Return to the 0.8 minimum. Compare w = 0.4 and w = 0.6 when B's penalty has triple weight. Report both costs.",
+        "hint": "Compute A's squared error and B's squared shortfall separately.",
+        "a": "For 0.4 the cost is 0.16 + 3 × 0.16 = 0.64. For 0.6 it is 0.36 + 3 × 0.04 = 0.48. Of these two candidates, choose 0.6."
+      },
+      {
+        "q": "A classmate reports that training reduced the objective, so the detector must make fewer mistakes on future returns. Design a check.",
+        "hint": "Decide which photos took part in choosing the weight and which photos could provide a fresh test.",
+        "a": "Set aside independently labeled returns before choosing weights or the cutoff. Run both the original and fitted detectors on those same held-out returns, using the same cutoff. Compare false positives, false negatives and rule violations. The two training cases alone cannot establish future accuracy."
+      }
+    ],
+    "faq": [
+      {
+        "q": "How can a rule teach a model if the model never reads a sentence?",
+        "a": "We translated the desk's statement into an operation on a number. When a verified photo scores below 0.8, the squared shortfall raises the objective. The training procedure compares weights using that objective. The rule affects the selected weight through the cost calculation."
+      },
+      {
+        "q": "Why train on two photos that share a feature but have different evidence?",
+        "a": "They expose a limitation we can inspect by hand. With one rim feature, the unit assigns both photos exactly the same score. A stronger rule shifts the compromise. Distinguishing the photos requires information the current input omits."
+      },
+      {
+        "q": "Is trying five weights how large neural networks are usually trained?",
+        "a": "Here five values make the full comparison small enough to check. Larger networks usually use gradients to choose updates to many weights. Both approaches need an objective that says which changes count as improvements."
+      }
+    ],
+    "bridge": "A soft training rule can leave a violation. When one physical camera can go to only one borrower, how can the desk guarantee that every proposed allocation respects that limit?"
+  },
+  {
+    "n": 8,
+    "title": "Choosing predictions that satisfy constraints",
+    "goal": "Construct the allowed assignments, select the one with the highest total score, and explain what happens when no complete assignment is possible.",
+    "prereq": "You can read model scores and distinguish a soft training penalty from a rule applied to a decision. We now apply rules after scores have been produced.",
+    "slides": [
+      {
+        "title": "Separate preference from permission",
+        "text": "The desk now has a different task. A model scores how well each available camera suits a borrower's request. These are suitability scores for allocation. The desk also knows how many physical cameras it has. A hard constraint states a condition every acceptable output must satisfy. Here the same camera cannot be assigned to two borrowers at once.",
+        "example": "Ava's highest score is 0.9 for C1. Ben's highest score is 0.8 for C1. Choosing each person's favorite independently would promise C1 twice.",
+        "code": "scores = {\"Ava\": {\"C1\": .9, \"C2\": .7},\n          \"Ben\": {\"C1\": .8, \"C2\": .2}}\nfavorites = {p: max(row, key=row.get) for p, row in scores.items()}\nprint(favorites[\"Ava\"], favorites[\"Ben\"])\nprint(\"Distinct cameras:\", len(set(favorites.values())))",
+        "out": "C1 C1\nDistinct cameras: 1",
+        "q": "Would lowering Ben's C1 score from 0.8 to 0.75 remove the conflict?",
+        "a": "No. He still prefers C1 at 0.75 over C2 at 0.2. Independent highest-score choices still promise C1 twice."
+      },
+      {
+        "title": "Generate possibilities and test the rule",
+        "text": "A candidate output now contains two choices, ordered as Ava's camera followed by Ben's. An assignment is feasible if it satisfies every hard constraint. In this first exercise both cameras are available, each borrower must get one, and they must get different cameras. List all pairs and keep the feasible ones.",
+        "example": "There are four pairs because each of the two people can initially be matched to either camera. Discard (C1, C1) and (C2, C2). The two remaining pairs can be compared by score.",
+        "code": "cameras = [\"C1\", \"C2\"]\nfor ava in cameras:\n    for ben in cameras:\n        if ava != ben:\n            print(ava, ben)",
+        "out": "C1 C2\nC2 C1",
+        "q": "If C2 becomes unavailable, is there any way to assign both borrowers a different camera?",
+        "a": "No. The only pair using the available inventory is (C1, C1), which violates distinctness. The desk must handle the absence of a feasible complete assignment."
+      },
+      {
+        "title": "Compare the complete assignments",
+        "text": "Decoding means choosing the output from the model's scores. In constrained decoding we choose among feasible outputs. This desk uses the sum of the two suitability scores as its stated objective. Compare complete assignments because choosing Ava's favorite first can leave Ben with a poor match.",
+        "example": "Ava C1 and Ben C2 totals 0.9 + 0.2 = 1.1. Ava C2 and Ben C1 totals 0.7 + 0.8 = 1.5. The second pair wins under this objective, although C2 ranks second for Ava.",
+        "code": "ava = {\"C1\": .9, \"C2\": .7}\nben = {\"C1\": .8, \"C2\": .2}\npairs = [(a, b) for a in ava for b in ben if a != b]\ndef total(pair):\n    a, b = pair\n    return ava[a] + ben[b]\nbest = max(pairs, key=total)\nprint(f\"Ava {best[0]}, Ben {best[1]}, total {total(best):.1f}\")",
+        "out": "Ava C2, Ben C1, total 1.5",
+        "q": "How could you justify the selected pair without mentioning the code?",
+        "a": "Write down the two feasible pairs. Both respect the one-camera limit, and their totals are 1.1 and 1.5. Choosing the larger total proves the second pair is best among the feasible choices."
+      },
+      {
+        "title": "Handle a shortage explicitly",
+        "text": "Suppose only C1 is available. If the desk requires both borrowers to get a camera, it should report that no complete assignment exists. If the desk explicitly permits waiting, introduce Wait as an allowed choice with score zero. Both people may wait because a waiting place uses no camera.",
+        "example": "With waiting allowed and C1 as the only camera, the feasible totals are 0.9 for Ava borrowing, 0.8 for Ben borrowing, and 0 for both waiting. The decision and its assumptions can be shown to the desk.",
+        "code": "ava = {\"C1\": .9, \"Wait\": 0}\nben = {\"C1\": .8, \"Wait\": 0}\npairs = [(a, b) for a in ava for b in ben\n         if a == \"Wait\" or b == \"Wait\" or a != b]\nbest = max(pairs, key=lambda pair: ava[pair[0]] + ben[pair[1]])\nprint(f\"Ava {best[0]}, Ben {best[1]}\")",
+        "out": "Ava C1, Ben Wait",
+        "q": "Tomorrow both requests have the same score for C1. Can these scores and constraints resolve who gets it?",
+        "a": "No. Giving C1 to either borrower has the same total. The desk needs an explicit tie-breaking rule, such as earlier request time, or it can report both equally scoring assignments. Loop order is an accidental policy."
+      }
+    ],
+    "lab": [
+      {
+        "label": "A second camera is nearly as useful",
+        "input": "Ava scores C1 = 0.9 and C2 = 0.85. Ben scores C1 = 0.8 and C2 = 0.1. Both must receive distinct cameras.",
+        "q": "Which assignment maximizes the total?",
+        "a": "Ava C2 and Ben C1 totals 1.65. Ava C1 and Ben C2 totals 1.0. Distinctness leaves no other complete pair."
+      },
+      {
+        "label": "A camera is unavailable",
+        "input": "Only C2 is available. Ava and Ben must each receive a camera and sharing is forbidden.",
+        "q": "Which complete assignment should the desk display?",
+        "a": "There is no feasible complete assignment. Giving C2 to both violates the rule. Waiting would need to be explicitly allowed before the desk could offer a partial allocation."
+      },
+      {
+        "label": "A tie at the desk",
+        "input": "Only C1 is available, waiting scores zero, and both borrowers score 0.7 for C1. Ava requested it at 10:03 and Ben at 10:01.",
+        "q": "Who gets the camera if the desk uses earlier request time to break score ties?",
+        "a": "The two best allocations each total 0.7. The separately stated tie-break awards C1 to Ben at 10:01. Without the tie-break both allocations are equally good under the score objective."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Ava and Ben can request C1 or C2. How many complete pairs are possible before and after applying the distinct-camera rule?",
+        "hint": "Treat (Ava C1, Ben C2) and (Ava C2, Ben C1) as different.",
+        "a": "Two choices for each of two people give four pairs. Remove the two pairs that reuse a camera. Two distinct-camera pairs remain."
+      },
+      {
+        "q": "Ava's scores are 0.6 for C1 and 0.5 for C2. Ben's scores are 0.9 for C1 and 0.8 for C2. Both must receive distinct cameras. Is there a unique winner?",
+        "hint": "Calculate both feasible totals before deciding.",
+        "a": "Ava C1 plus Ben C2 totals 1.4. Ava C2 plus Ben C1 also totals 1.4. Neither the hard rule nor the total breaks this tie."
+      },
+      {
+        "q": "A colleague replaces the hard rule with a penalty of 0.1 for sharing. Ava and Ben each score C1 at 1.0 and C2 at 0.2. What can the new objective select?",
+        "hint": "Compare the penalized shared-camera total with the best distinct-camera total.",
+        "a": "Giving both people C1 scores 2.0 − 0.1 = 1.9. Giving them different cameras scores 1.2. The penalized objective prefers an impossible handoff. A hard feasibility check rules it out regardless of scores."
+      }
+    ],
+    "faq": [
+      {
+        "q": "How is this different from putting a rule into the training loss?",
+        "a": "In Module 07 a penalty changed which model weight we learned. Here the suitability scores are fixed before the decision. The decoder filters which outputs it can return. An allocation that reuses C1 fails the filter even if its raw score is high."
+      },
+      {
+        "q": "Does the highest total make an allocation fair?",
+        "a": "The total answers one question about the stated suitability scores. It contains no information about waiting time or prior access unless the desk explicitly includes it. Two allocations with the same total can treat particular borrowers differently. Decide what matters before choosing the objective and tie-break."
+      },
+      {
+        "q": "Would listing every pair still work for a large equipment center?",
+        "a": "For two people and two cameras there are only four pairs to inspect. For ten people with ten options each, listing every combination would examine ten billion possibilities before filtering. Larger problems can use assignment or constraint-solving algorithms that avoid testing every combination."
+      }
+    ],
+    "bridge": "A score and an inventory rule can help the desk allocate a camera. Once a reservation is recorded, Ava has a new question. Which records will tell her where to collect her camera?"
+  }
+]

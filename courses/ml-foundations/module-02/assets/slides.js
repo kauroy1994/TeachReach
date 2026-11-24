@@ -77,7 +77,7 @@ function render(){
   $('codeToggle').setAttribute("aria-expanded",String(codeVisible));
   $('codeCopy').textContent='Copy code';
   $('codeContent').textContent=s.code||"";
-  document.title=(i+1)+" / "+all.length+" · "+s.title+" · Module "+document.body.dataset.trModule;
+  document.title=(i+1)+" / "+all.length+" · "+s.title+" · CS 483/583 · Module "+document.body.dataset.trModule;
   try{history.replaceState(null,"",location.pathname+"#"+(i+1))}catch{}
 }
 function jump(j){i=clamp(j,0,all.length-1);codeVisible=false;render();$('slide').scrollTop=0;$('outline').hidden=true}

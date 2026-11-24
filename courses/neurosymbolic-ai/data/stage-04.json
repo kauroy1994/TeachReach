@@ -1,0 +1,374 @@
+[
+  {
+    "n": 13,
+    "title": "Reading event histories",
+    "goal": "Decide whether one request’s records support a required order of events, and explain how a missing or tied time limits the answer.",
+    "prereq": "You have checked whether a proposed plan puts its steps in a permissible order. Now the desk has already acted. You will check what the records say happened.",
+    "slides": [
+      {
+        "title": "What happened to this request?",
+        "text": "A plan lists intended steps. An event log records observations of steps that took place. Each row needs a case identifier so that events about the same request stay together. One borrower or one camera can appear in several cases.",
+        "example": "Ava requests camera C1 twice. The desk calls her first request R7 and her second R8. In the code each row contains a request, an action and the minute after opening. The loop reads one row at a time.",
+        "code": "events = [(\"R7\", \"check\", 2), (\"R8\", \"check\", 7),\n          (\"R7\", \"handoff\", 5)]\nfor request, action, minute in events:\n    if request == \"R7\":\n        print(minute, action)",
+        "out": "2 check\n5 handoff",
+        "q": "Could Ava’s name and the camera’s ID, together, replace the request ID in this example?",
+        "a": "No. Both requests would share exactly those values. The request ID lets us determine which check belongs with which handoff."
+      },
+      {
+        "title": "Seeing two events is different from ordering them",
+        "text": "Our fictional desk requires an ID check before handing over C1. A list of action names tells us which actions appear. A time for each action lets us test the word “before.” We start with cases that contain one check and one handoff.",
+        "example": "Two requests contain the same actions. For each request, compare the minute of the check with the minute of the handoff. Python’s less-than sign asks whether the first time is strictly earlier.",
+        "code": "for request, check, handoff in [(\"R7\", 2, 5), (\"R8\", 7, 4)]:\n    print(request, check < handoff)",
+        "out": "R7 True\nR8 False",
+        "q": "R8 is marked False even though the log shows an ID check. What exactly failed?",
+        "a": "R8’s check at minute 7 came after its handoff at minute 4. The presence of the check alone cannot establish the required order."
+      },
+      {
+        "title": "Leave room for an incomplete record",
+        "text": "A missing check entry can mean the check was skipped or that its record is missing. Equal timestamps can hide the actual order when the clock only counts whole minutes. Keep these two kinds of uncertainty separate from a recorded reversal.",
+        "example": "Use None for an absent time. Test for missing values before comparing numbers. For this exercise the two timestamps use the same clock.",
+        "code": "def order(check, handoff):\n    if check is None or handoff is None:\n        return \"missing record\"\n    if check == handoff:\n        return \"order unknown\"\n    return \"in order\" if check < handoff else \"reversed\"\n\nfor pair in [(None, 6), (6, 6), (7, 6)]:\n    print(order(*pair))",
+        "out": "missing record\norder unknown\nreversed",
+        "q": "What additional evidence would help when both events show minute 6?",
+        "a": "A reliable within-minute sequence number or more precise event times for the same request could establish which action occurred first."
+      },
+      {
+        "title": "Explain the result using the original records",
+        "text": "A clerk may enter a check after the handoff even when the check happened first. Retain both the event time and the entry time. An explanation should name the evidence rows, say which clock it used and describe only what those records support.",
+        "example": "Rows E12 and E13 both concern Ava’s R7. The columns are evidence ID, action, event minute and entry minute. Sorting by each of the last two columns answers a different question.",
+        "code": "rows = [(\"E12\", \"check\", 2, 8), (\"E13\", \"handoff\", 5, 5)]\nfor column in [2, 3]:\n    ordered = sorted(rows, key=lambda row: row[column])\n    print(\" then \".join(row[0] for row in ordered))",
+        "out": "E12 then E13\nE13 then E12",
+        "q": "A clerk says, “The check came after handoff because E12 was entered last.” What correction can you support?",
+        "a": "E12 records the check at minute 2, before the minute-5 handoff in E13. Its later entry at minute 8 describes when the record arrived. These records support the required event order."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Two visits",
+        "input": "Ava, camera C1. Request R7 has a check at minute 3. R8 has a handoff at minute 5. These are the only records.",
+        "q": "Does either request have evidence of a check before its own handoff?",
+        "a": "Neither does. R7 has no handoff record. R8 has no check record. Combining the visits would manufacture a completed sequence."
+      },
+      {
+        "label": "Whole-minute clock",
+        "input": "R9 contains a check marked 10 and a handoff marked 10. The timestamps record whole minutes. No sequence numbers are available.",
+        "q": "Which status should the desk show, and why?",
+        "a": "Order unknown. The two entries establish that both actions were recorded during minute 10. They leave their order unresolved."
+      },
+      {
+        "label": "Late entry",
+        "input": "R10 check occurred at minute 11 and was entered at 18. Handoff occurred at 15 and was entered at 16.",
+        "q": "Which clock answers whether the physical steps followed the rule?",
+        "a": "Use event times for the physical order. The recorded check at 11 preceded handoff at 15. Entry times 18 and 16 would reverse that order."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Request R11 has handoff H1 at 12, check C2 at 14 and an earlier check C1 at 9. The rule requires at least one earlier check. Does H1 pass?",
+        "hint": "Compare each check with the same handoff. One qualifying pair is sufficient.",
+        "a": "Yes. C1 at 9 is earlier than H1 at 12. C2 at 14 cannot support H1, but the rule only asks for one earlier check."
+      },
+      {
+        "q": "A return and a new loan share a camera. Which columns would let someone audit the order of steps in each loan even if the logs arrive late?",
+        "hint": "Consider identity, the action itself, both clocks and where to find the row again.",
+        "a": "Keep a distinct loan ID, item ID, action, event time, entry time and evidence-row ID. Group by loan, order by event time and use row IDs to cite the evidence. Record clock precision or a reliable sequence number if times can tie."
+      },
+      {
+        "q": "A dashboard counts 7 in order, 2 reversed and 1 missing. Of the 10 cases, what fraction has evidence of following the rule? Of the cases whose order is known, what fraction followed it?",
+        "hint": "The first denominator is all cases. For the second, drop the unresolved case.",
+        "a": "Seven of ten cases have supporting evidence. Among the nine with known order, seven of nine followed it. Report the missing case so readers know why the fractions differ."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Why bother with a process if a knowledge graph can store both actions?",
+        "a": "A graph can represent when an event happened and which request it concerns. Those details let you ask whether a particular check preceded a particular handoff. A graph containing only the broad facts “Ava was checked” and “C1 was handed over” cannot answer that question about R7."
+      },
+      {
+        "q": "If I see the check first and the handoff second, did the check cause the handoff?",
+        "a": "The log supports a statement about sequence. To ask about a cause, imagine changing whether the check happened and ask what that change would do to the outcome. A log of one sequence observes only what actually happened."
+      }
+    ],
+    "bridge": "Suppose a log shows that an extra clerk arrived before a queue cleared. Would the same queue have cleared just as quickly without that clerk? Module 14 gives that question a precise meaning."
+  },
+  {
+    "n": 14,
+    "title": "Comparing an observation with an intervention",
+    "goal": "Tell an observed group difference from the effect of a change, and calculate both in a small staffing model.",
+    "prereq": "You can establish the order of two recorded events. You will now ask what would happen if the desk deliberately changed a decision.",
+    "slides": [
+      {
+        "title": "Which shifts waited longer?",
+        "text": "Ava wants to know whether adding a clerk would shorten her wait for C1. First look at what the desk observed. An association is a pattern across observations. Here we compare wait times from two fictional shifts.",
+        "example": "On the quiet shift there was no extra clerk and the wait was 4 minutes. On the busy shift there was an extra clerk and the wait was 8 minutes. We measure the difference as extra minus no extra.",
+        "code": "wait_without_extra = 4\nwait_with_extra = 8\nprint(wait_with_extra - wait_without_extra)",
+        "out": "4",
+        "q": "Complete the sentence using only the observations: “The shift with an extra clerk …”",
+        "a": "… had a wait four minutes longer than the shift without one. The comparison changes both staffing and how busy the desk was."
+      },
+      {
+        "title": "Why was the extra clerk there?",
+        "text": "The supervisor assigns extra help when a shift is busy. Crowding can also increase wait time. A factor that influences both the staffing decision and the wait is a possible confounder. The two observed shifts give us no equally busy pair with different staffing.",
+        "example": "Use 0 for quiet or no extra clerk and 1 for busy or an extra clerk. Each row records busy, extra and minutes waited. Grouping by busy shows which choices were actually observed together.",
+        "code": "shifts = [(0, 0, 4), (1, 1, 8)]\nfor busy in (0, 1):\n    choices = [extra for load, extra, wait in shifts if load == busy]\n    print(busy, choices)",
+        "out": "0 [0]\n1 [1]",
+        "q": "Can we find out what happened on a busy shift without the extra clerk by filtering this table?",
+        "a": "No row contains that combination. Filtering can select observations the desk has, but cannot supply the missing comparison."
+      },
+      {
+        "title": "Change one decision inside a stated model",
+        "text": "An intervention sets a choice deliberately. To practice, assume the wait starts at 4 minutes, a busy desk adds 6 and an extra clerk saves 2, with everything else fixed. These are assumptions of a toy model. They let us calculate the outcome of each staffing choice on the same busy shift.",
+        "example": "Set busy to 1 in both calculations. Compare a clerk count setting of 1 (extra help) with 0 (usual staffing). The unobserved alternative for that shift is its counterfactual outcome under this model.",
+        "code": "def wait(busy, extra):\n    return 4 + 6 * busy - 2 * extra\n\nwithout = wait(1, 0)\nwith_extra = wait(1, 1)\nprint(without, with_extra, with_extra - without)",
+        "out": "10 8 -2",
+        "q": "Why does this difference have the opposite sign from the observed four-minute difference?",
+        "a": "The observed comparison changed crowding and staffing together. Here the same busy shift is considered under two staffing choices. The model assigns a two-minute reduction to the extra clerk, giving 8 minus 10, or −2."
+      },
+      {
+        "title": "Two explanations can fit the same log",
+        "text": "To see what the log leaves open, try another model. Suppose a busy shift adds 4 minutes and the extra clerk changes nothing. Both models reproduce the two observed waits. Their predictions disagree for a busy shift with usual staffing.",
+        "example": "Model A is the previous rule. Model B ignores staffing. Compare predictions on the observed rows and then on the combination the log lacks.",
+        "code": "def model_a(busy, extra):\n    return 4 + 6 * busy - 2 * extra\n\ndef model_b(busy, extra):\n    return 4 + 4 * busy\n\nfor busy, extra in [(0, 0), (1, 1), (1, 0)]:\n    print(model_a(busy, extra), model_b(busy, extra))",
+        "out": "4 4\n8 8\n10 8",
+        "q": "Which additional staffing comparison would help distinguish these explanations?",
+        "a": "Compare otherwise comparable busy shifts with and without an extra clerk. A study that randomly assigns extra help across many such shifts could reduce systematic differences between staffing groups."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Quiet shift",
+        "input": "Model A starts at 4 minutes, adds 6 when busy and subtracts 2 with an extra clerk. Keep the shift quiet.",
+        "q": "What does the model predict when extra help is added?",
+        "a": "It predicts 2 minutes with help versus 4 without, a change of −2 minutes. This comes from the specified rule."
+      },
+      {
+        "label": "Same observations, new rule",
+        "input": "Model B starts at 4 minutes, adds 4 when busy and has no staffing term. The observed busy, extra-clerk shift waited 8 minutes.",
+        "q": "What does Model B predict for that shift if the extra clerk is removed?",
+        "a": "It still gives 8 minutes. Having observed 8 with extra help does not distinguish Model B from Model A."
+      },
+      {
+        "label": "A different observation",
+        "input": "The desk now reports a busy shift with usual staffing and an 11-minute wait. The two toy rules ignore variation between equally busy shifts.",
+        "q": "Does this match either model’s exact prediction for that input?",
+        "a": "Neither. Model A predicts 10 and B predicts 8. A is closer on this case. A single mismatch still calls for revisiting the rules or measuring other sources of variation."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Suppose usual staffing on a quiet shift gives a wait of 5 and extra staffing on a busy shift gives 7. Calculate the observed difference and name the question it leaves open.",
+        "hint": "Subtract usual from extra, then ask which two things changed together.",
+        "a": "The observed difference is 7 − 5 = 2 minutes. Both staffing and crowding changed. We still need to ask how the same kind of shift would do under the two staffing choices."
+      },
+      {
+        "q": "Keep Model A’s starting wait at 4 and busy increment at 6. Change the assumed saving from an extra clerk to 3. For a busy shift, work out both waits and the effect of adding help.",
+        "hint": "Calculate usual staffing first. Then apply the saving with the load held fixed.",
+        "a": "Usual staffing gives 4 + 6 = 10 minutes. Extra help gives 10 − 3 = 7. Under the revised assumption, the intervention changes the wait by 7 − 10 = −3 minutes."
+      },
+      {
+        "q": "A team evaluates a staffing policy by comparing every busy Friday with an extra clerk against every quiet Monday without one. Propose a more informative study.",
+        "hint": "Look for comparable shifts where both choices could be tried. State how to assign the choices and what to measure.",
+        "a": "For shifts eligible for either staffing level, group by expected demand and randomly assign extra help within each group. Compare waits measured the same way across many shifts. Record changes such as equipment outages that could affect interpretation."
+      }
+    ],
+    "faq": [
+      {
+        "q": "What does “hold everything else fixed” mean in this example?",
+        "a": "Use the same input for busyness and the same rule for translating inputs into a wait. Change only the extra-clerk input. This defines a precise calculation inside the model. A real desk cannot rerun the very same shift, which is why the study design matters."
+      },
+      {
+        "q": "If a model predicts every wait we recorded, has it discovered the cause?",
+        "a": "Models A and B both match the two recorded waits, yet disagree about removing help on a busy shift. To defend a causal interpretation, explain the assumptions and seek observations or a study that can distinguish rival explanations."
+      }
+    ],
+    "bridge": "Two models can agree on past observations for different reasons. In Module 15 you will trace a hybrid system’s decisions and test where those decisions succeed or fail on new requests."
+  },
+  {
+    "n": 15,
+    "title": "Explaining and testing a hybrid decision",
+    "goal": "Trace a screening decision, compare a learned model and a rule on the same held-out requests, and locate an error using independent evidence.",
+    "prereq": "You have used scores, rules and evidence records to justify a decision. You have also seen how several explanations can fit the same observations.",
+    "slides": [
+      {
+        "title": "What made this request reach the clerk?",
+        "text": "Ava submits a photo of the item she wants to borrow. A learned model gives a score for whether the photo matches camera C1. Our fictional desk sends the request to a clerk if the score is at least 0.80 and the inventory lists C1 as available. The clerk makes the final decision.",
+        "example": "An explanation can retrace this decision using its actual inputs. Record the photo ID, model score, inventory-row ID and the result of the two tests. A clerk can then inspect either source.",
+        "code": "photo, score = \"P7\", 0.91\ninventory, available = \"I3\", False\nmatch = score >= 0.80\nprint(photo, \"passes cutoff:\", match)\nprint(inventory, \"available:\", available)\nprint(\"send to clerk:\", match and available)",
+        "out": "P7 passes cutoff: True\nI3 available: False\nsend to clerk: False",
+        "q": "Would “the model rejected the photo” explain why this request was held?",
+        "a": "No. The photo passed its cutoff. Inventory row I3 marked C1 unavailable, which made the final test fail. This trace explains the system’s behavior even if I3 later turns out to contain an error."
+      },
+      {
+        "title": "Give the test a reference answer",
+        "text": "Choose the decision you want to evaluate. Here a reviewer independently checks whether the photographed item really was C1 and whether C1 actually was available at the request time. Only a true match and actual availability together warrant a send. A held-out set consists of requests kept out of training and choices such as the cutoff. Compare every method on these same requests.",
+        "example": "The six reviewed decisions run from R1 to R6. True means the request met both conditions. A baseline is a simple comparison method. One baseline holds every request. Accuracy counts agreements and divides by all requests.",
+        "code": "reviewed = [True, False, False, True, False, False]\nalways_hold = [False] * len(reviewed)\ncorrect = sum(pred == ref for pred, ref in zip(always_hold, reviewed))\nprint(correct, \"of\", len(reviewed))",
+        "out": "4 of 6",
+        "q": "Can the desk claim that this baseline successfully sends eligible requests to the clerk?",
+        "a": "It earns four correct holds but sends none of the two eligible requests. Overall accuracy hides that failure."
+      },
+      {
+        "title": "Which part of the system helped?",
+        "text": "Test a score-only decision and a decision that also uses inventory. Keep the same six requests, the same reference decisions and the same cutoff. Removing a component while keeping the rest fixed is an ablation. The comparison shows what that component contributes on these cases.",
+        "example": "Each row lists the photo score, recorded availability and reviewer’s decision. The score-only method sends any row at or above 0.80. The hybrid method also requires availability.",
+        "code": "rows = [(0.95, True, True), (0.90, False, False),\n        (0.40, True, False), (0.60, True, True),\n        (0.85, True, False), (0.35, False, False)]\nscore_only = hybrid = 0\nfor score, available, reference in rows:\n    match = score >= 0.80\n    score_only += (match == reference)\n    hybrid += ((match and available) == reference)\nprint(score_only, hybrid)",
+        "out": "3 4",
+        "q": "Which row changes when inventory is added, and do the four hybrid agreements settle which system is best?",
+        "a": "Only R2 changes, from an incorrect send to a correct hold. Hybrid and always-hold both agree four times. The hybrid sends eligible R1 and ineligible R5, so the choice also depends on the costs of a missed request and an unnecessary review."
+      },
+      {
+        "title": "Diagnose the two kinds of mistakes",
+        "text": "A false positive is a request the system sends that the reviewer says should be held. A false negative is an eligible request the system holds. Precision asks what fraction of sent requests were eligible. Recall asks what fraction of eligible requests were sent. To locate a mistake, inspect independent evidence for each step.",
+        "example": "The hybrid sends R1 and R5. The reviewer marks R1 and R4 eligible. The reviewer also confirms availability in R4 and R5, so their errors warrant inspection of the photo decisions.",
+        "code": "sent = {\"R1\", \"R5\"}\neligible = {\"R1\", \"R4\"}\ncorrect_sends = sent & eligible\nprint(\"unnecessary review:\", sorted(sent - eligible))\nprint(\"missed:\", sorted(eligible - sent))\nprint(\"precision:\", len(correct_sends) / len(sent))\nprint(\"recall:\", len(correct_sends) / len(eligible))",
+        "out": "unnecessary review: ['R5']\nmissed: ['R4']\nprecision: 0.5\nrecall: 0.5",
+        "q": "What would you inspect before raising the cutoff to remove R5?",
+        "a": "Inspect the photos, their reference labels and their scores. R5 is an incorrect match at 0.85, but R4 is a real match at only 0.60. Raising the cutoff cannot recover R4. Choose changes on development cases, then evaluate on fresh held-out cases."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Trace one send",
+        "input": "R12 has photo P12 with score 0.80 and inventory I12 says C1 is available. Send if score is at least 0.80 and the item is available.",
+        "q": "Write the explanation the clerk should see.",
+        "a": "P12 reaches the inclusive 0.80 cutoff and I12 lists C1 as available, so R12 is sent for review. Whether the photo really matches still depends on checking the source."
+      },
+      {
+        "label": "Identify a faulty record",
+        "input": "R13 has score 0.94 for a real match. The program reads unavailable, while an independent inventory snapshot for that time confirms available.",
+        "q": "Which component should you inspect first?",
+        "a": "The photo decision agrees with the independent check. The availability input disagrees. Inspect the inventory record, its timestamp and how R13 was linked to it."
+      },
+      {
+        "label": "Count two denominators",
+        "input": "A new test set has 4 eligible requests. A system sends 3, of which 2 are eligible.",
+        "q": "Calculate precision and recall.",
+        "a": "Precision is 2 of 3 sent requests. Recall is 2 of 4 eligible requests. One unnecessary review reduces precision and two missed eligible requests reduce recall."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "On ten reviewed requests, eight should be held. How accurate is always-hold, and what is its recall for eligible requests?",
+        "hint": "Count correct holds, then count eligible requests sent.",
+        "a": "It agrees eight times out of ten, or 80%. It sends zero of the two eligible requests, giving 0% recall. Precision for sends has a zero denominator here."
+      },
+      {
+        "q": "The hybrid and the score-only method give the same wrong answer for R20. What evidence could distinguish a bad photo score from a bad inventory record?",
+        "hint": "Use independent information available for the same request and time.",
+        "a": "Compare the photo with the correct item and obtain an independently checked inventory snapshot at the request time. Replay both tests with those values. The failed comparison locates a possible error, and both components could be wrong."
+      },
+      {
+        "q": "A team tries 20 score cutoffs on its final test set and reports the one that sent the most eligible requests with few incorrect sends. How would you redesign that evaluation?",
+        "hint": "Separate the examples used to choose the cutoff from the examples used to report performance.",
+        "a": "Choose the cutoff on a development set. Fix the threshold, inventory rule and evaluation measures, then run the comparison once on new held-out requests. Keep repeated copies of the same request together when dividing the data."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Can an explanation be faithful even when the decision is wrong?",
+        "a": "Yes. A trace that says “I3 showed unavailable” can faithfully describe the program’s decision. If I3 was stale, that same trace helps a clerk find the problem. To judge correctness, compare the inputs and decision with independent evidence."
+      },
+      {
+        "q": "Should I always choose the method with the highest accuracy?",
+        "a": "Ask what happens to each type of request. A desk that holds everything scores well when most requests should be held, but misses every eligible borrower. Count missed requests and unnecessary reviews, and relate both to the desk’s purpose."
+      }
+    ],
+    "bridge": "In the capstone, a hospital teaching-room clerk needs to review equipment handoffs. You will combine the score, evidence lookup and time rule in one auditable decision, then test its weak spots."
+  },
+  {
+    "n": 16,
+    "title": "Capstone: auditing a hospital teaching-room handoff",
+    "goal": "Build and test an evidence-backed review of training-room equipment handoffs, then explain when an administrative reviewer needs to inspect the records.",
+    "prereq": "You have built rule traces, checked evidence, compared event times and evaluated held-out decisions. You will combine these skills in one new setting.",
+    "slides": [
+      {
+        "title": "Translate the clerk’s question into a rule",
+        "text": "A fictional hospital teaching room lends projectors to staff for workshops. Its clerk asks whether the paperwork records a label check before each handoff. This is an administrative record-review task. A teaching-room ticket identifies one handoff, just as a request ID identified Ava’s camera loan.",
+        "example": "Ticket T17 concerns projector P7. K8 is a note attached to a recorded label check. H4 is a scanned handoff record. Keep evidence from the same ticket. Each row below gives the evidence ID, ticket and source type.",
+        "code": "records = [(\"K8\", \"T17\", \"note\"), (\"H4\", \"T17\", \"scan\"),\n           (\"K9\", \"T18\", \"note\")]\nevidence = [key for key, ticket, kind in records if ticket == \"T17\"]\nprint(\", \".join(evidence))",
+        "out": "K8, H4",
+        "q": "A check note for T18 also mentions projector P7. May the clerk use it to clear T17?",
+        "a": "The projector can be borrowed several times. T17 needs a check record tied to its own handoff. The shared item name cannot establish that link."
+      },
+      {
+        "title": "Connect a learned signal to an evidence record",
+        "text": "A note classifier reads a staff note and scores whether it reports a completed label check. The practice data supply its scores so everyone can audit the same inputs. Under the exercise policy, a score of at least 0.80 admits the note as candidate evidence. A lower score sends the case for review.",
+        "example": "K8 reads “Projector P7 label checked” and receives 0.92. K12 reads “Check label when available” and receives 0.55. The source wording remains available to the clerk even when a score passes the cutoff.",
+        "code": "notes = [(\"K8\", 0.92), (\"K12\", 0.55)]\nfor source, score in notes:\n    result = \"use as candidate\" if score >= 0.80 else \"review note\"\n    print(source, result)",
+        "out": "K8 use as candidate\nK12 review note",
+        "q": "If a note only promises a future check but receives 0.93, what can the rule establish?",
+        "a": "It can establish that the classifier admitted that note. The wording does not document a completed check. A clerk who examines the source can catch the classification error."
+      },
+      {
+        "title": "Return a finding the clerk can inspect",
+        "text": "Use one candidate note and one handoff scan for the same ticket. Compare their event minutes. Label the records “in order” or “reversed.” Use “needs review” for missing evidence, a low score or tied times. These labels summarize the records for a human reviewer.",
+        "example": "For T17, K8 reports a check at minute 12 and H4 records handoff at 18. Print the ticket, finding and source IDs so the clerk can open the records. This case has a qualifying note and distinct times.",
+        "code": "ticket = \"T17\"\nnote_id, score, check = \"K8\", 0.92, 12\nscan_id, handoff = \"H4\", 18\nif None in (note_id, score, check, scan_id, handoff) or score < 0.80 or check == handoff:\n    finding = \"needs review\"\nelif check < handoff:\n    finding = \"in order\"\nelse:\n    finding = \"reversed\"\nprint(ticket, finding, note_id, scan_id)",
+        "out": "T17 in order K8 H4",
+        "q": "What would you write for the clerk, and what could the clerk check?",
+        "a": "“For T17, candidate note K8 reports a check at minute 12. Scan H4 records a handoff at minute 18. The recorded order meets the teaching-room rule.” The clerk can verify the note wording, times and ticket IDs."
+      },
+      {
+        "title": "Run the audit on three tickets",
+        "text": "Your capstone is a small program plus a short audit. First predict the findings for the three tickets below. Then run the code, trace the source IDs and add the two tests in the exercises: one for the cutoff boundary and one for tied times. Treat None as missing evidence. The compact table assumes the desk has already joined each ticket to its own source rows.",
+        "example": "Rows give a ticket, note ID, classifier score, check minute, scan ID and handoff minute. T17 and T18 have both sources. T19’s note is uncertain and its scan is missing. Each ticket has at most one note and one scan in this exercise.",
+        "code": "cases = [(\"T17\", \"K8\", .92, 12, \"H4\", 18),\n         (\"T18\", \"K9\", .90, 20, \"H5\", 17),\n         (\"T19\", \"K12\", .55, 11, None, None)]\nfor ticket, note, score, check, scan, handoff in cases:\n    if None in (note, score, check, scan, handoff) or score < .80:\n        result = \"needs review\"\n    elif check == handoff:\n        result = \"needs review\"\n    else:\n        result = \"in order\" if check < handoff else \"reversed\"\n    print(ticket, result, note, scan)",
+        "out": "T17 in order K8 H4\nT18 reversed K9 H5\nT19 needs review K12 None",
+        "q": "What would make this submission convincing beyond matching the three printed labels?",
+        "a": "For each decision, explain what the score test and time test contributed, cite the available records and name any missing evidence. Test a new case such as a high score with tied timestamps. Check that the clerk can see the uncertainty."
+      }
+    ],
+    "lab": [
+      {
+        "label": "Event time reversed",
+        "input": "T25 has note K20, score 0.89, event minute 17, and handoff scan H20 at minute 14. Both records identify T25.",
+        "q": "Which finding and which evidence should the desk display?",
+        "a": "Reversed. Candidate note K20 reports a check at 17, after the handoff in H20 at 14. A clerk can inspect those records before drawing conclusions about the actual handoff."
+      },
+      {
+        "label": "Check without a scan",
+        "input": "T26 has note K21, score 0.98, event minute 12, and no handoff scan.",
+        "q": "How should this differ from a documented reversal?",
+        "a": "Needs review. K21 is a candidate check record, but the missing handoff time prevents ordering the events. Show K21 and the missing scan."
+      },
+      {
+        "label": "A misleading high score",
+        "input": "T27 has note K22, “Label still needs checking,” score 0.91 at minute 9. Scan H22 records handoff at 12. Both IDs match.",
+        "q": "What does the program print, and what should a reviewer do?",
+        "a": "It labels T27 in order because the score passes and 9 is earlier than 12. The note itself describes unfinished work. Flag the note classification, record the correction and send the ticket for review."
+      }
+    ],
+    "exercises": [
+      {
+        "q": "Build the capstone review for T17, T18 and T19. Report each status with its source IDs and explain the tests in everyday language.",
+        "hint": "Retrieve within a ticket, apply the inclusive 0.80 cutoff, check that both records exist, then compare times. Look for every reason a case needs review.",
+        "a": "T17 is in order on the records: K8 scores 0.92 and reports minute 12 before H4 at 18. T18 is reversed: K9 scores 0.90 but reports 20 after H5 at 17. T19 needs review: K12 scores 0.55 and there is no scan. Its evidence cannot establish the order."
+      },
+      {
+        "q": "Add a ticket that isolates the cutoff boundary and one that isolates equal times. Predict both outputs before running your program.",
+        "hint": "Keep all other facts ordinary and complete. Change one feature per case.",
+        "a": "Try T20, K13, 0.80, 7, H6, 8. The inclusive cutoff admits K13 and the result is in order. Try T21, K14, 0.95, 9, H7, 9. The note passes, but minute-level times tie, so the result is needs review."
+      },
+      {
+        "q": "A clerk independently labels four new tickets: in order, reversed, needs review, needs review. The system gives in order, in order, needs review, in order. Evaluate it and propose one diagnostic step.",
+        "hint": "Line up labels by ticket. Identify a reversal it missed and a case it cleared with insufficient evidence.",
+        "a": "Two of four labels agree. The second ticket is a missed reversal. The fourth is an unsupported clearance. Inspect source IDs, wording and timestamps for each, replay the cutoff and order tests, and report which step first diverged from the clerk’s evidence. For a new version, keep fresh cases for independent evaluation."
+      }
+    ],
+    "faq": [
+      {
+        "q": "Where is the neurosymbolic part of this capstone?",
+        "a": "The learned classifier proposes what free-text notes mean. The symbolic part checks explicit conditions about ticket identity, admissible evidence and time order. An error can arise in either part. Keeping the note and scan IDs lets a reviewer test the particular decision."
+      },
+      {
+        "q": "How does this relate to healthcare decision support?",
+        "a": "Both an administrative audit and a clinical compliance study can ask what a record supports under an explicit rule. This projector exercise lets you practice representing evidence and uncertainty. Interpreting patient-care protocols requires clinical expertise, validated definitions and evaluation on appropriate data."
+      },
+      {
+        "q": "What should I hand in for the capstone?",
+        "a": "Submit runnable code, a trace for each supplied ticket, the predicted and observed outcomes for your two added tests, and a short error analysis of the four independently reviewed tickets in the final exercise. A reader should be able to reproduce each label and locate its supporting records."
+      }
+    ],
+    "bridge": "Return to the course overview and trace one finding from its learned input through its rule and supporting records. Your capstone is complete when another reader can reproduce the finding, identify its assumptions and tell when to ask for review."
+  }
+]

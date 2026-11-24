@@ -1,0 +1,306 @@
+[
+  {
+    "n": 1,
+    "q": "Ava asks for C1 while Bo holds it. The clerk records only Requested(Ava, C1). Which question can someone answer from that single fact?",
+    "options": [
+      {
+        "text": "Who currently holds C1?",
+        "feedback": "You know from the story that Bo holds it. Someone reading only the recorded fact would see the request and would still need a record naming the current holder."
+      },
+      {
+        "text": "Which item did Ava request?",
+        "feedback": "The second position in Requested(Ava, C1) contains the requested item. It gives C1 directly."
+      },
+      {
+        "text": "When did Ava request C1?",
+        "feedback": "The fact names a requester and an item. Neither position records a time."
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "n": 2,
+    "q": "The desk has one rule that says every oriented borrower is eligible. It records Eligible(Lin). What can you infer about Lin’s orientation from this information?",
+    "options": [
+      {
+        "text": "Lin’s orientation remains unknown.",
+        "feedback": "The rule lets you start with orientation and infer eligibility. It leaves open other possible grounds for Lin’s eligibility."
+      },
+      {
+        "text": "Lin completed orientation.",
+        "feedback": "That reasoning reverses the implication. To infer orientation this way, you would need an additional rule requiring orientation for everyone who is eligible."
+      },
+      {
+        "text": "Lin missed orientation.",
+        "feedback": "There is no record saying Lin missed it. Eligibility is consistent with having completed orientation."
+      }
+    ],
+    "correct": 0
+  },
+  {
+    "n": 3,
+    "q": "The graph says C1 has type Camera and Camera is a subclass of Equipment. A clerk adds one new fact, (C1, storedIn, Drawer3). Which inference is justified?",
+    "options": [
+      {
+        "text": "Every camera is stored in Drawer3.",
+        "feedback": "The new edge starts at the individual C1. Other cameras may have their own storage locations."
+      },
+      {
+        "text": "Drawer3 has type Equipment because it contains C1.",
+        "feedback": "Subclass membership applies to C1 through Camera. The stated graph gives no rule assigning a type to the container."
+      },
+      {
+        "text": "At least one piece of equipment is stored in Drawer3.",
+        "feedback": "C1 supplies a witness. Its type places it in Equipment and its own location edge leads to Drawer3."
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "n": 4,
+    "q": "Ava and Bo each have a ready-for-review conclusion for C1. Each proof uses the same availability record. Their request and eligibility records are separate. Which conclusions should the desk recheck after that availability record is corrected?",
+    "options": [
+      {
+        "text": "Only the conclusion produced last.",
+        "feedback": "The order in which the proofs were produced does not tell you which premises they used. Both depend on the corrected record."
+      },
+      {
+        "text": "Both ready-for-review conclusions.",
+        "feedback": "Following the dependency from the availability record reaches both proofs. Rechecking means determining whether each conclusion still has support."
+      },
+      {
+        "text": "Both eligibility conclusions.",
+        "feedback": "In this exercise the orientation rule supports eligibility. The availability record is used later when deriving readiness."
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "n": 5,
+    "q": "A camera photograph scores 0.81. The cutoff for CapCandidate is 0.75, and a clerk has yet to inspect the image. Which label can the desk justify now?",
+    "options": [
+      {
+        "text": "CapCandidate",
+        "feedback": "The score crosses the cutoff for proposing a visible cap. A staff inspection would supply separate evidence for confirmation."
+      },
+      {
+        "text": "CapConfirmed",
+        "feedback": "The desk reserves confirmation for a staff inspection. A score above the cutoff can still come from a photograph with no visible cap."
+      },
+      {
+        "text": "An 81% probability that a cap is present",
+        "feedback": "The example computes a cue score. Interpreting 0.81 as a probability would require evidence connecting scores to observed frequencies."
+      }
+    ],
+    "correct": 0
+  },
+  {
+    "n": 6,
+    "q": "The desk recorded Reserved(Ava, C1). A C1 photograph scores 0.88, above the 0.75 cutoff. The saved candidate is accidentally labeled C2, and no review is suggested for Ava. Where is the first broken link?",
+    "options": [
+      {
+        "text": "The photograph scored too low.",
+        "feedback": "A score of 0.88 exceeds 0.75. Lowering the cutoff would leave the incorrect item ID in place."
+      },
+      {
+        "text": "The same-item rule should allow C2 in place of C1.",
+        "feedback": "That would let one camera’s image support a recommendation about a different camera. The rule is correctly requiring a match."
+      },
+      {
+        "text": "The step that wrote the named candidate copied the wrong item ID.",
+        "feedback": "The source photograph is for C1 but the stored candidate names C2. Correcting that link allows the rule to match Ava’s C1 reservation."
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "n": 7,
+    "q": "In Module 07, photo A has no cap and photo B has a verified cap. Both have the same single rim feature, x = 1. What changes when the rule penalty is given more weight?",
+    "options": [
+      {
+        "text": "The unit can now recognize B separately from A.",
+        "feedback": "The unit only sees x. Because both inputs have x = 1, both still get the same score at any chosen weight."
+      },
+      {
+        "text": "Training gives a larger cost to B falling below the required score.",
+        "feedback": "The larger penalty can favor a higher shared score. It changes the balance between the two training costs without supplying a new feature."
+      },
+      {
+        "text": "The training procedure discards A’s label.",
+        "feedback": "A’s squared label error remains in the objective. Only the multiplier on B’s penalty changes."
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "n": 8,
+    "q": "Two borrowers need different cameras. Ava scores C1 at 0.8 and C2 at 0.7. Ben scores C1 at 0.9 and C2 at 0.3. Which assignment maximizes the sum while respecting the desk rule?",
+    "options": [
+      {
+        "text": "Ava gets C2 and Ben gets C1.",
+        "feedback": "This assignment totals 0.7 + 0.9 = 1.6. The other feasible assignment totals 0.8 + 0.3 = 1.1."
+      },
+      {
+        "text": "Ava gets C1 and Ben gets C2.",
+        "feedback": "This is feasible, but totals 1.1. Comparing complete assignments shows that switching both choices increases the total to 1.6."
+      },
+      {
+        "text": "Ava and Ben both get C1.",
+        "feedback": "This would total 1.7 but uses the same camera twice. An assignment that violates the hard rule cannot win."
+      }
+    ],
+    "correct": 0
+  },
+  {
+    "n": 9,
+    "q": "R2 identifies Ava’s reserved item as C1. D5 says C1 is stored in Vault2. D6 says C2 is picked up at East Desk. What additional record would answer Ava’s question about where to pick up her camera?",
+    "options": [
+      {
+        "text": "Another reservation record for C1.",
+        "feedback": "R2 already identifies the reserved camera. A second reservation still would not tell you where to collect it."
+      },
+      {
+        "text": "A record about C1’s pickup location.",
+        "feedback": "The missing link starts at the camera named by R2 and gives its pickup location. D5 has the wrong relationship and D6 has the wrong item."
+      },
+      {
+        "text": "A storage record for C2.",
+        "feedback": "That would give another storage location for a different camera. Ava’s question requires a pickup location for C1."
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "n": 10,
+    "q": "Today C1 has exactly one pickup desk. A current record names North Desk. A draft says “Pick up C1 at North Desk at 3 p.m.” No record gives a time. How should you assess the draft?",
+    "options": [
+      {
+        "text": "The whole sentence is supported by the current desk record.",
+        "feedback": "The location record supports the North Desk claim. It supplies no time."
+      },
+      {
+        "text": "The entire sentence is contradicted because the time is missing.",
+        "feedback": "A missing time leaves that part unknown. It does not conflict with the stated location."
+      },
+      {
+        "text": "The location is supported and the time is unknown.",
+        "feedback": "Each claim needs its own evidence. The record identifies the desk while leaving 3 p.m. unresolved."
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "n": 11,
+    "q": "A desk model starts with available and oriented. Reserve removes available and adds reserved. Issue requires reserved and oriented. After the one-step plan [reserve], which verdict is correct for the goal issued?",
+    "options": [
+      {
+        "text": "The step ran, but the goal has not been reached.",
+        "feedback": "The resulting state includes reserved and oriented. An issue action would still have to run to add issued."
+      },
+      {
+        "text": "The plan succeeded because every listed action could run.",
+        "feedback": "Execution of each listed action is one check. You must also check that the final state contains the goal."
+      },
+      {
+        "text": "The reserve action failed because issued was absent at the start.",
+        "feedback": "Issued is the goal. The precondition of reserve is available, which was present when the plan started."
+      }
+    ],
+    "correct": 0
+  },
+  {
+    "n": 12,
+    "q": "P1 requires an active reservation and completed camera orientation. Ava’s reservation is active. Two records for Ava’s camera orientation disagree and cover the same time. Neither is known to supersede the other. What should the desk say?",
+    "options": [
+      {
+        "text": "Eligible, because one of the records says complete.",
+        "feedback": "Choosing the favorable record would ignore equally relevant evidence that conflicts with it."
+      },
+      {
+        "text": "Ineligible, because any disagreement proves orientation is incomplete.",
+        "feedback": "Disagreement leaves the orientation status unresolved. It does not establish which record is correct."
+      },
+      {
+        "text": "The reservation is confirmed. The conflicting orientation records need to be reconciled.",
+        "feedback": "This reports the condition already established and identifies exactly why the desk cannot yet apply P1 to reach a verdict."
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "n": 13,
+    "q": "The log shows check E1 for request R8 at minute 2, handoff E2 for R7 at minute 5, and check E3 for R7 at minute 6. Each request has at most one check in this complete example. What do the records show for R7?",
+    "options": [
+      {
+        "text": "Its check came before handoff because E1 occurred at minute 2.",
+        "feedback": "E1 concerns R8. A check on a different request cannot establish the order for R7."
+      },
+      {
+        "text": "Its handoff came before its check.",
+        "feedback": "Group by request first. For R7, E2 at minute 5 precedes E3 at minute 6."
+      },
+      {
+        "text": "The order is unknown because the earliest check belongs to R8.",
+        "feedback": "R7 has its own check and handoff with distinct times. Those two records are enough to order its events."
+      }
+    ],
+    "correct": 1
+  },
+  {
+    "n": 14,
+    "q": "The desk wants to estimate what adding a clerk would change during a busy shift. Which pair of predictions from a stated model addresses that question?",
+    "options": [
+      {
+        "text": "A quiet shift with the usual staff and a busy shift with extra help.",
+        "feedback": "Both crowding and staffing change across this pair. The difference cannot isolate the modeled effect of staffing on a busy shift."
+      },
+      {
+        "text": "Two shifts that both have extra help, one quiet and one busy.",
+        "feedback": "Staffing is constant across this pair. The comparison changes how busy the desk is."
+      },
+      {
+        "text": "The same busy conditions under usual staffing and under extra staffing.",
+        "feedback": "Changing only staffing isolates its effect within the stated model. How well the model represents the real desk remains an empirical question."
+      }
+    ],
+    "correct": 2
+  },
+  {
+    "n": 15,
+    "q": "A score-only system and a hybrid system see the same held-out request. The independent reviewer says to hold it. The score-only system sends it and the hybrid holds it because the inventory says unavailable. What does this comparison establish?",
+    "options": [
+      {
+        "text": "The added inventory check corrected a false send on this request.",
+        "feedback": "The score and request stayed fixed and only the added check changed the action. The reviewer’s independent decision shows which action matched this case."
+      },
+      {
+        "text": "Inventory is always reliable for future requests.",
+        "feedback": "One correct hold cannot establish the quality of future inventory records. Other requests may contain stale availability."
+      },
+      {
+        "text": "The photo score was necessarily wrong about which camera was pictured.",
+        "feedback": "A correct item match can still involve an unavailable camera. The reviewer’s hold decision concerns the full screening task."
+      }
+    ],
+    "correct": 0
+  },
+  {
+    "n": 16,
+    "q": "Ticket T30 has a qualifying check note at minute 8. The only handoff scan you can find is at minute 10 on ticket T31 for the same projector. Under the capstone policy, how should T30 be labeled?",
+    "options": [
+      {
+        "text": "In order because 8 is less than 10.",
+        "feedback": "Compare times only after matching the ticket. T31’s handoff cannot complete the evidence for T30."
+      },
+      {
+        "text": "Reversed because T30 has no handoff.",
+        "feedback": "A reversal requires two matching records with a known order. A missing scan cannot establish a reversal."
+      },
+      {
+        "text": "Needs review because T30 lacks its own handoff scan.",
+        "feedback": "The note passes the classifier cutoff, but the two records belong to different tickets. The reviewer needs a handoff record for T30."
+      }
+    ],
+    "correct": 2
+  }
+]

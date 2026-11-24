@@ -1,0 +1,114 @@
+[
+  {
+    "n": 1,
+    "start_q": "Ava writes, “Could I borrow C1 tomorrow?” Which words tell the clerk what she wants, and what would the clerk still need to check before promising it?",
+    "start_a": "“Borrow C1 tomorrow” identifies the item and day she wants. The clerk still needs evidence that C1 can be lent on that day.",
+    "end_q": "Lin and Bo each have a separate record of completing camera orientation. A clerk wants the same eligibility policy to cover a new borrower next week. What part of the policy should change from person to person?",
+    "end_a": "Only the borrower’s name should vary. The desk can state one policy for anyone who completes orientation, then apply it when an individual’s orientation record arrives."
+  },
+  {
+    "n": 2,
+    "start_q": "Ava and Lin both requested C1. If you leave the person’s name blank in Requested(person, C1), how many matching names should you find in those records?",
+    "start_a": "Two. Keeping C1 fixed makes each of the two requesters a match.",
+    "end_q": "A rule covers every piece of equipment. The list calls T2 a tripod. What general statement about tripods would let you apply the rule to T2?",
+    "end_a": "If every tripod is equipment, T2’s recorded type puts it in the group covered by the rule. You can use the same statement for a newly listed tripod."
+  },
+  {
+    "n": 3,
+    "start_q": "Ava requested C2. C1 is available. A rule needs both a request and availability for the same item. Which additional availability fact would complete this case?",
+    "start_a": "Available(C2) would match the item in Ava’s request. C1’s availability answers a question about a different camera.",
+    "end_q": "A clerk labels a new C3 as equipment after reading its Camera type. A reviewer asks where “equipment” came from. Which two pieces should the clerk show?",
+    "end_a": "Show the record that C3 is a Camera and the statement that every Camera is Equipment. Together they explain how the individual received the broader type."
+  },
+  {
+    "n": 4,
+    "start_q": "A graph explicitly lists C2 as a Camera. It also says all cameras are equipment. Which statement about C2 would require an inference if you answered from just these two records?",
+    "start_a": "C2 is equipment. Its camera type is already in the record. Connecting that type to the broader class takes one reasoning step.",
+    "end_q": "A record confirms C1 came back. The only evidence about its cap is a blurry photo. Why would it help to record “the detector suggests a cap” separately from “a clerk saw a cap”?",
+    "end_a": "The first claim depends on an interpretation of the image. Keeping its source makes a later rule or clerk able to check it before treating the cap as confirmed."
+  },
+  {
+    "n": 5,
+    "start_q": "Ava’s receipt identifies C1 as returned at 9. It says nothing about its accessories. If you want to know whether the cap was visible at return, which evidence would you seek?",
+    "start_a": "Seek an inspection made at return or a photograph of C1 from that return. The time and camera on the receipt help link the new evidence to the right event.",
+    "end_q": "Two photos score above the cutoff, one for C1 and one for C3. Ava reserved C3. Which information must the detector pass along with each candidate so the desk can choose the matching evidence?",
+    "end_a": "Keep the camera ID with each candidate. Matching C3 in the reservation to C3 in the candidate identifies the relevant photograph even if both scores are identical."
+  },
+  {
+    "n": 6,
+    "start_q": "The example detector proposes a cap when its score is at least 0.75. If the score is exactly 0.75, what can appear in the record before inspection?",
+    "start_a": "A cap candidate for that photo’s item. “At least” includes equality, and the proposal remains available for inspection.",
+    "end_q": "Staff repeatedly confirm caps on photos that score below the cutoff. The desk wants future scores on photos like these to rise during training. Where in the system would that information need to enter?",
+    "end_a": "It would have to affect how candidate detector weights are judged during training. A desk rule that runs only after scoring can change the review decision while leaving the learned scores untouched."
+  },
+  {
+    "n": 7,
+    "start_q": "A detector uses score = weight × cue. A photo has cue 1. If the weight changes from 0.3 to 0.5, what changes before any desk rule runs?",
+    "start_a": "The detector’s score rises from 0.3 to 0.5 because multiplying by 1 preserves the weight. Whether that changes a decision depends on the later rule.",
+    "end_q": "A desk adds a small training penalty for suggesting the same camera to two people. It now needs to guarantee that its final assignment never double-books a camera. What should be checked when choosing the assignment?",
+    "end_a": "Check the actual proposed assignments and exclude any that allocate a camera twice. A soft training cost can discourage a violation while still leaving it possible."
+  },
+  {
+    "n": 8,
+    "start_q": "Ava and Bo are each offered the only copy of C1 for 10 a.m. The desk has promised each a camera at that time. Can both promises be kept as written?",
+    "start_a": "No. Two borrowers would need the same physical camera at the same time. At least one promise or the available inventory would have to change.",
+    "end_q": "After allocating C2 to Ava, the desk moves C2’s pickup point. Should the old suitability score or the new pickup record determine where Ava goes?",
+    "end_a": "Use the reservation to identify C2, then consult the current pickup record for C2. The suitability score helped allocate a camera and contains no location information."
+  },
+  {
+    "n": 9,
+    "start_q": "Ava’s reservation names camera C4. One record gives C4’s shelf and another gives its public pickup desk. If Ava is on her way to collect it, which record belongs with the reservation?",
+    "start_a": "The pickup record. It matches both the item, C4, and the relationship the question asks about.",
+    "end_q": "A draft based on a pickup record says “Collect C4 at South Desk and bring a photo ID.” Which part needs a second kind of evidence?",
+    "end_a": "The ID requirement needs a relevant policy record. The pickup record can support the desk location while leaving that other claim open."
+  },
+  {
+    "n": 10,
+    "start_q": "C1’s pickup record says North Desk and C2’s says South Desk. A message about C1 cites the C2 record. What would you inspect before trusting the message?",
+    "start_a": "Match the item, relationship and location in the cited record to the message. A real pickup record can still be the wrong source if it describes C2.",
+    "end_q": "Ava verifies that C1 is available now. A proposed sequence reserves it for Bo and then promises Ava she can reserve it too. Why check the second step again?",
+    "end_a": "The first action can change availability. A claim that was supported before Bo’s reservation may no longer hold when Ava’s step is reached."
+  },
+  {
+    "n": 11,
+    "start_q": "A cabinet opens only when it is unlocked. A note proposes “open it, then unlock it.” If it starts locked, where does the plan first fail?",
+    "start_a": "At open. The required state, unlocked, does not hold before that action. Unlocking first could supply what opening requires.",
+    "end_q": "A simulated issue action requires a reservation and orientation. Ava’s reservation is present, but her orientation record has yet to be retrieved. Which check would make the desk’s answer more informative?",
+    "end_a": "Look up Ava’s orientation. The reservation already satisfies one requirement, and the missing record leaves the other unresolved. There is no basis yet for saying she failed orientation."
+  },
+  {
+    "n": 12,
+    "start_q": "Ava asks if she may collect C1. The desk knows where C1 is stored. What else would you ask for before deciding whether she may take it?",
+    "start_a": "Ask for the rule governing collection and the records for Ava and C1 that satisfy its requirements. A location tells you where the item is without settling permission.",
+    "end_q": "A reservation and orientation now support issue, but Ava says she waited 20 minutes. What new information would let the desk locate the delay?",
+    "end_a": "Look for event times for this request, such as arrival, verification and handoff. Comparing the times can locate a long interval. A reason for the delay would require further evidence about what happened in it."
+  },
+  {
+    "n": 13,
+    "start_q": "A plan said “check ID, then hand over C1.” The desk wants to know what actually happened on Ava’s request. What would you look for?",
+    "start_a": "Look for observations of each action tied to Ava’s request, with their event times. The plan alone gives the intended order.",
+    "end_q": "The recorded wait fell just after an extra clerk arrived. What outcome is missing if you want to know whether the extra clerk caused the drop?",
+    "end_a": "You would need to know how the queue would have changed over the same period without extra help. The event order establishes which happened first and leaves that alternative outcome unobserved."
+  },
+  {
+    "n": 14,
+    "start_q": "An extra clerk arrived at minute 12 and the queue shrank at minute 18. Which of these facts can you settle from the times alone: which event came first, or what made the queue shrink?",
+    "start_a": "The clerk arrived first. Finding the cause would require information about other changes and what the queue would have done without extra help.",
+    "end_q": "Two screeners gave identical decisions while every camera was available. One screener consults inventory and the other ignores it. Which new example could reveal the difference?",
+    "end_a": "Try a high-scoring request for an unavailable camera. Holding the score high lets the availability change expose whether the inventory check affects the decision."
+  },
+  {
+    "n": 15,
+    "start_q": "A desk forwards a request when the photo score is at least 0.80 and the camera is available. The score is 0.93 and the inventory says unavailable. What would the rule do?",
+    "start_a": "It would hold the request. Both conditions must hold, and the inventory condition fails even though the score passes.",
+    "end_q": "A teaching-room audit will screen staff notes and compare a check time with a handoff time. If one ticket is labeled incorrectly, what should you save so someone can tell which step went wrong?",
+    "end_a": "Keep the ticket ID, original note and its score, the handoff record, both event times and the rule used. A reviewer can then test whether the note was interpreted correctly and replay the time comparison independently."
+  },
+  {
+    "n": 16,
+    "start_q": "A staff note and a scan both concern ticket T40. The note records a check at minute 6 and the scan records a handoff at minute 9. Assuming the note is accepted as evidence, which event came first and by how much?",
+    "start_a": "The recorded check came first by three minutes. Both rows refer to T40, so the time comparison concerns one handoff.",
+    "end_q": "A second reviewer reproduces an “in order” result, then learns that the qualifying note’s minute was its filing time, not its event time. What should appear in the audit now?",
+    "end_a": "Record the discovered assumption and mark the order for review until the actual check time is available. Reproducing the computation shows how the first label arose, but the available times no longer establish the sequence."
+  }
+]

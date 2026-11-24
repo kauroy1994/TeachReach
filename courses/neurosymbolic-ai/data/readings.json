@@ -1,0 +1,38 @@
+[
+  {
+    "stage": 1,
+    "title": "RDF 1.1 Primer",
+    "url": "https://www.w3.org/TR/rdf11-primer/",
+    "authors": "W3C RDF Working Group (2014)",
+    "reading": "Read sections 3.1 and 3.2 on triples and identifiers, then the worked domain-inference example in section 6. A triple names a subject, a relationship and an object. A domain declaration says what kind of thing the subject of a relationship must be.",
+    "task": "Two desks each call a different camera C1. Adapt the campus graph so both desks can share their records. Then suppose the graph declares Borrower as the domain of requests and records that Ava requests the North Desk camera. Which new fact follows under RDF Schema reasoning? Can the desk now hand over the camera?",
+    "answer": "Give each camera its own global identifier and keep C1 as its local display label. Use the North Desk identifier as the object of Ava’s requests triple. Since requests has domain Borrower, a reasoner can infer that Ava is a Borrower. A desk rule would still need evidence of availability and any required orientation. Inferring a type from the schema supplies neither of those facts."
+  },
+  {
+    "stage": 2,
+    "title": "DeepProbLog: Neural Probabilistic Logic Programming",
+    "url": "https://arxiv.org/abs/1805.10872",
+    "authors": "Robin Manhaeve, Sebastijan Dumančić, Angelika Kimmig, Thomas Demeester and Luc De Raedt (2018)",
+    "reading": "Read the handwritten-digit addition example and Appendix A, Listing 1. A neural predicate assigns probabilities to the possible digits in an image. An ordinary addition rule then relates those uncertain digit readings to an observed sum. Training can use the sum as a target even when the individual digits are unlabeled.",
+    "task": "Try a classroom version in which each picture is either 1 or 2. The first picture gives probabilities 0.60 and 0.40 for those digits. The second gives 0.25 and 0.75. Assume the two readings are independent. What probability does the addition rule give the sum 3? What information would be lost by keeping just the most likely digit in each picture?",
+    "answer": "Two mutually exclusive pairs make 3. Reading 1 then 2 contributes 0.60 × 0.75 = 0.45. Reading 2 then 1 contributes 0.40 × 0.25 = 0.10. Their total is 0.55. Keeping only 1 and 2 gives a single answer of 3 and discards the alternative explanations and their weights. In the desk exercise, turning a learned score into a yes-or-no fact before applying a rule makes a similar choice about what evidence to retain."
+  },
+  {
+    "stage": 3,
+    "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+    "url": "https://arxiv.org/abs/2005.11401",
+    "authors": "Patrick Lewis and colleagues (2020)",
+    "reading": "Read sections 2.1 and 2.2, focusing on RAG-Sequence. The retriever scores the similarity of learned numerical representations of the question and passages. For each retrieved passage, the generator assigns a probability to the complete answer. The model combines those probabilities across candidate passages, an operation called marginalization.",
+    "task": "In a two-passage example, the retriever gives weights 0.75 and 0.25. The generator assigns the complete answer “C1 is available” probabilities 0.20 and 0.80 when given those passages separately. Calculate the RAG-Sequence mixture. What extra check from the desk exercise would you perform before showing that answer to Ava?",
+    "answer": "The weighted probability is 0.75 × 0.20 + 0.25 × 0.80 = 0.35. It measures the model’s probability of generating those words. In the desk exercise you can look up C1 by its exact identifier and inspect the current availability record. A passage about a different camera, or an old record, cannot justify a claim about C1 now. Keep the supporting record ID or report that the evidence is missing."
+  },
+  {
+    "stage": 4,
+    "title": "How Compliant is Sepsis Treatment? An Expert-Guided Neuro-symbolic Pipeline for Generating Clinical Compliance Insights",
+    "url": "https://arxiv.org/abs/2608.13617",
+    "authors": "Himanshu Tripathi, Kaushik Roy, Subash Neupane and Shahram Rahimi (NeSy 2026)",
+    "reading": "Read Figure 3 and the Pipeline Architecture section. Follow a source string into the fixed vocabulary used by the rules. The language model helps normalize varied drug and microbiology names. A separate fuzzy inference system uses expert-informed rules to score degrees of documented protocol compliance. Then read the discussion of ICU outcomes and consider what a retrospective comparison can establish.",
+    "task": "Transfer that division of labor to the projector capstone. Suppose two names for the same projector are assigned to different item IDs. Which downstream finding could change although the event times never changed? Design a test that distinguishes a naming error from a rule error. What could you conclude if high-scoring tickets also had shorter queues?",
+    "answer": "A valid handoff scan might be filed under the wrong item, leaving the matching ticket without its scan. First compare the mapped IDs against an independent clerk’s labels. Then give the time rule the corrected IDs and replay it with unchanged timestamps. If the result recovers, the mapping contributed to the error. Report the queue pattern as an association. Busy periods could affect both record completeness and queues, so that comparison alone cannot establish that improving documentation shortens waits."
+  }
+]

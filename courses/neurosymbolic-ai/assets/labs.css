@@ -1,0 +1,74 @@
+[data-stage-lab] {
+  --lab-crimson: #8a1b33;
+  --lab-line: #e2ccd1;
+  color: #252c34;
+  margin-block: 2rem;
+}
+.nsy-sandbox {
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--lab-line);
+  border-radius: 1rem;
+  background: #fff;
+}
+.nsy-sandbox h2 { margin: .35rem 0 .75rem; }
+.nsy-sandbox p { max-width: 76ch; line-height: 1.55; }
+.nsy-sandbox .nsy-stage {
+  color: var(--lab-crimson);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.nsy-sandbox fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem 1.25rem;
+  min-inline-size: 0;
+  margin: 1.25rem 0;
+  padding: .85rem 1rem 1rem;
+  border: 1px solid var(--lab-line);
+  border-radius: .75rem;
+  background: #fff9fa;
+}
+.nsy-sandbox legend { padding-inline: .35rem; font-weight: 700; }
+.nsy-sandbox label {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  line-height: 1.4;
+  font: inherit;
+}
+.nsy-sandbox label.nsy-choice { flex-direction: column; align-items: flex-start; }
+.nsy-sandbox input[type=checkbox] { accent-color: var(--lab-crimson); width: 1.05rem; height: 1.05rem; flex: none; }
+.nsy-sandbox select {
+  max-width: 100%;
+  padding: .4rem .65rem;
+  font: inherit;
+  color: inherit;
+  background: white;
+  border: 1px solid #987780;
+  border-radius: .4rem;
+}
+.nsy-sandbox :focus-visible { outline: 3px solid var(--lab-crimson); outline-offset: 3px; }
+.nsy-sandbox .nsy-trace {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
+  padding: 0;
+  margin: 1rem 0;
+  gap: .75rem;
+  list-style: none;
+}
+.nsy-sandbox .nsy-trace li {
+  border: 1px solid var(--lab-line);
+  border-top: 3px solid var(--lab-crimson);
+  padding: .8rem .95rem;
+  border-radius: .5rem;
+  background: #fff;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.nsy-sandbox .nsy-trace strong, .nsy-sandbox .nsy-trace span { display: block; }
+.nsy-sandbox .nsy-trace strong { margin-bottom: .4rem; color: #712036; }
+.nsy-sandbox .nsy-result { padding: .75rem 1rem; border-left: 4px solid var(--lab-crimson); background: #f9eff1; }
+.nsy-sandbox details { margin-block: .5rem; }
+.nsy-sandbox summary { cursor: pointer; font-weight: 700; color: var(--lab-crimson); }
