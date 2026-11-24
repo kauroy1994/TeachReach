@@ -16,7 +16,7 @@ jobs:
           python -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
           CHROME_BIN="$(command -v google-chrome)" python scripts/check_lesson_navigation.py http://127.0.0.1:8080
   browser-layout:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
