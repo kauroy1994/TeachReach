@@ -17,6 +17,7 @@ jobs:
           CHROME_BIN="$(command -v google-chrome)" python scripts/check_lesson_navigation.py http://127.0.0.1:8080
   browser-layout:
     runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright/python:v1.56.0-noble
     strategy:
       fail-fast: false
       matrix:
@@ -25,9 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check page layout and navigation in ${{ matrix.engine }}
         run: |
-          python3 -m venv "$RUNNER_TEMP/layout"
-          source "$RUNNER_TEMP/layout/bin/activate"
-          pip install playwright==1.56.0
-          python -m playwright install --with-deps ${{ matrix.engine }}
-          python -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
-          python scripts/check_site_layout.py http://127.0.0.1:8080 --engine ${{ matrix.engine }}
+          python3 -m venv /tmp/layout-checks
+          /tmp/layout-checks/bin/pip install playwright==1.56.0
+          python3 -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
+          /tmp/layout-checks/bin/python scripts/check_site_layout.py http://127.0.0.1:8080 --engine ${{ matrix.engine }}
