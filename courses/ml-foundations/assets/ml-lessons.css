@@ -1,0 +1,17 @@
+.ml-lesson .ml-lab-controls {display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));margin:1.5rem 0}
+.ml-lab-controls>div {display:grid;grid-template-columns:1fr auto;align-items:start;gap:.4rem .7rem}
+.ml-lab-controls label {font-weight:650}
+.ml-lab-controls output {font-variant-numeric:tabular-nums;color:#831b31}
+.ml-lab-controls input {grid-column:1/-1;width:100%;accent-color:#9e1b32;min-height:2rem;margin:0}
+.ml-lab-results {display:grid;gap:.5rem;max-width:100%;overflow-x:auto}
+.ml-chart-row {display:grid;grid-template-columns:minmax(0,1.2fr) minmax(2rem,1fr) minmax(3rem,auto);align-items:center;gap:.65rem;line-height:1.3}
+.ml-chart-row>span:first-child {overflow-wrap:anywhere}
+.ml-chart-row strong {text-align:right;font-variant-numeric:tabular-nums}
+.ml-chart-track {position:relative;height:.7rem;background:#f1e9eb;border-radius:3px;overflow:hidden}
+.ml-chart-track::after {content:"";position:absolute;left:clamp(0px,var(--zero),calc(100% - 1px));width:1px;top:0;bottom:0;background:#68575b}
+.ml-chart-track i {display:block;position:absolute;top:.1rem;bottom:.1rem;background:#a12b40}
+.ml-lab-results table {border-collapse:collapse;width:100%;margin:.7rem 0;font-variant-numeric:tabular-nums}
+.ml-lab-results th,.ml-lab-results td {padding:.35rem;text-align:center;border:1px solid #ded6d7;overflow-wrap:anywhere}
+.ml-lab-results th:first-child {text-align:left}
+.ml-lesson .ml-lab-results+p {margin-top:1rem}
+.ml-lesson .tr-course-footer nav {display:flex;flex-wrap:wrap;gap:.5rem}

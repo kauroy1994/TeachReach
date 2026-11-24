@@ -1,0 +1,152 @@
+{
+  "n": 16,
+  "opening": "Can the class improve on a simple exam-score forecast for students whose scores it has never used? Build a reproducible comparison, find a case where the improvement breaks down, and defend the conclusion in a short report.",
+  "recall": "Start with Ava, Ben and Cam from Module 01. Add nine fictional records. Reuse tensors from Stage I, regression and model comparison from Stage II, and reliability checks from Module 15. Each row is one student and each score is out of 100.",
+  "recallQ": "Why can getting closer to Ava's score of 60 after a gradient update leave the class unsure about future students?",
+  "recallA": "Ava's score helped choose that update. Other students supply independent evidence about whether the changed rule generalizes.",
+  "lessons": [
+    {
+      "title": "Write the question as a prediction task",
+      "explain": "Put yourself at the instant just before a fictional exam. The model receives a student's study hours and completed practice sets recorded by then. Its target is the exam score, measured later. Success means small errors for students held out from fitting.",
+      "worked": "For Ava the available pair is (2, 3), and the eventual score is 60. A one-row forecast under the original course rule is 55 points. A post-exam field such as number of correct answers would reveal the outcome.",
+      "notation": "xᵢ = (hᵢ, sᵢ) is student i's pair of hours and sets; yᵢ is that student's exam score. A prediction ŷᵢ has the same unit as yᵢ, score points.",
+      "code": "hours, sets, actual = 2, 3, 60\nforecast = 20 + 10*hours + 5*sets\nprint(\"forecast\", forecast, \"absolute error\", abs(forecast-actual))",
+      "q": "Could you include a field called final_grade when predicting before the exam?",
+      "a": "Only information actually available at prediction time belongs in the input. A final grade computed using the exam score leaks the outcome.",
+      "out": "forecast 55 absolute error 5"
+    },
+    {
+      "title": "Freeze the data, split and evaluation rule",
+      "explain": "Training rows fit parameters. Validation rows help choose a candidate. Test rows are held aside until that choice is fixed. Keep one student in only one split and write down the exact names so someone else can reproduce the same comparison.",
+      "worked": "Use the six named training records, two validation records and four test records below. Choose among three candidates by lowest validation mean absolute error, resolving a tie in favor of the training mean, then the original rule, then the fitted line. Evaluate the choice once on the test set alongside the predeclared baseline.",
+      "notation": "MAE = (1/n) Σᵢ |ŷᵢ − yᵢ|. Sum absolute errors, then divide by the number n of students in the evaluated split.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nnames = [name for rows in [train,valid,test] for name,h,s,y in rows]\nassert len(names) == len(set(names))\nfor label, rows in [(\"train\", train), (\"validation\", valid), (\"test\", test)]:\n    print(label, [row[0] for row in rows])",
+      "q": "After seeing the four test scores, may you try several new models and present the best on those four as an independent result?",
+      "a": "Those scores would then help select the model. Treat the change as exploratory and reserve a fresh independent test set for a new evaluation.",
+      "out": "train ['Ava', 'Ben', 'Cam', 'Dee', 'Eli', 'Fin']\nvalidation ['Ira', 'Jo']\ntest ['Rin', 'Sol', 'Tay', 'Uma']"
+    },
+    {
+      "title": "Set two reference points",
+      "explain": "A baseline answers how much performance a more complex method must improve upon. Use a constant equal to the mean training score. Also evaluate the original hand-picked two-feature rule so the class can track what it learned since Module 01.",
+      "worked": "The six training scores sum to 375. Their mean is 62.5, which becomes one shared prediction for every student. On validation, Ira scored 61 and Jo 69. The constant's mean absolute error is (1.5 + 6.5)/2 = 4.",
+      "notation": "c = (Σtrain yᵢ)/ntrain. The constant c uses only training labels. The second candidate is ŷ = 20 + 10h + 5s.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nc = sum(row[3] for row in train)/len(train)\nfor name,h,s,y in valid:\n    print(name, y, c, 20+10*h+5*s)",
+      "q": "Why should two students with different study histories receive the same baseline forecast?",
+      "a": "The baseline deliberately uses only the training mean. Beating it measures whether the features and fitted rule add predictive value on this split.",
+      "out": "Ira 61 62.5 40\nJo 69 62.5 75"
+    },
+    {
+      "title": "Fit a line using only the training rows",
+      "explain": "The third candidate uses just study hours. Fit its slope and intercept by minimizing the sum of squared training errors as in Module 05. Evaluate all three candidates using the predeclared MAE. Training and evaluation can use different loss functions when their roles are explicit.",
+      "worked": "The mean training hours are 2.5 and mean score is 62.5. The sum of centered hour–score products is 87.5; the sum of squared centered hours is 17.5. The fitted slope is 5 and the intercept is 50.",
+      "notation": "w = Σ(hᵢ − h̄)(yᵢ − ȳ)/Σ(hᵢ − h̄)². Set b = ȳ − wh̄. The fitted forecast is b + wh. A bar marks an average over training rows.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nimport torch\nhours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)\nscores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)\ncentered = hours - hours.mean()\nslope = (centered * (scores-scores.mean())).sum() / centered.square().sum()\nbias = scores.mean() - slope * hours.mean()\nbaseline = scores.mean().item()\ndef predict(h):\n    return bias.item() + slope.item()*h\nprint(\"slope, intercept\", slope.item(), bias.item())\nprint(\"Ava's fitted forecast\", predict(2))",
+      "q": "What would happen to the slope calculation if every training student reported the same number of hours?",
+      "a": "Every centered hour value would be zero. The denominator would vanish, so the data could not identify a change in score per extra hour.",
+      "out": "slope, intercept 5.0 50.0\nAva's fitted forecast 60.0"
+    },
+    {
+      "title": "Select on validation and lock the rule",
+      "explain": "Evaluate all candidates on the same two validation students, keeping them out of the fit. A difference in validation error informs this example's choice. The small split also limits how stable the ranking may be.",
+      "worked": "The fitted line predicts 60 for Ira and 70 for Jo, giving errors 1 and 1. The hand-picked rule predicts 40 and 75, giving errors 21 and 6. The constant's errors are 1.5 and 6.5. The fitted line wins the predeclared comparison.",
+      "notation": "m* = argminₘ MAEvalid(m) means choose the candidate m with the smallest validation error. Freeze that choice before inspecting test results.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nimport torch\nhours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)\nscores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)\ncentered = hours - hours.mean()\nslope = (centered * (scores-scores.mean())).sum() / centered.square().sum()\nbias = scores.mean() - slope * hours.mean()\nbaseline = scores.mean().item()\ndef predict(h):\n    return bias.item() + slope.item()*h\ndef mae(rows, prediction):\n    errors = [abs(prediction(h,sets)-y) for name,h,sets,y in rows]\n    return sum(errors) / len(errors)\nmodels = {\"training mean\": lambda h,s: baseline,\n          \"Module 01 rule\": lambda h,s: 20+10*h+5*s,\n          \"fitted hours\": lambda h,s: predict(h)}\nvalidation_errors = {name: mae(valid, f) for name,f in models.items()}\nprint(validation_errors)\nprint(\"selected\", min(validation_errors, key=validation_errors.get))",
+      "q": "If the constant had beaten both rules on validation, what should you have selected?",
+      "a": "Select the constant under the written rule. A richer model must earn its place by predicting held-out outcomes well.",
+      "out": "{'training mean': 4.0, 'Module 01 rule': 13.5, 'fitted hours': 1.0}\nselected fitted hours"
+    },
+    {
+      "title": "Measure the result on the four held-out students",
+      "explain": "Apply the frozen model and training-mean baseline to all four test students. Show predictions beside outcomes so another student can recompute the reported average. Keep units on the result.",
+      "worked": "For Rin, Sol, Tay and Uma, the fitted line predicts 55, 65, 75 and 70. Its absolute errors are 3, 2, 7 and 5. The baseline's absolute errors are 4.5, 4.5, 5.5 and 12.5. On these cases the fitted line reduces MAE by 2.5 points.",
+      "notation": "MAEtest(line) = 17/4 = 4.25 points; MAEtest(constant) = 27/4 = 6.75 points. Each mean uses the same four records.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nimport torch\nhours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)\nscores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)\ncentered = hours - hours.mean()\nslope = (centered * (scores-scores.mean())).sum() / centered.square().sum()\nbias = scores.mean() - slope * hours.mean()\nbaseline = scores.mean().item()\ndef predict(h):\n    return bias.item() + slope.item()*h\ndef mae(rows, prediction):\n    errors = [abs(prediction(h,sets)-y) for name,h,sets,y in rows]\n    return sum(errors) / len(errors)\nmodels = {\"training mean\": lambda h,s: baseline,\n          \"Module 01 rule\": lambda h,s: 20+10*h+5*s,\n          \"fitted hours\": lambda h,s: predict(h)}\nfor name,h,s,y in test:\n    print(name, \"observed\", y, \"line\", predict(h), \"baseline\", baseline)\nprint(\"test MAE\", mae(test, models[\"fitted hours\"]), mae(test, models[\"training mean\"]))",
+      "q": "Did the fitted line beat the baseline for every test student?",
+      "a": "Tay's line error is 7 versus the baseline's 5.5. An improvement in the average can coexist with an individual regression.",
+      "out": "Rin observed 58 line 55.0 baseline 62.5\nSol observed 67 line 65.0 baseline 62.5\nTay observed 68 line 75.0 baseline 62.5\nUma observed 75 line 70.0 baseline 62.5\ntest MAE 4.25 6.75"
+    },
+    {
+      "title": "Interpret a probability only under its assumptions",
+      "explain": "A point prediction does not describe the spread around it. For an illustration, assume scores around the line have a Gaussian shape with a fixed standard deviation of five points. This specified spread is an additional modeling assumption. Evaluate its calibration with additional data before interpreting it as a measured uncertainty.",
+      "worked": "For four hours the mean is 70. A symmetric Gaussian centered at 70 puts half its mass at or above 70. For three hours the mean is 65; reaching 70 is one assumed standard deviation above it, an upper tail near 0.159.",
+      "notation": "Y | h ∼ Normal(50 + 5h, 5²) describes a conditional score distribution. The second argument 5² is the variance. P(Y ≥ 70 | h) is the fraction of that distribution at or above 70.",
+      "code": "import torch\nfor h in [3., 4.]:\n    mu = torch.tensor(50 + 5*h)\n    distribution = torch.distributions.Normal(mu, torch.tensor(5.))\n    upper_tail = 1 - distribution.cdf(torch.tensor(70.))\n    print(h, round(upper_tail.item(), 3))",
+      "q": "Does 0.5 at four hours mean that half of future four-hour students have been shown to reach 70?",
+      "a": "That fraction follows from the assumed Gaussian curve. Check observed frequencies in a larger held-out sample and evaluate the assumed spread.",
+      "out": "3.0 0.159\n4.0 0.5"
+    },
+    {
+      "title": "Report a failure and test the recording assumption",
+      "explain": "Separate prediction errors by a rule stated in the report and show the counts. Also simulate a plausible input mistake while holding the original scores fixed. These exploratory checks identify what to investigate on fresh data.",
+      "worked": "For students with at least four hours, the line's errors are 7 and 5, averaging 6. For the two students below four hours they average 2.5. If a reporting bug adds one hour to each test record, each line prediction rises by five points. Recalculate all four errors rather than assuming each gets worse.",
+      "notation": "Residual eᵢ = ŷᵢ − yᵢ. Positive means overprediction. The paired stress test uses h′ᵢ = hᵢ + 1 and keeps yᵢ fixed.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nimport torch\nhours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)\nscores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)\ncentered = hours - hours.mean()\nslope = (centered * (scores-scores.mean())).sum() / centered.square().sum()\nbias = scores.mean() - slope * hours.mean()\nbaseline = scores.mean().item()\ndef predict(h):\n    return bias.item() + slope.item()*h\nfor minimum, maximum in [(0, 3), (4, 5)]:\n    errors = [abs(predict(h)-y) for name,h,s,y in test if minimum <= h <= maximum]\n    print(minimum, maximum, len(errors), sum(errors)/len(errors))\nshifted = [abs(predict(h+1)-y) for name,h,s,y in test]\nprint(\"shifted errors\", shifted, \"MAE\", sum(shifted)/len(shifted))",
+      "q": "Can these two groups establish that studying longer causes larger prediction errors?",
+      "a": "Each group contains only two students. Study behavior was observed, and the groups may differ in other ways. Report the observed errors and test the pattern on fresh records.",
+      "out": "0 3 2 2.5\n4 5 2 6.0\nshifted errors [2.0, 3.0, 12.0, 0.0] MAE 4.25"
+    },
+    {
+      "title": "Submit a claim someone else can check",
+      "explain": "Submit a runnable notebook and a one-page findings report. Include the prediction moment, feature definitions, original rows and split, training code, baseline, selection rule, test table, and one stress test. Conclude with an error you would investigate and the evidence you would need.",
+      "worked": "A defensible conclusion is that the training-fitted hours line reduced test MAE from 6.75 to 4.25 on these four fictional students; it missed Tay by seven points. A fresh cohort and independently verified study logs could test whether the improvement persists. Award one rubric point for each reproducible element: task and split, fitting and selection, predictions and metrics, and a supported limitation with a follow-up test.",
+      "notation": "Improvement = MAEbaseline − MAEselected = 2.50 score points on this split. A positive difference favors the selected model under this metric.",
+      "code": "# Each row holds a fictional student's name, hours, completed sets, and score.\ntrain = [(\"Ava\",2,3,60),(\"Ben\",4,1,70),(\"Cam\",5,2,75),\n         (\"Dee\",0,1,52),(\"Eli\",1,0,52),(\"Fin\",3,2,66)]\nvalid = [(\"Ira\",2,0,61),(\"Jo\",4,3,69)]\ntest = [(\"Rin\",1,1,58),(\"Sol\",3,1,67),(\"Tay\",5,3,68),(\"Uma\",4,0,75)]\nimport torch\nhours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)\nscores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)\ncentered = hours - hours.mean()\nslope = (centered * (scores-scores.mean())).sum() / centered.square().sum()\nbias = scores.mean() - slope * hours.mean()\nbaseline = scores.mean().item()\ndef predict(h):\n    return bias.item() + slope.item()*h\ndef mae(rows, prediction):\n    errors = [abs(prediction(h,sets)-y) for name,h,sets,y in rows]\n    return sum(errors) / len(errors)\nmodels = {\"training mean\": lambda h,s: baseline,\n          \"Module 01 rule\": lambda h,s: 20+10*h+5*s,\n          \"fitted hours\": lambda h,s: predict(h)}\nwinner = min(models, key=lambda name: mae(valid, models[name]))\nbase_error = mae(test, models[\"training mean\"])\nfinal_error = mae(test, models[winner])\nprint(winner, \"baseline MAE\", base_error, \"model MAE\", final_error)\nprint(\"observed improvement\", base_error-final_error)",
+      "q": "A reviewer gets exactly your numbers but concludes that one more hour of study will raise anyone's score by five points. What should you revise?",
+      "a": "Make the interpretation explicit: five is the fitted slope on fictional training records. A causal effect would require evidence about what would happen if study hours actually changed.",
+      "out": "fitted hours baseline MAE 6.75 model MAE 4.25\nobserved improvement 2.5"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Use a novel student with 2.5 hours and 1 set. Predict using the frozen line, training mean and Module 01 rule. If the score is 64, which is closest?",
+      "hint": "Use the already fitted coefficients without modifying any model.",
+      "a": "The line and constant both predict 62.5, each 1.5 points away. The original rule predicts 20 + 25 + 5 = 50, 14 points away."
+    },
+    {
+      "q": "Build and defend a comparison for an in-class variant with new named records.",
+      "hint": "Write the prediction moment, split and choice rule before fitting.",
+      "a": "Choose a pre-exam target, keep each student in one split, fit the constant and a feature-based model on training only, select by validation MAE and evaluate the frozen choice and baseline on common test records. Report split names, predictions and errors so another student can reproduce the comparison."
+    },
+    {
+      "q": "A new blind test contains scores 63 at two hours and 72 at five hours. Compare the frozen line and constant.",
+      "hint": "Use 50 + 5h and the training mean of 62.5.",
+      "a": "Line predictions 60 and 75 give errors 3 and 3, MAE 3. Constant errors 0.5 and 9.5 give MAE 5. This small independent check favors the line by 2 points."
+    },
+    {
+      "q": "A team uses the test scores to select a different standard deviation for each student and reports excellent likelihood on those same scores. Identify the problem and repair the design.",
+      "hint": "Which records chose the uncertainty parameters?",
+      "a": "The test labels influenced the predictions being scored. Fit a spread on training or calibration data, freeze it, and evaluate the same likelihood or calibration criterion on unseen students."
+    },
+    {
+      "q": "For Tay and Uma compute signed residuals. What does their mean hide?",
+      "hint": "Subtract the observed score from the fitted prediction for each student.",
+      "a": "Tay gives 75 − 68 = +7. Uma gives 70 − 75 = −5. Their signed mean is +1, but their mean absolute error is 6. The mistakes point in opposite directions."
+    },
+    {
+      "q": "Propose one improvement after seeing the four test rows and describe how to test it fairly.",
+      "hint": "Separate discovering an idea from confirming its performance.",
+      "a": "One proposal is to fit a two-feature model using both hours and completed sets. Fit on training, compare on validation, and use a new untouched test cohort because the existing test set helped motivate the change. Report errors for both the new model and the original frozen line."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Why does the final model use fewer inputs than Module 01?",
+      "a": "Module 01 introduced weights by hand using both hours and sets. This capstone fits a separate one-feature line from training outcomes and compares both models on the same validation cases. More features do not automatically improve prediction."
+    },
+    {
+      "q": "Why include a probability exercise when the main metric is MAE?",
+      "a": "MAE evaluates a point estimate. A distribution answers a different question, such as how plausible a score of 70 is at three hours. Stating a spread makes that assumption visible and gives us something new to check."
+    },
+    {
+      "q": "How would I reproduce the capstone independently?",
+      "a": "Copy the named rows and split, start the notebook from its first cell, and compare your two validation predictions for the fitted line with 60 and 70. Then check the four test predictions individually before comparing aggregate errors."
+    },
+    {
+      "q": "What could change if these were real students?",
+      "a": "The chosen records might underrepresent particular courses, schedules or testing conditions. A genuine evaluation would need an appropriate collection design, sufficiently sized independent cohorts, and a documented policy for any intended use."
+    }
+  ],
+  "bridge": "Return to the course roadmap with a complete argument: a prediction rule, a reproducible fit, an independent comparison, and an honest account of where the evidence runs out. In a new setting, begin by writing down one decision, one observable target and one test that could change your conclusion.",
+  "bridgeQ": "Which evidence would most directly strengthen the claim that the fitted line helps on future exams?",
+  "bridgeA": "Collect a larger independent cohort with the same prediction-time features, apply the frozen line and baseline, and compare errors on the same new students while checking performance across relevant conditions."
+}

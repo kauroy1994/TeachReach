@@ -1,0 +1,236 @@
+{
+  "04": {
+    "q": "Ava’s team uses a test set to choose among 30 rules, then reports the best rule’s score on that same set. Which change would give a cleaner estimate for the chosen rule?",
+    "correct": 1,
+    "options": [
+      {
+        "text": "Evaluate the winning rule on its training records.",
+        "feedback": "The training outcomes influenced the fitted rule. A training score answers how closely it fits those examples."
+      },
+      {
+        "text": "Choose the rule on a validation set, then evaluate it once on a separate test set.",
+        "feedback": "Choosing among 30 rules uses information about which cases are easy to fit. Saving an independent set until the choice is final keeps that information out of model selection."
+      },
+      {
+        "text": "Report the same best score rounded to fewer decimal places.",
+        "feedback": "Rounding changes the appearance of the score. The test outcomes still influenced which rule was reported."
+      }
+    ]
+  },
+  "05": {
+    "q": "A classifier assigns probability 0.2 to passing. The student actually fails. Which probability goes inside the negative logarithm for this student’s binary cross-entropy loss?",
+    "correct": 2,
+    "options": [
+      {
+        "text": "0.2, because the model reports a probability of passing.",
+        "feedback": "The log-loss uses the probability assigned to the observed outcome. Here the outcome is failure."
+      },
+      {
+        "text": "0, because the observed failure is encoded as class 0.",
+        "feedback": "Zero names a class here. It is a label rather than the probability assigned to that class."
+      },
+      {
+        "text": "0.8, because the observed class is failure.",
+        "feedback": "There are two outcomes. The model assigns 1 − 0.2 = 0.8 to failure, giving loss −ln(0.8), about 0.223."
+      }
+    ]
+  },
+  "06": {
+    "q": "With three nearest neighbors, the closest records to a new student have labels pass, fail, fail in that order. Ordinary unweighted kNN uses a vote. What does it predict?",
+    "correct": 0,
+    "options": [
+      {
+        "text": "Fail, because two of the three neighbors vote for it.",
+        "feedback": "Each of the three selected neighbors contributes one vote. Two votes for fail exceed one for pass."
+      },
+      {
+        "text": "Pass, because the closest record gets the deciding vote.",
+        "feedback": "That would be the prediction with k = 1. The stated rule gives all three selected neighbors equal weight."
+      },
+      {
+        "text": "A tie, because both labels occur nearby.",
+        "feedback": "A tie requires equal vote counts. The observed counts are one and two."
+      }
+    ]
+  },
+  "07": {
+    "q": "Four centered study logs lie exactly along the diagonal that runs from bottom left to top right in a reading-hours versus practice-hours plot. What does the first principal component capture?",
+    "correct": 1,
+    "options": [
+      {
+        "text": "A boundary separating students who pass from students who fail.",
+        "feedback": "No exam labels enter PCA. This calculation uses the spread of the input logs."
+      },
+      {
+        "text": "A direction along that diagonal, because projecting there preserves the variation.",
+        "feedback": "Differences between these logs occur along the diagonal. Projection onto it retains their spread. Reversing the sign of the direction changes the coordinate signs and preserves the same variance."
+      },
+      {
+        "text": "The direction perpendicular to the diagonal, because points are closest together there.",
+        "feedback": "Projecting perpendicular to this line maps every centered log to zero. It loses the variation the first component seeks to preserve."
+      }
+    ]
+  },
+  "08": {
+    "q": "A hidden unit has z = wx + b and output max(0, z). For one input z = −2. How sensitive is the unit’s output to a tiny change in z that leaves z negative?",
+    "correct": 2,
+    "options": [
+      {
+        "text": "Its slope is −2.",
+        "feedback": "−2 is the input to the activation at this example. A slope measures the change in output for a change in input."
+      },
+      {
+        "text": "Its slope is 1, since z contains a linear expression.",
+        "feedback": "The preceding weighted sum is linear in its inputs. The activation afterward changes which inputs can affect this unit’s output."
+      },
+      {
+        "text": "Its slope is 0.",
+        "feedback": "Both the original and slightly changed negative inputs produce output zero. The gradient flowing backward through this activation is therefore zero for this example."
+      }
+    ]
+  },
+  "09": {
+    "q": "Two light records have the same strongest rise and strongest fall. A classifier receives only those two numbers. Can it always determine which record fell first?",
+    "correct": 0,
+    "options": [
+      {
+        "text": "No. The representation discarded the times of the changes.",
+        "feedback": "Two different event orders can produce exactly the same pair of maxima. A decision that depends on order needs evidence about position or time."
+      },
+      {
+        "text": "Yes. A deep enough classifier can reconstruct the order.",
+        "feedback": "Extra layers operate on the numbers supplied to them. Identical inputs give a fixed classifier identical evidence."
+      },
+      {
+        "text": "Yes. The larger of the two numbers must have occurred first.",
+        "feedback": "Magnitude measures how large a change was. It says nothing about when the change occurred."
+      }
+    ]
+  },
+  "10": {
+    "q": "You want embeddings to distinguish rising from falling records. Which transformation is a reasonable way to create a positive pair for that purpose?",
+    "correct": 2,
+    "options": [
+      {
+        "text": "Reverse the order of all readings.",
+        "feedback": "Reversing a rising sequence makes it fall. Treating the two as equivalent would remove information needed for the downstream task."
+      },
+      {
+        "text": "Keep only the mean reading and repeat that value at every position.",
+        "feedback": "The transformed record is constant. It no longer shows whether the original record rose or fell."
+      },
+      {
+        "text": "Add the same small constant to every reading, with no clipping.",
+        "feedback": "For two readings a and b, (b + k) − (a + k) = b − a. Their signed change survives this transformation."
+      }
+    ]
+  },
+  "11": {
+    "q": "At position 2, a causal attention layer is allowed to use positions 1 and 2. The two allowed scores are equal. Position 3 has a much higher score but belongs to the future. What are the three weights?",
+    "correct": 1,
+    "options": [
+      {
+        "text": "One third, one third, one third.",
+        "feedback": "The mask removes position 3 from the allowed set before normalization. Only two positions share the weight."
+      },
+      {
+        "text": "One half, one half, zero.",
+        "feedback": "Equal allowed scores receive equal weights. They share a total of one, while the masked future position receives zero."
+      },
+      {
+        "text": "Almost zero, almost zero, almost one.",
+        "feedback": "The raw future score would matter with unrestricted attention. A causal mask makes that position inaccessible."
+      }
+    ]
+  },
+  "12": {
+    "q": "A model assigns the observed first token probability 0.5 and the observed second token probability 0.25 given the first. What probability does it assign to this two-token prefix?",
+    "correct": 0,
+    "options": [
+      {
+        "text": "0.125.",
+        "feedback": "The second probability already conditions on the first token. Multiplying 0.5 × 0.25 gives 0.125 for the joint prefix."
+      },
+      {
+        "text": "0.375.",
+        "feedback": "Averaging the two probabilities describes their arithmetic mean. The prefix requires both token events to occur in order."
+      },
+      {
+        "text": "0.75.",
+        "feedback": "Adding would be appropriate for certain alternative events. This prefix contains both token events."
+      }
+    ]
+  },
+  "13": {
+    "q": "In a diffusion training example, you draw noise, add a known amount of it to a clean example, and keep the noise you drew. Why is that saved noise useful?",
+    "correct": 2,
+    "options": [
+      {
+        "text": "It identifies the single real example that every noisy input must have come from.",
+        "feedback": "Several clean examples and noise draws can yield similar noisy measurements. The forward draw gives one supervised example."
+      },
+      {
+        "text": "It tells the generator which output a discriminator labeled fake.",
+        "feedback": "A discriminator belongs to adversarial training. This denoising example obtains its target directly from the corruption process."
+      },
+      {
+        "text": "It supplies a target for a network learning to predict the added noise.",
+        "feedback": "You know the sampled noise for this training draw. Comparing it with the network’s estimate teaches a denoising step at the specified noise level."
+      }
+    ]
+  },
+  "14": {
+    "q": "A move earns reward 1 now. The best estimated value of the next, nonterminal state is 4. With discount 0.5, what one-step target uses this observed transition?",
+    "correct": 1,
+    "options": [
+      {
+        "text": "2.5, from discounting the sum of both values.",
+        "feedback": "In the stated convention the first reward is immediate. Only the estimate for the future return receives the discount."
+      },
+      {
+        "text": "3, from 1 + 0.5 × 4.",
+        "feedback": "The target combines the observed reward with the discounted estimate of what can be earned from the next state."
+      },
+      {
+        "text": "5, from adding the reward and the next value unchanged.",
+        "feedback": "That calculation uses discount 1. With discount 0.5, the future contribution here is 2."
+      }
+    ]
+  },
+  "15": {
+    "q": "Among 100 displayed predictions, each gave its selected class confidence 0.8. Only 60 of those selected classes were correct. What does this particular group suggest?",
+    "correct": 0,
+    "options": [
+      {
+        "text": "Overconfidence in this group.",
+        "feedback": "The stated confidence averaged 80%, and the observed correct fraction was 60%. The 20-percentage-point gap is evidence to investigate, especially on additional held-out examples."
+      },
+      {
+        "text": "Underconfidence, because more than half of the predictions were correct.",
+        "feedback": "A majority being correct establishes accuracy above 50%. Calibration compares that accuracy to the stated 80% confidence."
+      },
+      {
+        "text": "Exactly 20 individual predictions must each have been wrong by 100 percentage points.",
+        "feedback": "Calibration compares groups of predictions against observed frequencies. The difference between 80% and 60% does not assign a probability error to individual cases."
+      }
+    ]
+  },
+  "16": {
+    "q": "Two models will be compared on future student records. One model is evaluated on an easy cohort and the other on a harder cohort. What comparison would support a clearer conclusion?",
+    "correct": 2,
+    "options": [
+      {
+        "text": "Compare only the number of correct predictions from those two cohorts.",
+        "feedback": "Counts also depend on cohort size and difficulty. They cannot isolate what changed when the model changed."
+      },
+      {
+        "text": "Select the most favorable subgroup for each model and report both scores.",
+        "feedback": "Choosing favorable subgroups after inspection changes the question and makes the comparison hard to reproduce."
+      },
+      {
+        "text": "Freeze both models, then evaluate both on the same untouched records using the same prespecified metric.",
+        "feedback": "This controls the examples and scoring rule. Reporting per-case or subgroup errors alongside the aggregate helps identify where one model improves or fails."
+      }
+    ]
+  }
+}

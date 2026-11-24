@@ -1,0 +1,133 @@
+{
+  "n": 14,
+  "opening": "A tiny delivery cart has two choices at a fork. It can finish immediately for two points or travel one more step for a larger delivery. Which route should it take if later rewards count less?",
+  "recall": "Module 13 generated samples by taking successive steps. Here a decision maker chooses at each step, and its choice changes which states and rewards it can reach. Follow one cart before writing a learning rule.",
+  "recallQ": "Two generators could produce different routes through a grid. What extra information would tell you which route to prefer?",
+  "recallA": "Specify what counts as success, the reward along each route and how long the cart can keep acting. A picture of a route alone gives no preference.",
+  "lessons": [
+    {
+      "title": "Turn a fork into a decision problem",
+      "explain": "A state describes where the cart is now. An action is a choice available there. A transition tells us where the cart goes after the choice. A reward is a number the cart receives on that transition. Reaching Done ends the episode, one complete trip.",
+      "worked": "From Start, taking Short earns 2 and ends the trip. Taking Detour earns 0 and moves to Bridge. At Bridge the only action, Deliver, earns 4 and ends the trip. These are the complete rules of this first fictional grid.",
+      "notation": "Write a transition as (s, a, r, s′). Read this as current state s, chosen action a, received reward r, next state s′. The prime marks the next state.",
+      "code": "routes = {(\"Start\", \"Short\"): (2, \"Done\"),\n          (\"Start\", \"Detour\"): (0, \"Bridge\"),\n          (\"Bridge\", \"Deliver\"): (4, \"Done\")}\nstate = \"Start\"\nfor action in [\"Detour\", \"Deliver\"]:\n    reward, next_state = routes[(state, action)]\n    print(state, action, reward, next_state)\n    state = next_state",
+      "q": "After Detour, can the cart take Short on its next move?",
+      "a": "It is now at Bridge. The only listed action there is Deliver. The earlier choice changed the choices available next.",
+      "out": "Start Detour 0 Bridge\nBridge Deliver 4 Done"
+    },
+    {
+      "title": "Decide what the state must remember",
+      "explain": "A Markov decision process (MDP) specifies states, actions, how likely each next state and reward are, and how future rewards count. The Markov assumption says the current state and action contain all the history needed for those probabilities.",
+      "worked": "Suppose a gate opens only for a charged cart. Two carts at the same gate could go different ways under the same action because their batteries differ. Include charge in the state before listing transition probabilities.",
+      "notation": "P(s′ | s, a) means the probability of a next state s′ given the present state s and action a. Probabilities across possible next states sum to 1.",
+      "code": "next_state = {(\"Gate\", True): \"Across\", (\"Gate\", False): \"Charging bay\"}\nfor charge in (True, False):\n    state = (\"Gate\", charge)\n    print(state, \"attempt crossing\", next_state[state])",
+      "q": "If a gate remembers the last code entered and that changes the next result, what could you add to the state?",
+      "a": "Record the relevant code or whether the last code was valid. Location alone would mix histories with different consequences for the same action.",
+      "out": "('Gate', True) attempt crossing Across\n('Gate', False) attempt crossing Charging bay"
+    },
+    {
+      "title": "Compare immediate and delayed reward",
+      "explain": "Add the rewards on a trip to get its return. A discount factor between zero and one shrinks a reward once for every step of delay. Count the first reward at its full value.",
+      "worked": "With discount 0.75, Short returns 2. Detour returns 0 + 0.75 × 4 = 3. Change the discount to 0.25 and Detour returns just 1. How we value waiting changes the best choice.",
+      "notation": "G = r₁ + γr₂ + γ²r₃ + … . G is the discounted return, γ (gamma) the discount, and r₁ the reward on the first transition.",
+      "code": "for gamma in (0.25, 0.75):\n    for route in ([2], [0, 4]):\n        total = sum(gamma ** t * r for t, r in enumerate(route))\n        print(gamma, route, total)",
+      "q": "For what discount do Short and Detour tie?",
+      "a": "Short returns 2 and Detour returns 4γ. Set 4γ = 2, giving γ = 0.5.",
+      "out": "0.25 [2] 2.0\n0.25 [0, 4] 1.0\n0.75 [2] 2.0\n0.75 [0, 4] 3.0"
+    },
+    {
+      "title": "Evaluate a policy before improving it",
+      "explain": "A policy tells the cart how to choose from the available actions. It can assign probabilities to choices. A state's value under a policy is the average return if trips start there and use that policy.",
+      "worked": "At γ = 0.75, suppose a policy takes Detour on half of trips and Short on half. The average starting return is 0.5 × 3 + 0.5 × 2 = 2.5.",
+      "notation": "π(a | s) is the policy's probability of choosing a at s. Vπ(s) = Eπ[G | s] is the mean return you would expect following π from s.",
+      "code": "gamma = 0.75\nfor detour_probability in (0.0, 0.5, 1.0):\n    short_probability = 1 - detour_probability\n    value = short_probability * 2 + detour_probability * gamma * 4\n    print(detour_probability, value)",
+      "q": "What is the value at Bridge under any policy in this first grid?",
+      "a": "The cart must Deliver and receives 4 immediately. Done has no future reward, so Bridge is worth 4.",
+      "out": "0.0 2.0\n0.5 2.5\n1.0 3.0"
+    },
+    {
+      "title": "Work backward with a Bellman backup",
+      "explain": "A backup updates a state's value by looking one transition ahead. For each available action, add its immediate reward to the discounted value of the next state. Choose the highest value if the goal is the best policy.",
+      "worked": "Start all values at zero and update all states from the previous round. Round one discovers that Bridge is worth 4, while Start sees only Short's 2. Round two carries Bridge's 4 back to Start and Detour wins with 3.",
+      "notation": "For a deterministic transition, Vnew(s) = maxₐ [r + γ Vold(s′)]. The subscript on max means compare available actions. At Done the remaining value is zero.",
+      "code": "import torch\nv = torch.zeros(3)  # Start, Bridge, Done\nfor sweep in range(2):\n    old = v.clone()\n    v[0] = max(2.0, float(0.75 * old[1]))\n    v[1] = 4.0\n    print(\"sweep\", sweep + 1, v.tolist())",
+      "q": "Why did the first sweep fail to favor Detour?",
+      "a": "It used the old Bridge estimate of zero. Only the second synchronous sweep can use the four points discovered at Bridge in the first sweep.",
+      "out": "sweep 1 [2.0, 4.0, 0.0]\nsweep 2 [3.0, 4.0, 0.0]"
+    },
+    {
+      "title": "Average over an uncertain crossing",
+      "explain": "A known model sometimes lists several outcomes for one action. Weight each outcome's reward plus future value by its probability. Choose among actions after computing those averages.",
+      "worked": "Now change the grid. Detour reaches Bridge with probability 0.8 and ends empty-handed otherwise. The next delivery at Bridge still earns 4. At γ = 0.75 the expected Detour return is 0.8 × 3 + 0.2 × 0 = 2.4.",
+      "notation": "Q(s,a) = Σ p × (r + γV(s′)). Σ means sum over possible outcomes. Q is the expected return of choosing a now with the stated continuation values.",
+      "code": "gamma = 0.75\nfor crossing in (0.5, 0.8):\n    outcomes = [(crossing, 0, 4), (1-crossing, 0, 0)]\n    q = sum(p * (reward + gamma * v_next)\n            for p, reward, v_next in outcomes)\n    print(round(q, 2), \"Detour\" if q > 2 else \"Short\")",
+      "q": "If the crossing succeeds half the time, which route has higher expected return?",
+      "a": "Detour has expected return 0.5 × 0.75 × 4 = 1.5. Short has return 2, so Short wins.",
+      "out": "1.5 Short\n2.4 Detour"
+    },
+    {
+      "title": "Learn an action value from one trip",
+      "explain": "When the transition probabilities are unknown, the cart can update an action estimate from its observed reward and the best estimated action at the next state. The difference between that target and its old estimate tells it which way to move.",
+      "worked": "The estimate for Detour is 1. A successful transition earned 0 and the best next-action estimate is 4. With γ = 0.75 the target is 3. A learning rate of 0.5 moves the estimate halfway from 1 to 3, giving 2.",
+      "notation": "Qnew = Qold + α [r + γ max_b Q(s′,b) − Qold]. Here α (alpha) is the step size and b ranges over actions at the next state. Use 0 for the next value on a terminal transition.",
+      "code": "import torch\nq = torch.tensor([2., 1.])  # Short and Detour at Start\nfor next_value in (4., 0.):  # crossing succeeds, then fails on another trip\n    target = 0. + 0.75 * next_value\n    q[1] += 0.5 * (target - q[1])\n    print(q.tolist())",
+      "q": "After the successful update, the next trip ends with zero reward on Detour. What changes?",
+      "a": "That sample's target is zero. The previous estimate was 2, so the half-step update lowers it to 1. A single trip can differ from the average return.",
+      "out": "[2.0, 2.0]\n[2.0, 1.0]"
+    },
+    {
+      "title": "Explore a choice whose value is uncertain",
+      "explain": "Taking the action with the highest estimate is exploitation. Exploration tries other actions so their estimates can improve. In an epsilon-greedy policy with one best action, choose it directly with probability 1 − ε. Otherwise draw uniformly from all actions, including the current best.",
+      "worked": "If there are two actions and ε = 0.2, the best gets 0.8 + 0.1 = 0.9 probability. The other gets 0.1. During a separate evaluation of the learned greedy policy, set ε to zero and record fresh trip returns.",
+      "notation": "π(best | s) = 1 − ε + ε/k and π(other | s) = ε/k for k actions with a unique current best.",
+      "code": "epsilon, count = 0.2, 2\nfor action, best in [(\"Short\", True), (\"Detour\", False)]:\n    p = epsilon / count + (1 - epsilon if best else 0.0)\n    print(action, round(p, 2))",
+      "q": "Why could a cart that always chooses Short learn very little about Detour?",
+      "a": "It never samples Detour's outcome from Start. Its estimate can remain at its initial value even when a better delayed return is available.",
+      "out": "Short 0.9\nDetour 0.1"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "A corridor action earns −1 and moves to a room worth 8. Ending immediately earns 4. With γ = 0.75, which action wins?",
+      "hint": "Compute immediate reward plus discounted next value for each action.",
+      "a": "The corridor is worth −1 + 0.75 × 8 = 5, versus 4 for ending. Choose the corridor."
+    },
+    {
+      "q": "A next state worth 10 occurs with probability 0.4. Otherwise the episode ends. The action always earns 1 and γ = 0.5. Back up its value.",
+      "hint": "Count the reward of 1 in both outcomes.",
+      "a": "The two outcomes are worth 6 and 1. Their weighted mean is 0.4 × 6 + 0.6 × 1 = 3."
+    },
+    {
+      "q": "In a grid with locked doors and reusable keys, propose an MDP state and a terminal event.",
+      "hint": "Can two agents at the same location get different outcomes by trying the same door?",
+      "a": "Use location and key possession, plus door status if opening persists independently. Moving or unlocking is an action. Reaching the destination ends the episode. Specify a reward on each transition."
+    },
+    {
+      "q": "An action value is 5. A trip ends on the next move, earning 1. Use α = 0.25 to update it.",
+      "hint": "A terminal state has zero continuation value.",
+      "a": "The target is 1. Qnew = 5 + 0.25 × (1 − 5) = 4."
+    },
+    {
+      "q": "A cart has four actions and one current best. Compare ε = 0.4 during learning to ε = 0 in evaluation.",
+      "hint": "Uniform exploration can also draw the best action.",
+      "a": "During learning the best action gets 0.6 + 0.4/4 = 0.7, and each other action gets 0.1. With ε = 0 the cart chooses the current best every time. Evaluation on fresh trips measures this fixed policy."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Why can a move with zero reward still be the best first move?",
+      "a": "The value of a move includes what it makes possible later. Taking Detour opens a four-point delivery. At γ = 0.75 that future reward contributes three points at Start, exceeding the immediate two."
+    },
+    {
+      "q": "What is the difference between Q and V?",
+      "a": "Q attaches a value to a state and a particular first action. V attaches a value to the state given a policy. If both continuation values and choices are optimal, V is the largest Q available at that state."
+    },
+    {
+      "q": "How do value iteration and Q-learning use evidence differently?",
+      "a": "Value iteration can average all possible transitions using a supplied model. Q-learning shifts one state-action estimate toward the target from an observed transition. Repeated trials can give evidence about outcomes that one sample misses."
+    }
+  ],
+  "bridge": "Changing a crossing probability reversed the preferred route. Module 15 asks how to check whether a model's confidence and performance survive a change in the population where it will be used.",
+  "bridgeQ": "A simulator sets crossing success to 0.8. A field log shows 5 successes in 10 attempts. What would you check before using its recommendation?",
+  "bridgeA": "Check whether attempted crossings in the log represent future conditions, inspect more trials and compare observed frequencies with the assumed probability. The preferred route can change as the evidence changes."
+}

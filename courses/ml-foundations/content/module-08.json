@@ -1,0 +1,142 @@
+{
+  "n": 8,
+  "opening": "A study log can lean toward reading or toward practice. How far from balance is the week? If we plot the size of the imbalance against the signed difference in hours, the graph bends. Use this small, checkable target to find out what adding a hidden layer changes.",
+  "recall": "Module 07 projected a pair of measurements onto a direction. Module 01 used a weighted sum plus a bias to make a prediction. Take a particularly simple weighted sum of reading hours and practice hours, then use a label from a known rule to compare two model families.",
+  "recallQ": "Ava logged 1 hour reading and 2 practicing. Bo reversed the hours. What signed differences do we get by subtracting practice from reading? How far from balance is each?",
+  "recallA": "Ava’s difference is −1 hour and Bo’s is +1 hour. Each is 1 hour from a balanced week. The sign identifies the direction of the imbalance, and the magnitude measures its size.",
+  "lessons": [
+    {
+      "title": "Give a linear model a target it cannot fit",
+      "explain": "For this controlled experiment, the input is reading time minus practice time. The toy label is the absolute difference. We know how we generated the labels, so we can check exactly which shapes the models can express. A single straight line has one slope everywhere.",
+      "worked": "At x=−1, 0, +1, targets are 1, 0, 1. A line through the two outer points is flat at 1 and misses the middle. Choosing a different straight line moves the error elsewhere.",
+      "notation": "x = reading hours − practice hours. y = |x| is the nonnegative label. A linear baseline predicts ŷ = wx + b, with learned slope w and intercept b.",
+      "code": "import torch\nx = torch.tensor([-1.,0.,1.])\ntarget = x.abs()\nbaseline = 0*x + 1\nprint(\"target:\",target.tolist())\nprint(\"prediction:\", baseline.tolist())\nprint(\"squared errors:\",((baseline-target)**2).tolist())",
+      "q": "Which slope fits the segment from −1 to 0, and which fits the segment from 0 to +1?",
+      "a": "The target falls from 1 to 0 across the first interval, so its slope is −1. It rises from 0 to 1 across the second, so its slope is +1.",
+      "out": "target: [1.0, 0.0, 1.0]\nprediction: [1.0, 1.0, 1.0]\nsquared errors: [0.0, 1.0, 0.0]"
+    },
+    {
+      "title": "Put a switch after a weighted sum",
+      "explain": "A perceptron turns a weighted sum into a binary decision by thresholding it. A rectified linear unit, or ReLU, keeps positive values and replaces negative ones with zero. ReLU therefore tells us how far an input has crossed a threshold. This is an activation function.",
+      "worked": "Use the signed study difference as input. With weight 1 and bias 0, Bo at +1 produces a ReLU output of 1 and Ava at −1 produces 0. With bias −1, a positive output requires a reading surplus greater than 1 hour.",
+      "notation": "a = wx+b is the pre-activation. A step unit returns 1 when a>0 here and 0 otherwise. ReLU(a)=max(0,a).",
+      "code": "import torch\nx = torch.tensor([-1.,0.,1.,2.])\na = x-1\nprint(\"before activation:\",a.tolist())\nprint(\"step:\",(a>0).int().tolist())\nprint(\"ReLU:\",torch.relu(a).tolist())",
+      "q": "For x=3, w=2 and b=−4, what do the step and ReLU units return?",
+      "a": "The weighted sum is 2×3−4=2. The step returns 1 under our strict-positive threshold. ReLU returns 2.",
+      "out": "before activation: [-2.0, -1.0, 0.0, 1.0]\nstep: [0, 0, 0, 1]\nReLU: [0.0, 0.0, 0.0, 1.0]"
+    },
+    {
+      "title": "Combine two hidden units into a bent prediction",
+      "explain": "A hidden unit calculates an intermediate feature. Two units can retain different kinds of evidence. Let one respond to a reading surplus, and the other to a practice surplus. An output unit adds their two magnitudes. This gives one possible solution before we attempt training.",
+      "worked": "At x=−2 the hidden values are 0 and 2. At x=+2 they are 2 and 0. Both lead to output 2. The kink comes from the two hidden activations. Stacking weighted sums without an activation would still yield just a weighted sum.",
+      "notation": "h₁=max(0,x), h₂=max(0,−x), ŷ=h₁+h₂. A multilayer perceptron uses one or more hidden layers like this between its input and output.",
+      "code": "import torch\nx = torch.tensor([[-2.],[0.],[2.]])\nW = torch.tensor([[1.],[-1.]])\nh = torch.relu(x @ W.T)\nprediction = h @ torch.tensor([[1.],[1.]])\nprint(\"hidden rows:\", h.int().tolist())\nprint(\"outputs:\",prediction.flatten().tolist())",
+      "q": "Why is W shaped 2 × 1 rather than 1 × 1?",
+      "a": "There are two hidden units, each reading one input. One weight for each unit gives two rows and one column. The batch of three examples is a separate dimension.",
+      "out": "hidden rows: [[0, 2], [0, 0], [2, 0]]\noutputs: [2.0, 0.0, 2.0]"
+    },
+    {
+      "title": "Follow one example through a computation graph",
+      "explain": "A computation graph records the order of operations. A forward pass substitutes values from input to prediction to loss. To keep the arithmetic visible, inspect just one active hidden unit. Its output has its own weight v. A loss measures the prediction error before any weight changes.",
+      "worked": "Use x=2, target y=2, hidden weight w=0.5, bias b=0, output weight v=1.5 and output bias 0. Forward values are a=1, h=1, ŷ=1.5, error ŷ−y=−0.5 and loss 0.125.",
+      "notation": "a=wx+b; h=max(0,a); ŷ=vh; L=(ŷ−y)²/2. The factor 1/2 will cancel the 2 in the derivative of a square.",
+      "code": "import torch\nx, y = torch.tensor(2.), torch.tensor(2.)\na = 0.5*x + 0\nh = torch.relu(a)\nprediction = 1.5*h\nloss = (prediction-y)**2 / 2\nprint(\"a, h, prediction, loss:\", [t.item() for t in (a,h,prediction,loss)])",
+      "q": "If the target changes from 2 to 1.5, which of the four forward values changes?",
+      "a": "Only the loss changes, becoming zero. The three values before the loss use the input and parameters, not the target.",
+      "out": "a, h, prediction, loss: [1.0, 1.0, 1.5, 0.125]"
+    },
+    {
+      "title": "Trace a gradient back to the first weight",
+      "explain": "Module 03 used the chain rule to carry a change in mean back to a score weight. Use the same reasoning through a hidden unit. At a positive pre-activation the ReLU slope is 1. At a negative pre-activation its slope is 0. Backpropagation multiplies local slopes along a path; contributions from paths into a shared parameter add.",
+      "worked": "Start with the prediction error −0.5. A one-unit change in h changes ŷ at rate v=1.5. A change in a passes through the active ReLU at rate 1. Increasing w changes a at rate x=2. Multiplying gives the loss gradient −1.5 for w.",
+      "notation": "∂L/∂w=(ŷ−y)·v·ReLU′(a)·x. The partial derivative is the loss slope as w changes with the other parameters fixed. At exactly zero ReLU has a corner; PyTorch uses gradient zero there.",
+      "code": "import torch\nw = torch.tensor(0.5,requires_grad=True)\nx = torch.tensor(2.)\nh = torch.relu(w*x)\nloss = (1.5*h-2)**2 / 2\nloss.backward()\nprint(\"hand:\", -0.5*1.5*1*2)\nprint(\"autograd:\", w.grad.item())",
+      "q": "Why does the hidden weight receive a zero gradient from an example whose pre-activation is −2?",
+      "a": "Small changes in that pre-activation keep the hidden output at zero. The zero local slope multiplies the other factors on this path.",
+      "out": "hand: -1.5\nautograd: -1.5"
+    },
+    {
+      "title": "Make an update and test the new loss",
+      "explain": "A negative gradient says that a small increase in the weight should lower the loss for this example. Gradient descent subtracts the gradient times a positive learning rate. Change only w here so that the before-and-after comparison has one cause.",
+      "worked": "With learning rate 0.1, w becomes 0.5−0.1×(−1.5)=0.65. The prediction becomes 1.95 and the loss becomes 0.00125. Check the actual loss after the change, especially if the step size is large.",
+      "notation": "w_new=w_old−η(∂L/∂w). η, pronounced eta, controls step size. The derivative comes from the old weight.",
+      "code": "import torch\nw = torch.tensor(0.5,requires_grad=True)\ndef objective(weight):\n    prediction = 1.5*torch.relu(2*weight)\n    return (prediction-2)**2 / 2\nbefore = objective(w)\nbefore.backward()\nwith torch.no_grad():\n    w -= 0.1*w.grad\nprint(\"w:\",round(w.item(),3))\nprint(\"loss:\",round(before.item(),5),\"to\",round(objective(w).item(),5))",
+      "q": "What happens for the same example if η=1 instead of 0.1?",
+      "a": "w jumps to 2. The prediction becomes 6 and the loss becomes (6−2)²/2=8. A direction that helps for a small move can overshoot for a large one.",
+      "out": "w: 0.65\nloss: 0.125 to 0.00125"
+    },
+    {
+      "title": "Train and compare on the same held-out inputs",
+      "explain": "Fit two models to five labeled examples, then predict four new input values that were set aside. The baseline learns a slope and intercept. The network learns two input weights and two output weights, with its hidden biases fixed at zero. We deliberately start these units with opposite input signs so both sides of the origin can respond. The starting magnitudes do not implement the target rule.",
+      "worked": "Both models see the signed differences −2, −1, 0, 1, and 2 during training. Both receive the same held-out differences −1.5, −0.5, 0.5, 1.5 at evaluation. The targets follow the same known absolute-value rule on both sets. Inspect every prediction as well as the average error.",
+      "notation": "MSE = Σᵢ(ŷᵢ−yᵢ)²/n averages squared error across n examples. The training optimizer uses only training examples. Test MSE uses frozen model parameters.",
+      "code": "import torch\nfrom torch import nn\ntrain_x = torch.tensor([[-2.],[-1.],[0.],[1.],[2.]])\ntest_x = torch.tensor([[-1.5],[-0.5],[0.5],[1.5]])\nline = nn.Linear(1,1)\nnet = nn.Sequential(nn.Linear(1,2,bias=False),nn.ReLU(),\n                    nn.Linear(2,1,bias=False))\nwith torch.no_grad():\n    line.weight.zero_()\n    line.bias.zero_()\n    net[0].weight.copy_(torch.tensor([[0.6],[-0.3]]))\n    net[2].weight.fill_(0.6)\nfor name, model in [(\"line\",line),(\"network\",net)]:\n    optimizer = torch.optim.SGD(model.parameters(),lr=0.1)\n    for step in range(120):\n        optimizer.zero_grad()\n        loss = ((model(train_x)-train_x.abs())**2).mean()\n        loss.backward()\n        optimizer.step()\n    with torch.no_grad():\n        pred = model(test_x)\n        print(name,\"predictions:\", [round(y.item(),3) for y in pred.flatten()])\n        print(\"test MSE (4 decimals):\",round(((pred-test_x.abs())**2).mean().item(),4))",
+      "q": "A classmate trains on the four test labels too and reports an improvement on those same four. Which part of the comparison breaks?",
+      "a": "Those four labels now helped choose the parameters. Reserve fresh independent records to measure performance on examples the training procedure has not seen.",
+      "out": "line predictions: [1.2, 1.2, 1.2, 1.2]\ntest MSE (4 decimals): 0.29\nnetwork predictions: [1.5, 0.5, 0.5, 1.5]\ntest MSE (4 decimals): 0.0"
+    },
+    {
+      "title": "Explain the comparison through the features",
+      "explain": "The held-out squared error favors the network on this particular V-shaped task. The line was forced into a single slope. The hidden units could follow separate slopes to the left and right. Inspect their activations to connect the numerical result to the functions each model could express.",
+      "worked": "A second task illustrates the limit of the conclusion. If the targets instead equal twice the signed difference plus 1, a line predicts all four held-out points exactly. The earlier experiment supplies no evidence of a universal benefit from extra layers.",
+      "notation": "A linear function f(x)=wx+b has one slope w. A ReLU network can be piecewise linear: different input intervals can have different slopes, separated by activation boundaries.",
+      "code": "import torch\nx = torch.tensor([-1.5,-0.5,0.5,1.5])\nlabel = 2*x + 1\nprediction = 2*x + 1\nprint(\"straight-line labels:\",label.tolist())\nprint(\"MSE for the matching line:\",((prediction-label)**2).mean().item())",
+      "q": "Would four held-out synthetic inputs be enough to claim the network predicts real students’ scores reliably?",
+      "a": "No. These targets measure a constructed difference in hours. A claim about scores requires actual score labels and evaluation on records representative of the intended students.",
+      "out": "straight-line labels: [-2.0, 0.0, 2.0, 4.0]\nMSE for the matching line: 0.0"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "For x=−3, use h₁=ReLU(2x+1), h₂=ReLU(−x−1) and ŷ=h₁+2h₂. Compute both hidden values and the prediction.",
+      "hint": "Substitute x in the parentheses, then replace a negative result with zero.",
+      "a": "The pre-activations are −5 and 2, hence the hidden values are 0 and 2. The prediction is 0+2×2=4."
+    },
+    {
+      "q": "A network has h=ReLU(wx+b), ŷ=vh and half-squared loss. Let x=3,w=1,b=−1,v=2,y=5. Calculate ∂L/∂w and ∂L/∂v.",
+      "hint": "Begin with the prediction error, then trace each path separately.",
+      "a": "a=2, h=2, ŷ=4, and ŷ−y=−1. The weight w has gradient (−1)×2×1×3=−6. The output weight v has gradient (−1)×h=−2."
+    },
+    {
+      "q": "Using the previous values, update only w with learning rate 0.01. Check the result by recomputing the loss.",
+      "hint": "Subtract the scaled gradient from w. Keep b and v fixed.",
+      "a": "w becomes 1.06, a becomes 3×1.06−1=2.18 and ŷ becomes 4.36. Loss falls from 0.5 to 0.64²/2=0.2048."
+    },
+    {
+      "q": "Two straight-line layers compute h=3x−1 and ŷ=2h+4. Can their composition give the V-shaped label?",
+      "hint": "Substitute h into the output and collect terms.",
+      "a": "The result is ŷ=6x+2. It has the same slope everywhere and cannot reproduce a function with slopes −1 and +1 on opposite sides of zero."
+    },
+    {
+      "q": "A baseline predicts 1.2 for four held-out targets 1.5, 0.5, 0.5, 1.5. Calculate its MSE and interpret it.",
+      "hint": "Square each difference before averaging.",
+      "a": "The squared errors are 0.09, 0.49, 0.49, and 0.09. The MSE is 1.16/4=0.29 hours squared. This measures error on these four synthetic inputs."
+    },
+    {
+      "q": "Design a second evaluation to see whether a trained model’s behavior extends beyond the observed hour differences.",
+      "hint": "Distinguish new points inside the training range from points outside it.",
+      "a": "Freeze both models. Select held-out differences outside [−2,2], generate the labels using the same stated rule, and report the new MSE separately. These examples test extrapolation. They would still give no estimate of real exam performance."
+    }
+  ],
+  "faq": [
+    {
+      "q": "How can a hidden unit learn if there is no label for it?",
+      "a": "The prediction loss depends on the hidden value. The chain rule measures how changing the hidden unit’s weight changes that final loss. Updating the weight lets the final label guide the intermediate feature."
+    },
+    {
+      "q": "What does backward() actually change?",
+      "a": "It traverses the recorded computation and accumulates derivatives in each trainable parameter’s .grad field. An optimizer step changes the parameter values. Clearing old gradients before the next batch prevents accidental accumulation across updates."
+    },
+    {
+      "q": "Does a ReLU output of zero mean the entire network has stopped learning?",
+      "a": "A single inactive unit supplies zero input-weight gradient from that example along that path. Other examples may activate it. Other units or the output bias can receive gradients from the same example."
+    },
+    {
+      "q": "Why use a known formula as the target when we could just calculate it?",
+      "a": "A known target lets us separate what the model family can express from ambiguity in labels. We can verify every prediction and locate a limitation of a straight line. Real applications require a separate reason to estimate an unknown rule from examples."
+    }
+  ],
+  "bridge": "At the end of Stage II, you can explain a hidden layer as a collection of learned features. Stage III begins by following one example through several such layers. Which features survive another transformation, and how can we still train parameters near the input?",
+  "bridgeQ": "A second hidden layer receives the reading-surplus and practice-surplus features. How many values does it receive per example? What must a gradient do to reach the first layer?",
+  "bridgeA": "It receives two numbers per example, one from each hidden unit. A gradient must pass back through every operation on a path from the loss to the first layer. Module 09 investigates what repeated transformations do to both features and gradients."
+}

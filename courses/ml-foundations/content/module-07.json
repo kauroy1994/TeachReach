@@ -1,0 +1,142 @@
+{
+  "n": 7,
+  "opening": "Ava’s class has four fictional weekly study logs. Each gives hours spent reading and hours spent practicing. The exam scores have not arrived. What patterns can the class describe using just these pairs of numbers?",
+  "recall": "Module 06 used distance to find neighbors whose known labels helped us make a prediction. Keep the distance calculation and cover the label column. We can still ask which records lie near one another, or how much of the variation fits along one direction.",
+  "recallQ": "Ava logged (1, 2) hours. Bo logged (2, 1) and Cy logged (5, 6). Without seeing a single score, which log is closer to Ava’s?",
+  "recallA": "Bo differs by one hour on each measurement. Cy differs by four on each. Either ordinary distance or squared distance puts Bo closer. Nothing in that comparison tells us who earned a higher score.",
+  "lessons": [
+    {
+      "title": "Read a row before choosing a method",
+      "explain": "The first number in every row counts reading hours and the second counts practice hours in the same week. A row is one point in a plane. We have two different questions. Which rows could share a representative point? Could a single number summarize how weekly study time varies across these rows?",
+      "worked": "Ava (1, 2), Bo (2, 1), Cy (5, 6), and Di (6, 5) give four points. Ava and Bo have equal total hours but distribute them differently. Keeping only the total would discard that difference.",
+      "notation": "X is the data matrix. X has shape 4 × 2: four records and two measurements. xᵢ denotes row i.",
+      "code": "import torch\nX = torch.tensor([[1.,2.],[2.,1.],[5.,6.],[6.,5.]])\nprint(\"rows, columns:\", tuple(X.shape))\nprint(\"weekly totals:\", X.sum(dim=1).tolist())",
+      "q": "How many rows would a fifth student add if they reported both measurements?",
+      "a": "One row. The number of columns stays at two because the measurements are unchanged.",
+      "out": "rows, columns: (4, 2)\nweekly totals: [3.0, 3.0, 11.0, 11.0]"
+    },
+    {
+      "title": "Assign each log to its nearest center",
+      "explain": "A center is a proposed representative. Start with two centers, A at Ava’s position and B at Cy’s. For each record, subtract a center coordinate by coordinate, square each difference, and add. Pick the smaller total. Taking a square root would give the same ordering.",
+      "worked": "For Bo, distance squared to A is (2−1)²+(1−2)²=2. To B it is (2−5)²+(1−6)²=34. Bo joins A. The numeric cluster labels in Python start at zero.",
+      "notation": "d²(x,c) = Σⱼ(xⱼ−cⱼ)². The sum runs over features j. For a fixed x, choose the center c with the smallest d².",
+      "code": "import torch\nX = torch.tensor([[1.,2.],[2.,1.],[5.,6.],[6.,5.]])\ncenters = X[[0,2]]\nfor row in X:\n    costs = ((centers-row)**2).sum(dim=1)\n    print(costs.tolist(), \"cluster\", costs.argmin().item())",
+      "q": "What does a cluster number tell us about performance on an exam?",
+      "a": "It identifies the nearest current center under these two measurements. We would need exam outcomes to check any link to performance.",
+      "out": "[0.0, 32.0] cluster 0\n[2.0, 34.0] cluster 0\n[32.0, 0.0] cluster 1\n[34.0, 2.0] cluster 1"
+    },
+    {
+      "title": "Move the centers and measure the improvement",
+      "explain": "K-means alternates two decisions. Assign rows to their closest center. Then move each nonempty center to the coordinate-wise mean of its assigned rows. For fixed assignments this mean minimizes the sum of squared distances within that cluster.",
+      "worked": "The mean of (1,2) and (2,1) is (1.5,1.5). Both points now cost 0.5. The other two rows give center (5.5,5.5) and cost 1 together. Total cost falls from 4 to 2. Another assignment leaves these pairs together.",
+      "notation": "J = Σᵢ ‖xᵢ−c[zᵢ]‖². zᵢ is row i’s cluster label, and c[zᵢ] is its center. J adds the squared distance of each row to its assigned center.",
+      "code": "import torch\nX = torch.tensor([[1.,2.],[2.,1.],[5.,6.],[6.,5.]])\ncenters = X[[0,2]].clone()\nfor step in range(3):\n    distances = torch.cdist(X, centers)\n    group = distances.argmin(dim=1)\n    print(\"cost\", round(((X-centers[group])**2).sum().item(), 2))\n    centers = torch.stack([X[group==k].mean(0) for k in (0,1)])\nprint(\"centers\", centers.tolist())",
+      "q": "Why can a center have 1.5 reading hours even if nobody recorded that value?",
+      "a": "The center summarizes two records with 1 and 2 hours. The mean can lie between observed values.",
+      "out": "cost 4.0\ncost 2.0\ncost 2.0\ncenters [[1.5, 1.5], [5.5, 5.5]]"
+    },
+    {
+      "title": "Check what a cluster depends on",
+      "explain": "Distance gives more influence to measurements with a larger numerical scale. Units, the number of centers, and the starting centers are choices that change the result. Repeating runs from different starts can expose several locally stable solutions. Inspect the groups and the task before interpreting them.",
+      "worked": "For a separate toy row (0,0), candidates (1,0) and (0,2) are one and two hours away. Express just the first column in minutes. The numerical distances become 60 and 2 and the nearest candidate changes although the events are identical.",
+      "notation": "With feature scales sⱼ, squared distance becomes Σⱼ[sⱼ(xⱼ−cⱼ)]². Choosing sⱼ amounts to choosing the influence of each feature.",
+      "code": "import torch\ncandidates = torch.tensor([[1.,0.],[0.,2.]])\nfor scale in [torch.tensor([1.,1.]), torch.tensor([60.,1.])]:\n    distance = torch.linalg.vector_norm(candidates*scale, dim=1)\n    print(distance.tolist(), \"nearest row\", distance.argmin().item())",
+      "q": "If we allow a center at each of the four distinct records, what happens to the training cost?",
+      "a": "Every row can have zero distance to a center. The cost falls to zero, but four representatives give us no compression of four records.",
+      "out": "[1.0, 2.0] nearest row 0\n[60.0, 2.0] nearest row 1"
+    },
+    {
+      "title": "Center the records and measure how features vary together",
+      "explain": "PCA, or principal component analysis, asks for a direction that preserves as much variation as possible. First subtract the average of each column. Then multiply centered feature pairs. Same-sign differences contribute a positive product and opposite signs contribute a negative one. Their average is a covariance.",
+      "worked": "Both original columns average 3.5. Ava’s centered row is (−2.5,−1.5), giving a product of +3.75. All four products are +3.75 here. In this dataset, above-average reading hours tend to accompany above-average practice hours.",
+      "notation": "Let Z be the centered data, with n rows. C = ZᵀZ/n uses divisor n to describe this dataset. The diagonal gives each feature’s variance. C₁₂ gives their covariance.",
+      "code": "import torch\nX = torch.tensor([[1.,2.],[2.,1.],[5.,6.],[6.,5.]])\nZ = X-X.mean(dim=0)\nC = Z.T @ Z / len(X)\nprint(\"Ava, centered:\", Z[0].tolist())\nprint(\"covariance:\", C.tolist())",
+      "q": "Why subtract the column means first?",
+      "a": "We want co-variation around the typical week. Centering gives zero to a typical feature value and separates variation from the location of the whole cloud.",
+      "out": "Ava, centered: [-2.5, -1.5]\ncovariance: [[4.25, 3.75], [3.75, 4.25]]"
+    },
+    {
+      "title": "Rotate a line and compare the variance it retains",
+      "explain": "A unit vector gives a direction of length one. Projecting a centered record onto that direction gives a signed coordinate along a line. Compare the variance of these coordinates across rows. The direction with the largest variance is the first principal direction.",
+      "worked": "Along the reading axis, retained variance is 4.25 h². Along the direction (1,1)/√2 it is 8 h². The perpendicular direction (1,−1)/√2 retains 0.5 h². Projecting onto the first line keeps 8/(8+0.5), about 94.1% of total variation.",
+      "notation": "tᵢ = zᵢ · u is the signed projection on unit direction u. Its variance is uᵀCu. C u = λ u means C scales that direction by λ. Such a u is an eigenvector. For a covariance matrix, its largest eigenvalue λ gives the highest achievable projection variance.",
+      "code": "import torch\nC = torch.tensor([[4.25,3.75],[3.75,4.25]])\nfor pair in [[1.,0.],[1.,1.],[1.,-1.]]:\n    u = torch.tensor(pair)\n    u = u / torch.linalg.vector_norm(u)\n    print(\"variance\", round((u @ C @ u).item(), 2))\nprint(\"eigenvalues\", torch.linalg.eigvalsh(C).tolist())",
+      "q": "Could the vector (−1,−1)/√2 serve equally well as the principal direction?",
+      "a": "Yes. It points along the same line. Each projected coordinate changes sign and its squared value stays the same.",
+      "out": "variance 4.25\nvariance 8.0\nvariance 0.5\neigenvalues [0.5, 8.0]"
+    },
+    {
+      "title": "Recover an approximate record from one coordinate",
+      "explain": "Given a projection, walk that distance along the chosen line and add the original column means. The result is an approximation. Two records can land at the same point on the line, even though the original measurements differ.",
+      "worked": "Ava and Bo each total 3 hours. Under the diagonal projection, both reconstruct to (1.5,1.5). The difference between reading more and practicing more lies perpendicular to the retained direction.",
+      "notation": "x̂ᵢ = x̄ + (zᵢ · u)u. Here x̄ denotes the mean row. The hat marks the reconstructed row.",
+      "code": "import torch\nX = torch.tensor([[1.,2.],[2.,1.],[5.,6.],[6.,5.]])\nu = torch.tensor([1.,1.]) / 2**0.5\nmean = X.mean(0)\ncoordinates = (X-mean) @ u\nrecovered = mean + coordinates[:,None] * u\nprint(\"reconstructed rows:\", recovered.round(decimals=2).tolist())",
+      "q": "A tutor wants to distinguish equal totals with different reading/practice balances. Is one principal coordinate enough here?",
+      "a": "No. Ava and Bo have identical diagonal coordinates. Keep the original two features or retain the second component as well.",
+      "out": "reconstructed rows: [[1.5, 1.5], [1.5, 1.5], [5.5, 5.5], [5.5, 5.5]]"
+    },
+    {
+      "title": "Let two groups share responsibility for an observation",
+      "explain": "A Gaussian mixture treats a measured value as coming from one of several distributions. Its component identity is latent: the model assumes an underlying group but we do not observe it. Combine the prior frequency of each component with how plausible the value is under it. Normalizing gives soft assignments.",
+      "worked": "For a separate one-feature illustration, centers are 2 and 6 hours, each with standard deviation 2 and prior probability 1/2. A 5-hour record is one hour from the second center and three from the first. The second component receives about 0.731 responsibility; a nearest-center rule assigns it entirely to the second.",
+      "notation": "rₖ = πₖ p(x|k) / Σⱼπⱼ p(x|j). πₖ is the frequency assumed for group k. p(x|k) is its density at x, as in Module 02. The responsibilities across components add to 1.",
+      "code": "import torch\nmeans = torch.tensor([2.,6.])\nmodels = torch.distributions.Normal(means, torch.tensor(2.))\nfor hours in [4.,5.]:\n    density = models.log_prob(torch.tensor(hours)).exp()\n    evidence = 0.5*density\n    responsibility = evidence / evidence.sum()\n    print(hours, [round(r.item(),3) for r in responsibility])",
+      "q": "At 4 hours both densities are equal. What responsibilities result if the priors change to 0.75 and 0.25?",
+      "a": "The common density cancels. The responsibilities are 0.75 and 0.25. Equal distance alone cannot determine responsibilities when priors differ.",
+      "out": "4.0 [0.5, 0.5]\n5.0 [0.269, 0.731]"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "A new weekly log is (2,3). With centers A=(1,2) and B=(5,6), find both squared distances and assign the row.",
+      "hint": "Subtract by coordinate and add the two squares.",
+      "a": "A costs (2−1)²+(3−2)²=2. B costs (2−5)²+(3−6)²=18. Choose A."
+    },
+    {
+      "q": "A cluster contains (1,2), (2,1), and (3,3). Update its center and calculate its new sum of squared distances.",
+      "hint": "Take the mean separately in each column.",
+      "a": "Both means equal 2. Distances squared to (2,2) are 1, 1, and 2, so the new within-cluster cost is 4."
+    },
+    {
+      "q": "Centered records have covariance matrix with rows (3,−2) and (−2,3). Which diagonal direction retains more variance?",
+      "hint": "Multiply the matrix by (1,1) and by (1,−1). Normalize for projection.",
+      "a": "C(1,1)=(1,1), but C(1,−1)=(5,−5). The unit direction (1,−1)/√2 therefore retains variance 5, compared with 1 along (1,1)/√2. One coordinate tends to rise as the other falls."
+    },
+    {
+      "q": "A researcher fits PCA to all records, including a reserved test set, before evaluating a prediction model. How would you redesign this?",
+      "hint": "Which quantities does PCA estimate from records?",
+      "a": "Estimate column means and principal directions from the training split. Apply those same values to the held-out records. Including the test inputs in the fit otherwise lets their distribution influence the representation used in evaluation."
+    },
+    {
+      "q": "Two mixture components give densities 0.2 and 0.1 for a record. Their prior weights are 0.25 and 0.75. Which group gets the larger responsibility?",
+      "hint": "Multiply density by prior before normalizing.",
+      "a": "Weighted densities are 0.05 and 0.075. Dividing by 0.125 gives 0.4 and 0.6. The second component wins despite having a lower density at this value."
+    },
+    {
+      "q": "Two students interpret the two k-means centers as proof of two natural learning styles. What evidence do the logs actually provide?",
+      "hint": "Who selected the number of centers and the measurements?",
+      "a": "The chosen two-center model groups four weekly logs by two measured activities. A student could change clusters next week. Vary the measurements, units, number of centers and sample before claiming a stable pattern. No learning-style label was measured."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Why does PCA belong in machine learning when nobody supplied a target?",
+      "a": "The mean and projection direction are estimated from observed records. New records can be mapped into the resulting coordinate system. The criterion being fitted is retained variance rather than a score-prediction loss."
+    },
+    {
+      "q": "How can I tell clustering and PCA apart?",
+      "a": "K-means gives Ava a group and a representative weekly log. PCA gives her a coordinate along a direction shared by everyone. You can ask how much squared variation each method loses, but the two representations answer different questions."
+    },
+    {
+      "q": "Will a k-means run always find the lowest possible cost?",
+      "a": "Assignment and mean-update steps can settle at a locally stable solution. Try several starts and compare costs for the same number of clusters. If a cluster receives no rows, its mean is undefined; the lab keeps that center in place and marks it empty."
+    },
+    {
+      "q": "Why might software give slightly larger covariance values?",
+      "a": "The worked example divides by n=4 to describe the four observed weeks. A sample covariance estimate often uses n−1=3 instead. It scales every entry and eigenvalue by 4/3 here, leaving the directions and retained fraction unchanged."
+    }
+  ],
+  "bridge": "Module 07 built directions and centers from the input records alone. Suppose we now have a target and want the model to learn intermediate features that help predict it. Module 08 starts with a weighted sum and gives it a bend that a single line cannot express.",
+  "bridgeQ": "A principal direction preserves nearly all input variance. Does that guarantee it contains the feature needed to predict a label?",
+  "bridgeA": "No. Imagine the label only records which activity took more time. Ava and Bo project to the same coordinate but their labels differ. A supervised model can use the labels to favor a different feature."
+}

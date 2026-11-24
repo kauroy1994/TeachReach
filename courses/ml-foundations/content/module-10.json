@@ -1,0 +1,142 @@
+{
+  "n": 10,
+  "opening": "A drawer holds thousands of sensor records but nobody labeled which ones contain a change of interest. Can the record itself pose a question whose answer we already know? Hide one reading, or make two views of the same record, and use the result to teach an encoder.",
+  "recall": "Module 09 converted raw readings into hidden features such as the strongest rise and fall. Its calibrated detector needed reference measurements. Here we choose tasks that get their training targets from the recorded signals themselves.",
+  "recallQ": "Can the readings [2, 4, 6] supply an input and a target for training without a person labeling the trend?",
+  "recallA": "Yes. Give the first two readings to the model and save 6 as the target. Keeping 6 hidden matters: if it appears in the input, copying it would solve the task.",
+  "lessons": [
+    {
+      "title": "Make a target from the record",
+      "explain": "A pretext task is a practice task chosen to teach features. In self-supervised learning, the training target comes from the data or from a known transformation of the data. Start by hiding the last reading. Split whole independent records into training and evaluation groups before creating examples.",
+      "worked": "For our fictional three-second records the next reading often continues a short trend. Use [2, 4] to predict 6. A simple baseline repeats the last seen reading and predicts 4. Its squared error is 4. A trend predictor can do better on this particular record.",
+      "notation": "Write the full record as (x₁, x₂, x₃). The model receives (x₁, x₂). The loss (prediction − x₃)² can be computed after making the prediction.",
+      "code": "record = [2., 4., 6.]\nfirst, second = record[:2]\ntarget = record[2]\nfor guess in (second, second + (second - first)):\n    print(\"prediction\", guess, \"squared error\", (guess-target)**2)",
+      "q": "A classmate creates two slightly different copies of each record, then randomly splits all copies. What might go wrong?",
+      "a": "Nearly identical versions could occur in training and testing. Split by original record first and keep its derived views together.",
+      "out": "prediction 4.0 squared error 4.0\nprediction 6.0 squared error 0.0"
+    },
+    {
+      "title": "Encode the visible part and reconstruct the hidden part",
+      "explain": "An encoder converts the visible readings to a feature, also called an embedding. Our encoder produces one number from two. A decoder uses that number to predict the missing reading. We fit the encoder by reducing reconstruction error on four fictional training records.",
+      "worked": "Let the decoder add the feature to the second reading. Then a useful feature is the expected change from second to third. Fitting the two encoder weights is the least-squares regression from Module 05, with the next recorded change as its target.",
+      "notation": "For visible readings a,b, embedding z = w₁a + w₂b. The reconstruction is b + z. Fit w to minimize the sum of (b + z − c)², where c is the hidden reading. That is the same as fitting z to c − b.",
+      "code": "import torch\nrecords = torch.tensor([[1.,2.,3.],[3.,2.,1.],[1.,3.,5.],[5.,4.,3.]])\nvisible = records[:, :2]\ntarget_change = records[:, 2] - records[:, 1]\nweights = torch.linalg.lstsq(visible, target_change).solution\nnew = torch.tensor([4., 7.])\nfeature = new @ weights\nprint(\"weights\", [round(w, 2) for w in weights.tolist()])\nprint(\"embedding\", round(feature.item(), 2))\nprint(\"reconstruction\", round((new[1]+feature).item(), 2))",
+      "q": "Why does the fit give approximately [−1, 1] on these records?",
+      "a": "In every example c − b equals b − a. We can compute that change with −1 times the first reading and +1 times the second. The training inputs include independent directions, so these weights are identified here.",
+      "out": "weights [-1.0, 1.0]\nembedding 3.0\nreconstruction 10.0"
+    },
+    {
+      "title": "Ask what the embedding preserves",
+      "explain": "The fitted encoder keeps the change across the first two readings. It discards their absolute brightness. An embedding is useful relative to a task: keeping change may help distinguish rising and falling signals, while a question about absolute brightness needs other features.",
+      "worked": "Both [1, 3] and [7, 9] become 2. The decoder still has access to the second reading and can predict different final values. A later classifier given only the embedding cannot recover the absolute level.",
+      "notation": "If z(a,b) = b − a, then z(a + k,b + k) = (b + k) − (a + k) = z(a,b). Adding the same offset k leaves this feature unchanged.",
+      "code": "for a, b in [(1,3), (7,9), (7,5)]:\n    z = b-a\n    print(\"visible\", (a,b), \"embedding\", z, \"decoded last reading\", b+z)",
+      "q": "Can a predictor using only z determine whether the second reading exceeds 8?",
+      "a": "No. The first two examples have z = 2, but only [7, 9] passes that threshold. Keeping the second reading would resolve the ambiguity.",
+      "out": "visible (1, 3) embedding 2 decoded last reading 5\nvisible (7, 9) embedding 2 decoded last reading 11\nvisible (7, 5) embedding -2 decoded last reading 3"
+    },
+    {
+      "title": "Compare two embeddings by their direction",
+      "explain": "A different encoder might keep several features. For example, give a record one coordinate for strongest rise and one for strongest fall. The dot product multiplies matching coordinates and adds. Cosine similarity divides that product by the length of each vector, allowing comparison of direction despite differences in size.",
+      "worked": "Take query [2, 0]. Candidate A is [1, 0], which points the same way. Candidate B is [0, 5], which points at a right angle. Candidate C is [3, 4], length 5. Its cosine with the query is 6/(2 × 5) = 0.6.",
+      "notation": "For nonzero vectors u,v, cos(u,v) = (u · v)/(‖u‖ ‖v‖). For [p,q], length ‖u‖ is the square root of p² + q². A cosine of 1 means equal direction, even for unequal magnitudes.",
+      "code": "import torch\nfrom torch.nn.functional import cosine_similarity\nquery = torch.tensor([[2., 0.]])\ncandidates = torch.tensor([[1.,0.],[0.,5.],[3.,4.]])\nprint([round(v, 2) for v in cosine_similarity(query, candidates).tolist()])",
+      "q": "Why might cosine be a poor choice if absolute jump size determines the class?",
+      "a": "[1, 0] and [10, 0] get cosine 1 with the query. A feature or distance that retains magnitude would make the jump-size difference available.",
+      "out": "[1.0, 0.0, 0.6]"
+    },
+    {
+      "title": "Make positive and negative pairs",
+      "explain": "In contrastive learning an anchor is a reference example. A positive is a view it should match. Negatives are alternatives. A useful augmentation changes something you expect to be irrelevant to the downstream question. That expectation is a modeling assumption you can test.",
+      "worked": "For trend direction, adding 5 to every reading preserves differences. Treat [1, 2, 3] and [6, 7, 8] as a positive pair from the same source. Reversing the order gives a falling signal, so using reversal as a positive would teach the wrong invariance for this task.",
+      "notation": "An encoder f maps each view x to z = f(x). The pair-selection rule supplies the match label. Here trend(t) = last(t) − first(t) is a simple feature to inspect the transformation.",
+      "code": "record = [1, 2, 3]\nviews = [record, [v+5 for v in record], list(reversed(record))]\nfor view in views:\n    print(view, \"net change\", view[-1]-view[0])",
+      "q": "Suppose a different rising record is treated as a negative. Why might that matter?",
+      "a": "The two records have distinct identities, but share the downstream trend class. Pushing them apart may suppress useful shared structure. Such a negative is called a false negative relative to that downstream meaning.",
+      "out": "[1, 2, 3] net change 2\n[6, 7, 8] net change 2\n[3, 2, 1] net change -2"
+    },
+    {
+      "title": "Write a loss that rewards the right match",
+      "explain": "Give each candidate a score for similarity to the anchor. Convert scores into positive weights with the exponential function, then divide by their sum. The resulting match probabilities add to one. Penalize a small probability for the positive with its negative natural logarithm, as in classification.",
+      "worked": "Use two candidates, positive score 1 and negative score 0, at temperature 1. The positive gets e/(e + 1), about 0.731, and loss about 0.313. If the scores tie, each gets 0.5 and loss rises to about 0.693.",
+      "notation": "With positive score s₊, candidate scores sⱼ, and temperature τ > 0, p₊ = exp(s₊/τ) / Σⱼ exp(sⱼ/τ). The sum includes the positive. For this one anchor the loss is −log(p₊).",
+      "code": "import torch\nfrom torch.nn.functional import cross_entropy\nscores = torch.tensor([[1., 0.], [0., 0.]])\npositive_index = torch.tensor([0, 0])\nprint(\"positive probabilities\", [round(x,3) for x in scores.softmax(dim=1)[:,0].tolist()])\nprint(\"losses\", [round(x,3) for x in cross_entropy(scores, positive_index, reduction=\"none\").tolist()])",
+      "q": "If a third alternative has score 0, what happens to the first example’s loss?",
+      "a": "The numerator remains e. The denominator increases from e + 1 to e + 2. The positive probability falls from about 0.731 to 0.576, so the loss rises to about 0.551.",
+      "out": "positive probabilities [0.731, 0.5]\nlosses [0.313, 0.693]"
+    },
+    {
+      "title": "See a contrastive objective change a weight",
+      "explain": "To distinguish rising from falling, try a feature with a fixed first coordinate 1 and a learned second coordinate equal to gain times signed change. Increasing the gain makes opposite trends point farther apart. Train the gain using one known positive pair and one negative.",
+      "worked": "The anchor rises by 1. A brightness-shifted copy also rises by 1. The negative falls by 1. Initially gain is 0.5, giving [1, 0.5] for the anchor and [1, −0.5] for the negative. Cosine with the positive is 1, while cosine with the negative starts at 0.6.",
+      "notation": "f(d) = [1, g·d] for signed change d and learned gain g. Apply the two-candidate loss to the two cosines, then use the Module 03 gradient update to adjust g.",
+      "code": "import torch\nimport torch.nn.functional as F\ngain = torch.tensor(0.5, requires_grad=True)\ndef embed(change):\n    return torch.stack([torch.ones_like(gain), gain * change])\nfor step in range(6):\n    anchor = embed(1.)\n    candidates = torch.stack([embed(1.), embed(-1.)])\n    scores = F.cosine_similarity(anchor[None, :], candidates)\n    loss = F.cross_entropy(scores[None, :], torch.tensor([0]))\n    if step in (0,5):\n        print(step, \"gain\", round(gain.item(),3), \"loss\", round(loss.item(),3))\n    if step < 5:\n        gradient, = torch.autograd.grad(loss, gain)\n        gain = (gain - 0.25*gradient).detach().requires_grad_()",
+      "q": "Does lowering this loss on one pair show that the encoder can identify every kind of trend?",
+      "a": "It shows that the update improves these supplied matches. Test the representation on independent records, including cases unlike this simple pair.",
+      "out": "0 gain 0.5 loss 0.513\n5 gain 1.009 loss 0.311"
+    },
+    {
+      "title": "Freeze the encoder and test it on a new task",
+      "explain": "Pretraining fits an encoder using a practice objective. For a downstream task, keep its weights fixed and train a simple classifier, called a probe, on labeled examples. The test labels stay out of both fits. Here we ask whether a record is rising, using new synthetic records.",
+      "worked": "Use the reconstruction encoder from earlier. In the labeled probe-training set its rising embeddings are 2 and 1, the falling embeddings −3 and −2. Put a threshold halfway between the two class means. Use that threshold on four different labeled records and inspect each prediction.",
+      "notation": "The class means are 1.5 and −2.5, so threshold t = (1.5 − 2.5)/2 = −0.5. Predict rising if z > t. This is a one-dimensional linear decision rule with score z − t.",
+      "code": "import torch\npre = torch.tensor([[1.,2.,3.],[3.,2.,1.],[1.,3.,5.],[5.,4.,3.]])\nweights = torch.linalg.lstsq(pre[:,:2], pre[:,2]-pre[:,1]).solution\ntrain = torch.tensor([[4.,6.],[9.,6.],[3.,4.],[7.,5.]])\nlabels = torch.tensor([1,0,1,0])\nz = train @ weights\nthreshold = (z[labels==1].mean() + z[labels==0].mean())/2\ntest = torch.tensor([[2.,5.],[7.,6.],[3.,5.],[9.,7.]])\ntruth = torch.tensor([1,0,1,0])\npred = (test @ weights > threshold).long()\nprint(\"threshold\", round(threshold.item(),2))\nprint(\"predictions\", pred.tolist(), \"correct\", int((pred==truth).sum()), \"of\", len(truth))",
+      "q": "Would four correct predictions prove that the representations detect changes in any real lamp?",
+      "a": "All four cases follow the synthetic construction. A useful next test includes unseen instruments, noise and flat signals. Compare with a baseline such as a classifier using the raw difference directly.",
+      "out": "threshold -0.5\npredictions [1, 0, 1, 0] correct 4 of 4"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Design a masked prediction task for [4, 7, 10]. Name the visible input, hidden target and one way to leak the answer.",
+      "hint": "The pretext task needs a target you can generate from a recorded example.",
+      "a": "For last-reading prediction, show [4, 7] and hide 10. Passing the full record, or giving the mean of all three readings alongside the first two, would reveal the target."
+    },
+    {
+      "q": "Use z = b − a to encode [5, 7] and [1, 3]. Which downstream question could distinguish these inputs: trend direction or second reading above 5?",
+      "hint": "List the two z values before considering each question.",
+      "a": "Both embeddings are 2, and both records rise. The second readings lie on opposite sides of 5. The embedding cannot distinguish that fact. Retaining b alongside z would allow both tasks."
+    },
+    {
+      "q": "Rank [0, 2], [4, 3] and [5, 0] by cosine with [1, 0]. Give the three cosines.",
+      "hint": "The dot product with [1,0] selects the first coordinate. Divide by candidate length.",
+      "a": "[5,0] scores 1, [4,3] scores 4/5 = 0.8, and [0,2] scores 0. Cosine measures angle here."
+    },
+    {
+      "q": "One anchor has three candidates. The positive has score 0, while the others have scores 0 and ln(2). At temperature 1, find the positive probability and loss.",
+      "hint": "Exponentiating those scores gives weights 1, 1 and 2.",
+      "a": "The total is 4. The positive receives 1/4, so the loss is −ln(1/4) = ln(4), about 1.386. The most similar alternative gets half of the probability."
+    },
+    {
+      "q": "The model should retrieve the same written digit across photographs. Two distinct photographs of the same digit are used as negatives. What assumption caused the problem, and how might you investigate it?",
+      "hint": "Compare the source identity used to create pairs with the desired downstream meaning.",
+      "a": "A different source image was assumed to mean a different semantic object or class. Inspect difficult negative pairs with available digit labels, then compare retrieval on an independent labeled set under alternative pair-selection rules."
+    },
+    {
+      "q": "Probe-training class means are −1 and +3. Use the midpoint rule on test embeddings 0, 1.5 and 4 with labels falling, rising and falling. Report accuracy and name the error.",
+      "hint": "Use a strict greater-than comparison with the midpoint.",
+      "a": "The threshold is 1. Predictions are falling, rising, rising. Two of three are correct. The final example is a false rising prediction. Its original record would help diagnose why its embedding falls on that side."
+    }
+  ],
+  "faq": [
+    {
+      "q": "How can a method be supervised by something other than a person?",
+      "a": "A recorded value or a known relationship supplies the answer to a deliberately constructed task. We can hide one measured value or record that two crops came from the same source. A person still chooses what counts as a meaningful task or transformation."
+    },
+    {
+      "q": "Is a low reconstruction error enough to choose an embedding?",
+      "a": "Consider a decoder with access to the whole unmasked input. It could copy the answer and ignore the embedding. Inspect what information enters each path, then test whether the embedding helps on a separate task."
+    },
+    {
+      "q": "Why freeze the encoder while evaluating the probe?",
+      "a": "It lets you test what a simple classifier can already read from the representation. Updating the encoder and classifier together is fine-tuning and measures what the system can learn after receiving downstream labels."
+    },
+    {
+      "q": "Should an embedding always stay the same when I add noise or change brightness?",
+      "a": "That depends on the desired task and the size of the change. A constant offset preserves the signed change of our synthetic trace. It changes the answer to questions about absolute brightness. Test the proposed transformation against the downstream question."
+    }
+  ],
+  "bridge": "We compared one embedding with several candidates, then normalized the scores to distribute weight across them. Module 11 applies that calculation inside a sequence. Each position can compare itself with earlier positions and mix information from them.",
+  "bridgeQ": "If a query gives two earlier readings equal scores and both are allowed, how much weight will each get after exponential normalization?",
+  "bridgeA": "Equal scores give equal positive weights. With only those two candidates, dividing by their sum gives one half to each. The next module uses those weights to combine the values at the two positions."
+}

@@ -1,0 +1,138 @@
+{
+  "n": 4,
+  "opening": "Ava’s fictional exam score was 60. Module 03 adjusted the prediction from 55 to 55.70. Would the updated rule also help on the next student? To answer, we need to decide whose scores matter and which scores we may use while choosing the rule.",
+  "recall": "Module 01 supplied the inputs and a prediction rule. Module 02 attached uncertainty to the prediction. Module 03 used a derivative to reduce the loss on one observed score. Here we ask what one observation can tell us about future errors.",
+  "recallQ": "If Ava’s prediction moves from 55 to 55.70 and her score is 60, what happens to the size of her error?",
+  "recallA": "It falls from 5 points to 4.30 points. Those numbers describe Ava’s result. We still need records from other students to see how well the model travels.",
+  "lessons": [
+    {
+      "title": "Whose next score will we predict?",
+      "explain": "A population is the group or process we want to predict for. A sample is the set of records we actually observe. Define the prediction time too. Information available after the exam cannot help a student making a prediction before it.",
+      "worked": "Imagine a tiny population of four equally likely study records. Hours and scores are (0,50), (1,56), (2,60), and (3,66). The third record reuses Ava’s hours and score. We use just hours here to compare rules by hand. In this toy world we know every score. Usually we see only a sample.",
+      "notation": "X denotes the input, here hours, and Y denotes the observed score. A row (x, y) gives one particular input and result.",
+      "code": "rows = [(0, 50), (1, 56), (2, 60), (3, 66)]\nsample = [rows[2]]\nprint(\"population size\", len(rows))\nprint(\"sample\", sample)",
+      "q": "If the intended population changes to all students taking a different exam, can we still treat the four rows as its full population?",
+      "a": "No. The four records describe the invented exam. A new exam could change both which students appear and how scores relate to preparation.",
+      "out": "population size 4\nsample [(2, 60)]"
+    },
+    {
+      "title": "Two rules can agree on Ava",
+      "explain": "A hypothesis is a candidate prediction rule. A hypothesis class is the set of rules we agree to consider. Restricting the class makes some patterns easier to learn and others impossible to express. That preference is an inductive bias.",
+      "worked": "Consider two candidates. One always predicts 60. The other starts at 50 and adds 5 points per hour. Both predict 60 for Ava at two hours. At zero hours they differ by 10 points.",
+      "notation": "H = {f, g} is a set of two rules. f(x) = 60 and g(x) = 50 + 5x. The notation f(x) means the number that rule f returns at input x.",
+      "code": "for hours in (2, 0):\n    print(hours, 60, 50 + 5 * hours)",
+      "q": "If the training sample contains only Ava, can squared error choose between these rules?",
+      "a": "Both predictions equal 60. Each has zero training error. A preference between them would have to come from another observation or an assumption about the pattern.",
+      "out": "2 60 60\n0 60 50"
+    },
+    {
+      "title": "Turn individual misses into a sample average",
+      "explain": "Define a loss for one prediction, then average the losses. Squared loss counts a miss twice as large as four times as costly. The mean squared loss on the observed data is called empirical risk.",
+      "worked": "For sample rows (0,50) and (2,60), the constant-60 rule misses by 10 and 0 points. Squaring gives 100 and 0. Their mean is 50 squared points.",
+      "notation": "ℓ(ŷ, y) = (ŷ − y)². Here ŷ is the prediction. R̂(f) = (1/n) Σᵢ ℓ(f(xᵢ), yᵢ). The index i visits each of the n sample rows once, and Σ means add.",
+      "code": "import torch\nscores = torch.tensor([50., 60.])\nerrors = 60 - scores\nprint(errors.square().tolist())\nprint(errors.square().mean().item())",
+      "q": "The sample contains scores 56 and 66. What is the empirical squared risk of predicting 60 for both?",
+      "a": "The errors are 4 and −6. Average the squares to obtain (16 + 36)/2 = 26 squared points.",
+      "out": "[100.0, 0.0]\n50.0"
+    },
+    {
+      "title": "Calculate the risk for the whole toy population",
+      "explain": "Expected risk means the average loss over future cases from the chosen population. A common case contributes more than a rare case. With four equally likely records, each contributes one quarter of its loss.",
+      "worked": "The constant rule gives losses 100, 16, 0, 36. Its population risk is 38. The line gives losses 0, 1, 0, 1. Its risk is 0.5. Ava alone gave zero for both.",
+      "notation": "R(f) = E[ℓ(f(X), Y)]. E means average using the population probabilities. For discrete cases with probabilities pᵢ, multiply each loss by pᵢ and sum.",
+      "code": "rows = [(0,50), (1,56), (2,60), (3,66)]\nfor name, predict in [(\"constant\", lambda x: 60),\n                      (\"line\", lambda x: 50 + 5*x)]:\n    losses = [(predict(x)-y)**2 for x,y in rows]\n    print(name, losses, sum(losses)/len(rows))",
+      "q": "Keep the four scores fixed but make Ava the only case that ever occurs. What is each rule’s expected risk?",
+      "a": "The population now puts probability 1 on Ava and 0 elsewhere. Both rules predict Ava exactly, so both expected risks are zero.",
+      "out": "constant [100, 16, 0, 36] 38.0\nline [0, 1, 0, 1] 0.5"
+    },
+    {
+      "title": "Why estimates vary between samples",
+      "explain": "An estimator is a recipe that converts sample data into a number. Its result can change when the sample changes. We can see that variation exactly by enumerating every possible pair of distinct students in this small population.",
+      "worked": "For the constant rule, one pair gives a risk estimate of (100 + 16)/2 = 58. Another gives (0 + 36)/2 = 18. The rule did not change. Different students entered the estimate.",
+      "notation": "R̂ uses a sample. In this example every unordered pair has equal probability, so the mean over all six pair estimates equals the population risk R.",
+      "code": "from itertools import combinations\nlosses = [100, 16, 0, 36]\nestimates = [(a+b)/2 for a,b in combinations(losses, 2)]\nprint(estimates)\nprint(\"mean across pairs\", sum(estimates)/len(estimates))",
+      "q": "If we always sample only the two students with the largest hours, what estimate do we get for the constant rule?",
+      "a": "Their losses are 0 and 36, so the estimate is 18. Repeating the same selection gives 18 again, even though the equally weighted population risk is 38.",
+      "out": "[58.0, 50.0, 68.0, 8.0, 26.0, 18.0]\nmean across pairs 38.0"
+    },
+    {
+      "title": "Separate choosing a rule from checking it",
+      "explain": "Use training data to fit parameters. If you compare design choices, use validation data to choose among them. Reserve test data for a final check after the choices are fixed. A test average estimates performance on similar future cases when the sampling design supports that interpretation.",
+      "worked": "Let training contain hours 0 and 2, and let test contain hours 1 and 3. The line beats the constant on training, so select the line using training alone. Its mean test loss is 1. This two-row test set is a very small estimate.",
+      "notation": "f̂ = argmin over f in H of R̂train(f). Read argmin as “the candidate with the smallest value.” R̂test(f̂) then averages the already chosen rule’s losses on the test rows.",
+      "code": "train = [(0,50), (2,60)]\ntest = [(1,56), (3,66)]\nrules = {\"constant\": lambda x: 60, \"line\": lambda x: 50+5*x}\ndef risk(rule, rows):\n    return sum((rule(x)-y)**2 for x,y in rows)/len(rows)\nbest = min(rules, key=lambda name: risk(rules[name], train))\nprint(best, risk(rules[best], train), risk(rules[best], test))",
+      "q": "What goes wrong if you repeatedly choose a different rule after viewing the same test scores?",
+      "a": "The test results influence the rule. That set now helps select the model and can give an optimistic final estimate. An independent final evaluation needs fresh cases.",
+      "out": "line 0.0 1.0"
+    },
+    {
+      "title": "Spot information that arrives too late",
+      "explain": "Leakage occurs when training or evaluation uses information unavailable under the intended prediction conditions. A model can look accurate for the wrong reason. Checking when an input becomes known is as important as checking its numerical type.",
+      "worked": "Suppose a column called adjusted_total equals the exam score plus two administrative points. Subtracting two gives perfect predictions in the stored table. At prediction time the exam has not happened, so the feature does not exist yet.",
+      "notation": "For an input x to support prediction before time t, every part of x must be available by t. A low test loss alone cannot establish that condition.",
+      "code": "scores = [50, 56, 60, 66]\nadjusted_totals = [score + 2 for score in scores]\nleaked_predictions = [total - 2 for total in adjusted_totals]\nprint(sum((p-y)**2 for p,y in zip(leaked_predictions,scores))/len(scores))",
+      "q": "You want to predict a new student’s performance, but that student’s duplicate record appears in training. How would you split the data?",
+      "a": "Keep rows for the same student together and split by student. This makes the test student genuinely new. If the goal also involves future exams, preserve the timing when you choose the split.",
+      "out": "0.0"
+    },
+    {
+      "title": "Turn Stage I into a learning procedure",
+      "explain": "A model needs a representation, a loss, a way to fit parameters, and a way to evaluate the fitted rule. Choosing among two hand-written rules was a first version of fitting. Stage II will let the examples determine a slope and intercept.",
+      "worked": "Fit a constant predictor to scores 50, 56, 60. Among constants, the sample mean minimizes squared loss. Check three nearby constants. Moving from the optimum by one point raises the mean squared loss by exactly one.",
+      "notation": "For a constant c, the objective is the average of (c − yᵢ)². Its slope with respect to c is 2(c − ȳ), where ȳ is the mean score. The slope vanishes at c = ȳ, the bottom of this upward-opening curve.",
+      "code": "import torch\nscores = torch.tensor([50.,56.,60.], dtype=torch.float64)\ncenter = scores.mean()\nfor shift in (-1,0,1):\n    c = center + shift\n    print(round(c.item(),3), round((c-scores).square().mean().item(),3))",
+      "q": "What do hours contribute to the fitted constant prediction?",
+      "a": "Nothing. A class containing only constants treats all students alike. A line with a learned slope can use differences in hours.",
+      "out": "54.333 17.889\n55.333 16.889\n56.333 17.889"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "A constant prediction of 12 meets observations 10, 11, 15. Write and compute its empirical squared risk.",
+      "hint": "Subtract each observation, square, then average.",
+      "a": "R̂(c) = [(c−10)²+(c−11)²+(c−15)²]/3. At c=12 the value is (4+1+9)/3 = 14/3 squared units."
+    },
+    {
+      "q": "A rule loses 1 on ordinary cases and 9 on unusual cases. Future cases are 75% ordinary. Find expected loss and compare with a sample containing one of each.",
+      "hint": "Weight by how often each case occurs.",
+      "a": "Population risk is 0.75×1+0.25×9=3. The balanced sample gives (1+9)/2=5 because unusual cases have a larger share in that sample."
+    },
+    {
+      "q": "Two candidate rules predict 70 on every training record. At a new input they predict 65 and 85. What evidence would discriminate between them?",
+      "hint": "Look for a record on which their predictions differ.",
+      "a": "A labeled case on which they differ lets us compare losses. More such independently sampled cases better represent which inputs matter. Agreement on training records alone cannot break the tie."
+    },
+    {
+      "q": "You fit twenty models and report the smallest of twenty test errors on the same students. Redesign the evaluation.",
+      "hint": "Which set made the selection?",
+      "a": "The so-called test set selected the winner. Fit on training data, choose among twenty using validation data, then evaluate that single choice on untouched students sampled for the prediction goal."
+    },
+    {
+      "q": "A score predictor uses a retake invitation sent after grading. Its held-out error is tiny. What is the first check?",
+      "hint": "Write down the time at which the prediction is needed.",
+      "a": "If the goal is a prediction before the exam, the invitation arrives too late. Remove it, rebuild training features as of prediction time, and rerun the evaluation."
+    },
+    {
+      "q": "Two independent small samples give estimates 12 and 18. Does the difference alone show that one estimate was computed incorrectly?",
+      "hint": "What changes between the averages?",
+      "a": "No. Different sampled cases may contribute different individual losses. Check the arithmetic, sample selection and variation before attributing the difference to a mistake."
+    }
+  ],
+  "faq": [
+    {
+      "q": "What does generalization mean for Ava’s example?",
+      "a": "A prediction rule generalizes well when it has low loss on the future records we care about. Lowering Ava’s loss proves that her prediction improved. Predicting for new students also requires evidence about those students, the time of prediction and which examples were excluded from fitting."
+    },
+    {
+      "q": "Why learn from a sample if it can give the wrong answer?",
+      "a": "Measuring everyone is often impossible. A sample drawn to represent the target population can estimate average loss and help select a rule. Examining how much the estimate changes across samples tells us about its precision. Selective sampling can still distort it."
+    },
+    {
+      "q": "Is the smallest training error always the best choice?",
+      "a": "It identifies the best fit to those measurements under the chosen loss. A flexible rule can memorize observed values yet predict poorly elsewhere. Validation compares choices on fresh cases, and a separate test estimates the chosen procedure’s performance."
+    }
+  ],
+  "bridge": "Stage I gave us inputs, probabilities, gradients, and a definition of success on new observations. In Stage II we use these tools to learn a line for a numerical score, then change the output to a probability for a yes-or-no event.",
+  "bridgeQ": "A constant score ignores hours. What two quantities would let a straight line adapt to how hours and scores vary together?",
+  "bridgeA": "An intercept gives the prediction at zero hours. A slope gives the change in the predicted score for one more hour. Module 05 estimates both from training pairs."
+}

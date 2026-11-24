@@ -1,0 +1,148 @@
+{
+  "n": 13,
+  "opening": "A desk display shows two lights. Its examples often have the left light bright when the right is dim, or vice versa. A generator should produce plausible pairs, including their relationship. We will build small pieces of three ways to learn that relationship.",
+  "recall": "In Module 12 you sampled tokens from a learned distribution. Modules 02 and 10 introduced Gaussian noise and reconstruction. Keep the idea of sampling, then ask how to generate two measurements together when there is no natural first word.",
+  "recallQ": "If half the training displays are [1, 0] and half are [0, 1], what is their coordinate-wise mean? Does it reproduce either display?",
+  "recallA": "The mean is [0.5, 0.5]. It lies between the displays. Matching an average alone does not recover their two distinct patterns.",
+  "lessons": [
+    {
+      "title": "Sample the relationship as well as its parts",
+      "explain": "A generative model gives us a way to draw a whole observation. Matching each coordinate’s individual distribution is insufficient when the coordinates depend on each other. Begin by listing all outcomes to see which pairs obey the relationship.",
+      "worked": "The observed patterns are [1, 0] and [0, 1]. Sampling two independent fair bits would produce four equiprobable patterns. Half have equal bits and violate the observed relationship.",
+      "notation": "x = (x₁, x₂) denotes one observation. p(x₁, x₂) is a joint probability. Independence would mean p(x₁, x₂) = p(x₁)p(x₂).",
+      "code": "from itertools import product\npairs = list(product([0, 1], repeat=2))\nvalid = [x for x in pairs if x[0] + x[1] == 1]\nprint(\"all independent outcomes\", pairs)\nprint(\"fraction with one light on\", len(valid) / len(pairs))",
+      "q": "A generator always outputs [1, 0]. Which check does it pass and which does it fail?",
+      "a": "Every pair has exactly one light on. But it never produces [0, 1], which appears half the time in the toy data. Both validity and coverage matter.",
+      "out": "all independent outcomes [(0, 0), (0, 1), (1, 0), (1, 1)]\nfraction with one light on 0.5"
+    },
+    {
+      "title": "Generate from a hidden coordinate",
+      "explain": "A latent variable is a quantity used by the model that was not directly recorded. Draw a latent coordinate z and send it through a decoder, a function that produces the parameters of an output distribution. Inputs near each other can produce nearby outputs.",
+      "worked": "Try a hand-chosen decoder: apply the sigmoid to z for the first light’s mean brightness and to −z for the second. At z = 0 both means equal 0.5. At z = 2 they are about 0.881 and 0.119. These are decoder means, not sampled binary lamps.",
+      "notation": "z ∼ N(0,1) means draw z from a standard normal prior. m(z) = [σ(z), σ(−z)] gives two means. The prior is the latent distribution used when generating.",
+      "code": "import torch\nz = torch.tensor([-2., 0., 2.])\nm = torch.stack((z.sigmoid(), (-z).sigmoid()), dim=1)\nprint([[round(float(x), 3) for x in row] for row in m])",
+      "q": "What new input does this decoder need to generate another pair of means?",
+      "a": "Draw a new z from the prior or choose a specific z to explore. The fixed decoder then maps it to the corresponding pair.",
+      "out": "[[0.119, 0.881], [0.5, 0.5], [0.881, 0.119]]"
+    },
+    {
+      "title": "Encode an example as a distribution",
+      "explain": "In a variational autoencoder (VAE), the encoder reads an observation x and estimates a distribution over latent variables that could explain it. This approximates the posterior, the distribution of z given x. A common encoder outputs a mean μ and a positive standard deviation s. To draw a code, scale and shift a standard normal noise value ε.",
+      "worked": "Suppose the encoder outputs μ = 1, s = 0.5 for [1, 0]. With ε = −1, z = 0.5. With ε = 1, z = 1.5. A decoder maps both codes to brightness means, so the same input can give different reconstructions.",
+      "notation": "q(z | x) = N(μ,s²). Sampling uses z = μ + sε, ε ∼ N(0,1). During training this form allows gradients through μ and s. The two ε values here are fixed for comparison.",
+      "code": "import torch\nx = torch.tensor([1., 0.])\nmu = x[0] - x[1]  # illustrative encoder\ns = torch.tensor(0.5)\nfor eps in [-1., 1.]:\n    z = mu + s * eps\n    reconstruction = torch.stack((z.sigmoid(), (-z).sigmoid()))\n    print(float(z), [round(float(v), 3) for v in reconstruction])",
+      "q": "When generating an entirely new example, must we first pass a training pattern through the encoder?",
+      "a": "No. Generation starts with z drawn from the prior. The encoder is used when inferring latent codes from observed examples.",
+      "out": "0.5 [0.622, 0.378]\n1.5 [0.818, 0.182]"
+    },
+    {
+      "title": "Fit the VAE with two costs",
+      "explain": "The reconstruction term charges the decoder when the observed output was unlikely under a sampled code. A second term, KL divergence, measures how far the encoder distribution is from the prior for this example. Using both gives a tractable objective when summing over every possible continuous z would be difficult. This approximation is the variational part.",
+      "worked": "Take binary lights [1, 0] and decoder probabilities [0.8, 0.2], conditionally independent given z. The observed pair has probability 0.8 × 0.8. Its loss is about 0.446. An encoder N(1,1) against prior N(0,1) has KL cost 0.5.",
+      "notation": "VAE cost = E_q[−ln p(x | z)] + KL(q || p). E_q means average over draws from the encoder. For one normal coordinate against N(0,1), KL = (μ² + s² − 1 − ln s²)/2.",
+      "code": "import math\np_left, p_right = .8, .2\nreconstruction = -math.log(p_left * (1 - p_right))\nmu, s = 1., 1.\nkl = (mu**2 + s**2 - 1 - math.log(s**2)) / 2\nprint(\"one-draw cost estimate\", round(reconstruction, 3), \"+\", kl, \"=\", round(reconstruction + kl, 3))",
+      "q": "If the encoder emits μ = 0 and s = 1 for this example, which cost vanishes?",
+      "a": "The KL cost is zero because the encoder equals the prior. The reconstruction cost can still be large if the decoder poorly predicts the observation.",
+      "out": "one-draw cost estimate 0.446 + 0.5 = 0.946"
+    },
+    {
+      "title": "Train a critic of generated examples",
+      "explain": "A generative adversarial network (GAN) trains two models. The generator G turns noise into samples. The discriminator D learns to distinguish training observations from generated ones. For a discriminator update, an observed pattern is labeled 1 and a generated pattern is labeled 0. For a generator update, keep the discriminator fixed and change the generator so its samples receive larger scores.",
+      "worked": "Suppose D gives an observed pattern 0.8 and a generated one 0.2. For the observed pattern, D assigns 0.8 to the training-data label. For the generated pattern, 1 − D = 0.8 is the probability it assigns to the generated label. The usual non-saturating generator objective instead charges −ln(0.2) on that fake pattern. The objectives pull the fake score in opposite directions.",
+      "notation": "D(x) is the predicted probability of the training-data label. L_D = −ln D(real) − ln(1−D(fake)) for one pair. A common generator loss is L_G = −ln D(G(z)).",
+      "code": "import math\np_real, p_fake = .8, .2\nld = -math.log(p_real) - math.log1p(-p_fake)\nlg = -math.log(p_fake)\nprint(\"discriminator sum\", round(ld, 3), \"generator\", round(lg, 3))",
+      "q": "If the fixed discriminator raises its score on the generated sample from 0.2 to 0.6, how does the generator loss change?",
+      "a": "It falls from about 1.609 to 0.511. This single improvement says nothing about coverage of the other training pattern.",
+      "out": "discriminator sum 0.446 generator 1.609"
+    },
+    {
+      "title": "Corrupt a clean signal gradually",
+      "explain": "A diffusion model trains by adding known noise to clean data and learning to undo corruption. Start with one brightness measurement x₀. At each forward step, retain part of the previous signal and add Gaussian noise. Repeating this operation makes the endpoint progressively less informative about the start on average.",
+      "worked": "Let each step retain a = 0.8 of signal power. Its signal coefficient is √0.8 and its noise coefficient is √0.2. After three steps, the fraction of original signal power retained is 0.8³ = 0.512. An individual noisy value can move in either direction.",
+      "notation": "xₜ = √a xₜ₋₁ + √(1−a) εₜ, with independent εₜ ∼ N(0,1). After t equal steps the cumulative retention is āₜ = aᵗ.",
+      "code": "import math, torch\ngen = torch.Generator().manual_seed(32)\nx, a = 1., .8\nfor t in range(1, 4):\n    eps = float(torch.randn(1, generator=gen))\n    x = math.sqrt(a)*x + math.sqrt(1-a)*eps\n    print(t, \"signal power\", round(a**t, 3), \"noisy value\", round(x, 3))",
+      "q": "If each step retains 0.5 of signal power, how much original signal power remains after three steps?",
+      "a": "Multiply 0.5 × 0.5 × 0.5 = 0.125. The coefficient on the original measurement is the square root of 0.125.",
+      "out": "1 signal power 0.8 noisy value 1.281\n2 signal power 0.64 noisy value 1.159\n3 signal power 0.512 noisy value 1.271"
+    },
+    {
+      "title": "Teach a network what noise looks like",
+      "explain": "During training we know the original signal, the noise level and the noise draw. We can construct a noisy input in one operation and compare the network’s noise estimate with that draw using squared error. At generation time the actual noise is unknown. The estimate relies on patterns learned from many training examples.",
+      "worked": "With cumulative retention 0.64, the signal multiplier is 0.8 and the noise multiplier is 0.6. A clean value 1 with noise −0.5 gives a noisy value 0.5. Predicting noise −0.4 costs 0.01 and implies an estimated clean value of 0.925.",
+      "notation": "xₜ = √āₜ x₀ + √(1−āₜ) ε. The target for εθ(xₜ,t) is ε. Solving the same equation with predicted noise produces a clean estimate. θ represents adjustable weights.",
+      "code": "import torch\nx0 = torch.tensor([1., -1.])\neps = torch.tensor([-.5, .5])\nxt = .8*x0 + .6*eps\nmodel = torch.nn.Linear(1, 1, bias=False)\nwith torch.no_grad():\n    model.weight.fill_(-.8)\npred = model(xt[:, None]).flatten()  # one fixed noise level\nloss = (pred - eps).square().mean()\nloss.backward()\nprint(\"noisy inputs\", xt.tolist(), \"loss\", round(float(loss.detach()), 3))\nprint(\"clean estimates\", [round(float(v), 3) for v in ((xt-.6*pred.detach())/.8)])",
+      "q": "Why provide the noise level t when training one denoiser across several levels?",
+      "a": "The same observed brightness can result from very different amounts of corruption. The appropriate estimate depends on how much original signal was retained.",
+      "out": "noisy inputs [0.5, -0.5] loss 0.01\nclean estimates [0.925, -0.925]"
+    },
+    {
+      "title": "Generate through a sequence of reverse steps",
+      "explain": "A sampler starts from noise and repeatedly uses a noise estimate to move toward a cleaner sample. A deterministic sampler can reuse the estimated clean signal and residual noise at a slightly cleaner level. Repeat with a fresh prediction at each level. Different starting noise draws can give different final samples.",
+      "worked": "To make the arithmetic inspectable, use a toy distribution with clean values −1 and +1 equally likely. Its ideal squared-error clean estimator can be calculated exactly. At a noisy value near zero both clean signs remain plausible. Use that estimator here in place of a trained network.",
+      "notation": "Let b be cumulative retention and y the noisy value. For this particular two-point prior, E[x₀ | y] = tanh(√b y/(1−b)). Estimate ε = (y−√b E[x₀ | y])/√(1−b). At larger retention c, set y′ = √c E[x₀ | y] + √(1−c) ε. This is a finite-step deterministic approximation.",
+      "code": "import math\nlevels = [.01, .25, .64, .90, 1.]\nfor start in [-.8, .8]:\n    y = start  # two illustrative starting noise values\n    path = [round(y, 3)]\n    for b, c in zip(levels, levels[1:]):\n        clean = math.tanh(math.sqrt(b)*y/(1-b))\n        residual = (y - math.sqrt(b)*clean)/math.sqrt(1-b)\n        y = math.sqrt(c)*clean + math.sqrt(1-c)*residual\n        path.append(round(y, 3))\n    print(path)",
+      "q": "Can this sampler recover which training signal originally produced an independently drawn noise value?",
+      "a": "There is no paired training signal for a new generation draw. The reverse updates aim to produce a sample consistent with the learned data distribution.",
+      "out": "[-0.8, -0.73, -0.71, -0.858, -1.0]\n[0.8, 0.73, 0.71, 0.858, 1.0]"
+    },
+    {
+      "title": "Choose evidence for a generator",
+      "explain": "The VAE fits a bound on data log likelihood using reconstruction and a prior. A GAN trains from a discriminator’s real/fake feedback. The diffusion example fits a denoising objective at known noise levels. All three need evaluation on what matters for the application. Inspect samples for both valid structure and coverage.",
+      "worked": "Compare two sets of generated displays. One generator covers both valid patterns but also yields an invalid pair. Another emits only the left-on pattern. Count valid pairs separately from the number of distinct valid patterns represented. The two measures diagnose different failures.",
+      "notation": "Validity = valid generated count / total generated count. Coverage here = distinct valid patterns generated / 2. This small finite example lets us count every valid pattern; real data rarely offer that convenience.",
+      "code": "valid = {(1,0), (0,1)}\nfor batch in [[(1,0),(0,1),(1,1),(0,1)], [(1,0)]*4]:\n    pass_rate = sum(x in valid for x in batch)/len(batch)\n    coverage = len(set(batch) & valid)/len(valid)\n    print(\"validity\", pass_rate, \"coverage\", coverage)",
+      "q": "Which generator would pass a validity-only test with a perfect score while failing to cover the data?",
+      "a": "The generator that always emits [1, 0] passes validity every time but covers only one of the two valid patterns.",
+      "out": "validity 0.75 coverage 1.0\nvalidity 1.0 coverage 0.5"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Reconstruct [0,1] with decoded Bernoulli probabilities [0.25,0.75]. Compute its one-draw reconstruction loss.",
+      "hint": "For an observed zero use one minus its probability of being one.",
+      "a": "The joint probability under conditional independence is (1−0.25)×0.75 = 0.5625. The loss is −ln(0.5625) ≈ 0.575."
+    },
+    {
+      "q": "An encoder gives μ = −1, s = 0.25. With ε = 2, find z and state how an unconditioned VAE sample would start instead.",
+      "hint": "Compare sampling from the encoder with sampling from the prior.",
+      "a": "z = −1 + 0.25 × 2 = −0.5. An unconditioned sample first draws z from the prior, then runs the decoder."
+    },
+    {
+      "q": "A discriminator assigns D(real) = 0.9 and D(fake) = 0.4. Find both training losses using the lesson’s sum convention.",
+      "hint": "Which label applies to the fake sample in each update?",
+      "a": "The discriminator loss is −ln(0.9) − ln(0.6) ≈ 0.616. The non-saturating generator loss is −ln(0.4) ≈ 0.916."
+    },
+    {
+      "q": "At cumulative retention 0.36, the noisy measurement is 0.7. A model predicts noise 0.5. Estimate the clean signal.",
+      "hint": "The signal and noise multipliers are 0.6 and 0.8.",
+      "a": "Subtract the estimated noise contribution first: (0.7−0.8×0.5)/0.6 = 0.5. An inaccurate noise prediction changes this estimate."
+    },
+    {
+      "q": "In a three-step sequence, signal power retention per step is 0.9, 0.8 and 0.5. Find the total retention and interpret it.",
+      "hint": "Multiply the three fractions. Separate signal power from its coefficient.",
+      "a": "Total retention is 0.36. The original signal’s coefficient is √0.36 = 0.6. The remaining variance from the forward Gaussian noises is 0.64."
+    },
+    {
+      "q": "A team wants diverse samples and reports five visually attractive outputs chosen by its authors. What evidence is missing?",
+      "hint": "Decide who selected the sample and what failures the selection might conceal.",
+      "a": "Generate a prespecified batch from independent random draws and measure validity and coverage using explicit criteria. Report failures and duplicates. A handpicked display cannot establish frequencies."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Why does the VAE care about the prior if reconstruction already measures fit?",
+      "a": "A good reconstruction uses a code suggested by an observed input. During generation we draw from the prior. The KL term encourages overlap between encoder distributions and that prior so the decoder sees useful codes in that region."
+    },
+    {
+      "q": "If a GAN discriminator guesses real or fake correctly, does it generate better samples?",
+      "a": "The discriminator produces a learning signal for the generator. Sample quality changes only as the generator updates. Check both plausibility and variation after training."
+    },
+    {
+      "q": "How can a model learn to remove noise it cannot see at generation time?",
+      "a": "During training we create noisy inputs from known clean examples and known noise draws. Across many such pairs a predictor learns statistical patterns. At generation time each estimate can be uncertain, and reverse steps combine these estimates to produce a sample."
+    }
+  ],
+  "bridge": "These models learn to sample observations. A decision maker faces an additional question: if it acts, how will that change the next observation and its future reward? In Module 14, an agent chooses actions and follows their consequences over time.",
+  "bridgeQ": "A model produces plausible pictures of a room. What else would you need to choose whether a robot should wait or move?",
+  "bridgeA": "Specify the available actions, how each can change the state, what reward follows and how future rewards count. A plausible picture alone does not compare the consequences of the choices."
+}
