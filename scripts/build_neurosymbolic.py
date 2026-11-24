@@ -246,6 +246,14 @@ def build_module(m, d, transition, trace):
 
 
 def generate():
+    from site_navigation import add_navigation
+    for name,content in course_files():
+        if name.endswith(".html"):
+            content=add_navigation("courses/neurosymbolic-ai/"+name,content)
+        yield name,content
+
+
+def course_files():
     stages=[read(f"stage-{i:02}.json") for i in range(1,5)]
     diagnostics=read("diagnostics.json")
     readings=read("readings.json")

@@ -127,3 +127,23 @@ if __name__ == "__main__":
     check()
     from check_neurosymbolic import check as check_cs691
     check_cs691()
+    from site_navigation import directory
+    if (ROOT / "navigate.html").read_text() != directory():
+        sys.exit("Rebuild the lesson directory with python scripts/site_navigation.py")
+    pages = list((ROOT / "courses").rglob("*.html")) + [ROOT / "index.html", ROOT / "navigate.html"]
+    for path in pages:
+        page = Page(path).root
+        nav = page.find(".//nav[@id='tr-global-nav']")
+        for label, target in [("TeachReach Home", "index.html"), ("Find a lesson", "navigate.html")]:
+            anchors = [] if nav is None else [a for a in nav.findall("a") if words(a) == label]
+            if len(anchors) != 1 or (path.parent / anchors[0].get("href")).resolve() != ROOT / target or anchors[0].get("target") != "_top":
+                sys.exit(f"{path}: missing top-level {label} link")
+    directory_page = Page(ROOT / "navigate.html").root
+    for a in directory_page.iter("a"):
+        dest, _, section = a.get("href").partition("#")
+        path = ROOT / dest
+        if path.is_dir(): path = path / "index.html"
+        if not path.is_file(): sys.exit(f"Broken directory link: {dest}")
+        if section and not any(b.get("data-tab") == section for b in Page(path).root.iter("button")):
+            sys.exit(f"Missing activity: {dest}#{section}")
+    print(f"Home and lesson directory links checked on {len(pages)} pages.")

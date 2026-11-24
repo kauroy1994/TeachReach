@@ -74,6 +74,23 @@ with sync_playwright() as pw:
             form.get_by_role("button", name="Check my answer").click()
             expect(form.locator("[data-feedback]:visible")).to_have_count(1)
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), route
+        site = sys.argv[1].rstrip("/") + "/"
+        nav = page.get_by_role("navigation", name="TeachReach navigation", exact=True)
+        for route in ["courses/ml-foundations/module-01/slides.html",
+                      "courses/neurosymbolic-ai/module-16/office.html",
+                      "courses/ml-foundations/stage-02/"]:
+            page.goto(urljoin(site, route))
+            nav.get_by_role("link", name="TeachReach Home").click()
+            expect(page.get_by_role("heading", name="TeachReach courses")).to_be_visible()
+        nav.get_by_role("link", name="Find a lesson").click()
+        page.locator("#course-filter").select_option("neurosymbolic-ai")
+        page.locator("#stage-filter").select_option("4")
+        page.locator("#lesson-search").fill("16")
+        expect(page.locator("[data-lesson]:visible")).to_have_count(1)
+        page.locator("[data-lesson]:visible").get_by_role("link", name="Notebook").click()
+        expect(page).to_have_url(urljoin(cs691, "module-16/#notebook"))
+        nav.get_by_role("link", name="TeachReach Home").click()
+        expect(page.get_by_role("heading", name="TeachReach courses")).to_be_visible()
         assert not errors, errors
         print(f"Passed at {width}px", flush=True)
         page.close()
