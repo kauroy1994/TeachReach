@@ -131,6 +131,8 @@ if __name__ == "__main__":
     check_links()
     from build_ml_lessons import build
     build(check_only=True)
+    from build_mentoring import build as build_mentoring
+    build_mentoring(check=True)
     from site_navigation import directory
     if (ROOT / "navigate.html").read_text() != directory():
         sys.exit("Rebuild the lesson directory with python scripts/site_navigation.py")
@@ -148,6 +150,6 @@ if __name__ == "__main__":
         path = ROOT / dest
         if path.is_dir(): path = path / "index.html"
         if not path.is_file(): sys.exit(f"Broken directory link: {dest}")
-        if section and not any(b.get("data-tab") == section for b in Page(path).root.iter("button")):
+        if section and not any(el.get("id") == section or el.get("data-tab") == section for el in Page(path).root.iter()):
             sys.exit(f"Missing activity: {dest}#{section}")
     print(f"Home and lesson directory links checked on {len(pages)} pages.")

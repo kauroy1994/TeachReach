@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Compare accuracy, coverage and cost on changed queues · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 06 of 08</span><h1>Compare accuracy, coverage and cost on changed queues</h1><p>Compare two existing reporting policies on the same what-if questions. Count incorrect answers shown, correct answers withheld and work performed. Defend a conclusion whose limits you can state.</p></div></section><div class="entry"><p class="source"><a href="../stage-03/">Stage 03 · Test a simulator under change</a></p><p>Module 05 showed how ordinary replay can conceal an error under a changed scan duration. Bring that distinction into evaluation. A museum archive has eight candidate answers and the response logs of two existing reporting policies. Compare the logs with independently worked schedules to decide what the archive can establish.</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>In this fictional archive, both policies receive the same candidate finish minute. The size policy reports answers for queues of at most two objects. The complete-input policy reports answers when the archived scan settings are available for every object. Empty means the policy withheld the answer. Separate field cards give the evaluator all eight reference times. Neither reporting policy had access to those cards. H uses three-minute scans, D uses six-minute scans, P compares a regular run with a middle delay, and T uses four-minute scans. Each inspection takes four minutes and all objects arrive at minute zero.</p><article class="worked" id="example-1"><h3>Count the cost of holding back an answer</h3><p>Start with the size policy’s archived output. A blank means an answer was withheld, even though the simulator produced a candidate finish time. Score each offered question with the independent field card, including the blanks. A policy’s reported accuracy describes only the answers it showed.</p><div class="notation"><code>coverage = A / N     error among released = W / A     useful answers withheld = C − K</code><p>N counts all questions. A counts released answers. W counts incorrect released answers. C counts all correct candidate answers in the ledger and K counts correct answers released. If A is zero, conditional error is undefined. Here usefulness means giving the correct requested finish minute.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code># ID, objects, hand-checked final minute, candidate final minute,
+# size-policy output, complete-input-policy output (None = withheld).
+rows = [
+    (&quot;H1&quot;, 1,  7,  7,  7,  7), (&quot;H2&quot;, 2, 11, 11, 11, 11),
+    (&quot;D1&quot;, 2, 16, 14, 14, None), (&quot;D2&quot;, 3, 22, 18, None, None),
+    (&quot;P1&quot;, 3, 15, 15, None, 15), (&quot;P2&quot;, 3, 18, 18, None, None),
+    (&quot;T1&quot;, 2, 12, 11, 11, 11), (&quot;T2&quot;, 3, 16, 16, None, None),
+]
+
+shown = [(key, answer == ref) for key, n, ref, guess, answer, complete in rows
+         if answer is not None]
+correct = sum(guess == ref for key, n, ref, guess, size, complete in rows)
+kept = sum(match for key, match in shown)
+print(&quot;shown&quot;, [key for key, match in shown], &quot;coverage&quot;, len(shown), &quot;/&quot;, len(rows))
+print(&quot;wrong shown&quot;, len(shown) - kept, &quot;correct withheld&quot;, correct - kept)
+</code></pre><h4>Output</h4><pre tabindex="0"><code>shown [&#x27;H1&#x27;, &#x27;H2&#x27;, &#x27;D1&#x27;, &#x27;T1&#x27;] coverage 4 / 8
+wrong shown 2 correct withheld 3</code></pre></details><h4>Think it through</h4><p>Could a planner infer the fraction of correct answers withheld from the error among released answers alone?</p><details><summary>Discuss the reasoning</summary><p>The size check releases four of eight answers. Two of the four are wrong, but the withheld set contains three of the five correct candidate answers. To recover that latter count you need reference answers for withheld questions as well. Evaluating just what a planner sees hides the cost of withholding useful results.</p></details></article><article class="worked" id="example-2"><h3>Compare policies at the same coverage</h3><p>The complete-input policy withheld D1, D2, P2 and T2 because their archived scan settings were missing. Its other four answers are the saved candidate minutes. The evaluator can reconstruct reference times even on those withheld cases using separate field cards. Both policies happened to answer four questions. Compare exactly which answers differed between them.</p><div class="notation"><code>Wⱼ = Σᵢ 𝟙[policy j answered i and its answer differs from referenceᵢ]</code><p>𝟙 is one when its condition holds and zero otherwise. j chooses the reporting policy and i indexes the same eight questions in each log. Equal coverage does not require that the two policies answered the same questions.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code># ID, objects, hand-checked final minute, candidate final minute,
+# size-policy output, complete-input-policy output (None = withheld).
+rows = [
+    (&quot;H1&quot;, 1,  7,  7,  7,  7), (&quot;H2&quot;, 2, 11, 11, 11, 11),
+    (&quot;D1&quot;, 2, 16, 14, 14, None), (&quot;D2&quot;, 3, 22, 18, None, None),
+    (&quot;P1&quot;, 3, 15, 15, None, 15), (&quot;P2&quot;, 3, 18, 18, None, None),
+    (&quot;T1&quot;, 2, 12, 11, 11, 11), (&quot;T2&quot;, 3, 16, 16, None, None),
+]
+
+for name, column in [(&quot;size&quot;, 4), (&quot;complete input&quot;, 5)]:
+    shown = [r for r in rows if r[column] is not None]
+    wrong = [r[0] for r in shown if r[column] != r[2]]
+    withheld_correct = [r[0] for r in rows if r[column] is None and r[2] == r[3]]
+    print(name, &quot;shown&quot;, [r[0] for r in shown], &quot;wrong&quot;, wrong,
+          &quot;correct held&quot;, withheld_correct, &quot;accuracy&quot;, len(shown) - len(wrong), &quot;/&quot;, len(shown))
+</code></pre><h4>Output</h4><pre tabindex="0"><code>size shown [&#x27;H1&#x27;, &#x27;H2&#x27;, &#x27;D1&#x27;, &#x27;T1&#x27;] wrong [&#x27;D1&#x27;, &#x27;T1&#x27;] correct held [&#x27;P1&#x27;, &#x27;P2&#x27;, &#x27;T2&#x27;] accuracy 2 / 4
+complete input shown [&#x27;H1&#x27;, &#x27;H2&#x27;, &#x27;P1&#x27;, &#x27;T1&#x27;] wrong [&#x27;T1&#x27;] correct held [&#x27;P2&#x27;, &#x27;T2&#x27;] accuracy 3 / 4</code></pre></details><h4>Think it through</h4><p>Why did the complete-input policy avoid D1 but still show the wrong answer to T1? What does the matched comparison actually tell you?</p><details><summary>Discuss the reasoning</summary><p>It happened to withhold D1, whose archived settings were missing, and to show correct P1. Accuracy is 3/4 compared with 2/4 at the same coverage of 4/8. T1 had complete inputs, but the candidate minute is 11 where the independently checked answer is 12. Input completeness alone cannot establish a correct calculation.</p></details></article><article class="worked" id="example-3"><h3>Ask what depends on one scenario family</h3><p>H1 and H2 are variants of one ordinary queue. D1 and D2 share the same long-scan change. Treating each variant as a new independent scenario exaggerates the diversity of the evaluation. Remove each family in turn and recompute the difference in wrong answers shown per question offered.</p><div class="notation"><code>gᵢ = 𝟙[size showed a wrong answer] − 𝟙[complete input showed a wrong answer]     G = Σᵢ gᵢ / N</code><p>A positive g favors the complete-input policy on that question. N is the number of questions offered to both policies. Including all offered questions keeps this measure defined if a policy answers none. Report coverage alongside it when comparing different question sets.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code># ID, objects, hand-checked final minute, candidate final minute,
+# size-policy output, complete-input-policy output (None = withheld).
+rows = [
+    (&quot;H1&quot;, 1,  7,  7,  7,  7), (&quot;H2&quot;, 2, 11, 11, 11, 11),
+    (&quot;D1&quot;, 2, 16, 14, 14, None), (&quot;D2&quot;, 3, 22, 18, None, None),
+    (&quot;P1&quot;, 3, 15, 15, None, 15), (&quot;P2&quot;, 3, 18, 18, None, None),
+    (&quot;T1&quot;, 2, 12, 11, 11, 11), (&quot;T2&quot;, 3, 16, 16, None, None),
+]
+
+for omit in (None, &quot;H&quot;, &quot;D&quot;, &quot;P&quot;, &quot;T&quot;):
+    kept = [r for r in rows if r[0][0] != omit]
+    difference = 0
+    for key, n, ref, guess, size, complete in kept:
+        difference += int(size is not None and size != ref)
+        difference -= int(complete is not None and complete != ref)
+    print(&quot;omitted family&quot;, omit, &quot;fewer wrong answers&quot;, difference, &quot;/&quot;, len(kept))
+</code></pre><h4>Output</h4><pre tabindex="0"><code>omitted family None fewer wrong answers 1 / 8
+omitted family H fewer wrong answers 1 / 6
+omitted family D fewer wrong answers 0 / 6
+omitted family P fewer wrong answers 1 / 6
+omitted family T fewer wrong answers 1 / 6</code></pre></details><h4>Think it through</h4><p>Can these eight observations establish that the complete-input policy improves answers on new kinds of changed queues?</p><details><summary>Discuss the reasoning</summary><p>The observed reduction is one wrong answer per eight offered questions. Removing D gives zero per six. Removing H, P or T gives one per six. All of the observed reduction comes from D1. These four omission results describe the sensitivity of the conclusion to the particular families in the archive.</p></details></article></section><section class="panel" id="workbench" data-module="6" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>The archive has a work log. The size policy used one unit per question. The complete-input policy used one lookup per question plus one unit per object when the scan settings were available. Compute total work, wrong answers shown and correct answers withheld. Which existing policy would you choose if a wrong answer costs six, a correct answer withheld costs one, and a work unit costs either 0.5 or 1? Find the break-even work-unit price.</p><details><summary>Show starter code</summary><pre tabindex="0"><code># ID, objects, hand-checked final minute, candidate final minute,
+# size-policy output, complete-input-policy output (None = withheld).
+rows = [
+    (&quot;H1&quot;, 1,  7,  7,  7,  7), (&quot;H2&quot;, 2, 11, 11, 11, 11),
+    (&quot;D1&quot;, 2, 16, 14, 14, None), (&quot;D2&quot;, 3, 22, 18, None, None),
+    (&quot;P1&quot;, 3, 15, 15, None, 15), (&quot;P2&quot;, 3, 18, 18, None, None),
+    (&quot;T1&quot;, 2, 12, 11, 11, 11), (&quot;T2&quot;, 3, 16, 16, None, None),
+]
+
+for key, n, ref, guess, size, complete in rows:
+    complete_work = 1 + (n if complete is not None else 0)
+    print(key, &quot;size work&quot;, 1, &quot;complete-input work&quot;, complete_work)
+</code></pre></details><details><summary>Get a hint</summary><p>For a policy with W wrong answers shown, H correct answers withheld and T work units, total loss is 6W + H + pT. Compute each term before combining them. Prices and work counts describe this invented exercise.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code># ID, objects, hand-checked final minute, candidate final minute,
+# size-policy output, complete-input-policy output (None = withheld).
+rows = [
+    (&quot;H1&quot;, 1,  7,  7,  7,  7), (&quot;H2&quot;, 2, 11, 11, 11, 11),
+    (&quot;D1&quot;, 2, 16, 14, 14, None), (&quot;D2&quot;, 3, 22, 18, None, None),
+    (&quot;P1&quot;, 3, 15, 15, None, 15), (&quot;P2&quot;, 3, 18, 18, None, None),
+    (&quot;T1&quot;, 2, 12, 11, 11, 11), (&quot;T2&quot;, 3, 16, 16, None, None),
+]
+
+stats = {}
+for name, column in [(&quot;size&quot;, 4), (&quot;complete input&quot;, 5)]:
+    wrong = sum(r[column] is not None and r[column] != r[2] for r in rows)
+    held = sum(r[column] is None and r[3] == r[2] for r in rows)
+    work = len(rows)
+    if name == &quot;complete input&quot;:
+        work += sum(r[1] for r in rows if r[5] is not None)
+    stats[name] = (wrong, held, work)
+    for price in (0.5, 1):
+        print(name, &quot;wrong/held/work&quot;, (wrong, held, work),
+              &quot;price&quot;, price, &quot;loss&quot;, 6 * wrong + held + price * work)
+sw, sh, st = stats[&quot;size&quot;]
+cw, ch, ct = stats[&quot;complete input&quot;]
+print(&quot;break-even work price&quot;, (6 * (sw - cw) + sh - ch) / (ct - st))
+</code></pre><pre tabindex="0"><code>size wrong/held/work (2, 3, 8) price 0.5 loss 19.0
+size wrong/held/work (2, 3, 8) price 1 loss 23
+complete input wrong/held/work (1, 2, 16) price 0.5 loss 16.0
+complete input wrong/held/work (1, 2, 16) price 1 loss 24
+break-even work price 0.875</code></pre><p>The size policy uses eight units, shows two wrong answers and withholds three correct ones. The complete-input policy uses 16 units, shows one wrong answer and withholds two correct ones. At price 0.5 the losses are 19 and 16, favoring complete inputs. At price 1 they are 23 and 24, favoring size. They tie at 7/8 per work unit. State the choice conditionally on this archive and these assumed costs. A claim about actual staff time would require timing data.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-06/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Bring both archived response logs, coverage and accuracy with denominators, work calculations and a short recommendation. Identify a changed queue whose independent record would give you evidence beyond these four families.</p><h3>What the artifact should show</h3><ul><li>Count all eight questions and all correct answers withheld, including cases with missing archived inputs.</li><li>Separate the evidence used for scoring from information available to each reporting policy. Identify one question answered only by each policy.</li><li>Report both prices, name the family driving the observed difference, and state the limits of the recommendation.</li></ul><h3>Questions for the meeting</h3><ul><li>If nobody reconstructed the withheld answers, which of your claims could still be checked?</li><li>Would missing inputs on slow-scanner days affect which cases appear in the complete-input log?</li><li>Which original record would let a second reader audit the claim about T1 without trusting the candidate?</li></ul></section><section class="next"><h2>Carry this forward</h2><p>Carry a claim from the comparison, the specific supporting records, the alternative explanation and the evidence still needed into Module 07. There you will check what a new set of records actually establishes. Keep each claim attached to the observation or rule that could support or overturn it.</p><div class="links"><a href="../module-05/">← Previous module</a><a href="../stage-03/">Stage overview</a><a href="../module-07/">Next module →</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

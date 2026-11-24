@@ -23,7 +23,7 @@ def css_urls(source):
 
 def html_urls(page):
     for el in page.iter():
-        for key in ("href", "src", "data-src", "action", "poster", "formaction"):
+        for key in ("href", "src", "data-src", "data-source", "action", "poster", "formaction"):
             if el.get(key) is not None:
                 yield el.tag, key, el.get(key)
         if el.get("srcset"):

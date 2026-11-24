@@ -1,0 +1,108 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Defend an evidence-grounded result · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 08 of 08</span><h1>Defend an evidence-grounded result</h1><p>Reproduce an event-QA score from frozen records, state its scope, and defend the assumptions behind a model-based what-if answer.</p></div></section><div class="entry"><p class="source"><a href="../stage-04/">Stage 04 · Reason from agent trajectories</a></p><p>Module 07 supplies two virtual cart prefixes and four questions. You already know which answers refer to observations, which depend on a transition model and which future is unresolved. Now give the same materials to a second reader. Could they detect an answer that has the right word but gives too little evidence?</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>The candidate sheet in this fictional audit contains two deliberate faults. E says “yes” and cites only tick 2. F gives the conditional answer with its model and starting tick. U abstains. W says “yes” where the cart remained in green. The numerical results below describe those four constructed responses.</p><article class="worked" id="example-1"><h3>Determine what the score actually measures</h3><p>Give each question one vote and freeze the scoring contract before running it. Short-answer scoring compares only the value. Complete-response scoring also checks the answer type, canonical evidence ticks and model ID. For these selected questions Module 07 supplies one accepted annotation per item. In a larger task, independent annotators might identify several sufficient evidence sets. Agree on how to accept alternatives before scoring them.</p><div class="notation"><code>Sshort = Σᵢ 1[valueᵢ = reference valueᵢ] / n     Sfull = Σᵢ 1[all four fields match] / n</code><p>The indicator 1[⋅] equals one when its condition is true. Each response carries a status, value, tick tuple and optional model ID. Here n equals four. A full score needs both the answer and its recorded justification.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code># E, F, U and W use the question order from the independent answer sheet.
+gold = {&#x27;E&#x27;: (&#x27;observed&#x27;, &#x27;yes&#x27;, (1, 2), None),
+        &#x27;F&#x27;: (&#x27;conditional&#x27;, &#x27;green&#x27;, (2,), &#x27;advance-v1&#x27;),
+        &#x27;U&#x27;: (&#x27;unresolved&#x27;, &#x27;unknown&#x27;, (), None),
+        &#x27;W&#x27;: (&#x27;observed&#x27;, &#x27;no&#x27;, (1, 2), None)}
+predicted = dict(gold)
+predicted[&#x27;E&#x27;] = (&#x27;observed&#x27;, &#x27;yes&#x27;, (2,), None)
+predicted[&#x27;W&#x27;] = (&#x27;observed&#x27;, &#x27;yes&#x27;, (1, 2), None)
+short = [q for q in gold if predicted[q][1] == gold[q][1]]
+full = [q for q in gold if predicted[q] == gold[q]]
+assert short == [&#x27;E&#x27;, &#x27;F&#x27;, &#x27;U&#x27;] and full == [&#x27;F&#x27;, &#x27;U&#x27;]
+print(&#x27;Correct short answer:&#x27;, short, &#x27;Complete match:&#x27;, full)
+</code></pre><h4>Output</h4><pre tabindex="0"><code>Correct short answer: [&#x27;E&#x27;, &#x27;F&#x27;, &#x27;U&#x27;] Complete match: [&#x27;F&#x27;, &#x27;U&#x27;]</code></pre></details><h4>Think it through</h4><p>Why do the candidates for E and W require different feedback?</p><details><summary>Discuss the reasoning</summary><p>E needs the previous tick to support the word “entered.” Its answer value is right. W cites the correct pair of ticks but misreads two green observations as an entry, so its value is wrong. Merely adding citations would leave W incorrect.</p></details></article><article class="worked" id="example-2"><h3>Make a second reader’s input verifiable</h3><p>Export one row per question, keeping unanswered future values distinct from missing spreadsheet cells. The literal word unknown is U’s deliberate answer. A blank ticks field denotes the empty evidence list. Record the frozen file’s SHA-256 digest separately. A reader who edits E’s evidence after seeing the errors will get a different digest. Preserve the original predictions and score any repairs as a separate version.</p><div class="notation"><code>h = SHA256(B)     input verified when h = hrecorded</code><p>B is the entire UTF-8 byte sequence of the frozen CSV, including its header and final newline. A digest checks byte identity. It does not establish that the reference evidence is scientifically appropriate. The second reader should separately compare the reference with the raw prefixes.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>from hashlib import sha256
+
+rows = b&quot;&quot;&quot;id,kind,answer,ticks,model,p_kind,p_answer,p_ticks,p_model
+E,observed,yes,1|2,,observed,yes,2,
+F,conditional,green,2,advance-v1,conditional,green,2,advance-v1
+U,unresolved,unknown,,,unresolved,unknown,,
+W,observed,no,1|2,,observed,yes,1|2,
+&quot;&quot;&quot;
+recorded = &#x27;e5f03e7ae4fdb97743a699af955852356c3d2f95bd5d1733e95a85987569d22d&#x27;
+assert sha256(rows).hexdigest() == recorded
+edited = rows.replace(b&#x27;observed,yes,2,&#x27;, b&#x27;observed,yes,1|2,&#x27;, 1)
+assert rows != edited and sha256(edited).hexdigest() != recorded
+print(&#x27;Original input verified. Candidate edit changes digest.&#x27;)
+</code></pre><h4>Output</h4><pre tabindex="0"><code>Original input verified. Candidate edit changes digest.</code></pre></details><h4>Think it through</h4><p>If the input digest matches but another reader awards E a full point, what should you compare next?</p><details><summary>Discuss the reasoning</summary><p>Check the evaluator revision and its field list. An evaluator comparing only type and value would silently omit the evidence requirement. Have the reader show E’s reference and candidate ticks next to the predicate used to award the point.</p></details></article><article class="worked" id="example-3"><h3>Defend the causal interpretation of a what-if</h3><p>The mentor asks whether forcing ADVANCE causes the next zone to be green. In the specified toy transition model, compare WAIT and ADVANCE from precisely the same blue state. A second plausible model permits a side route during ADVANCE. Both models can share the entire observed prefix. A claim about what the virtual cart would actually have done additionally requires a correct transition rule, the same starting conditions and background route setting in both branches, and a well-defined action intervention. The prefix alone cannot establish those assumptions.</p><div class="notation"><code>Δm(s) = 1[zone(Tm(s, ADVANCE)) = green] − 1[zone(Tm(s, WAIT)) = green]</code><p>Δm is a contrast between two modeled actions for the same starting state s and fixed model m. The indicator is one when the resulting zone is green. This difference is a statement about these modeled branches, without an estimated causal effect in an external environment.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>def transition(state, action, route):
+    tick, zone = state
+    forward = {&#x27;amber&#x27;: &#x27;blue&#x27;, &#x27;blue&#x27;: &#x27;green&#x27;, &#x27;green&#x27;: &#x27;amber&#x27;}
+    if action not in (&#x27;WAIT&#x27;, &#x27;ADVANCE&#x27;) or route not in (&#x27;main&#x27;, &#x27;side&#x27;):
+        raise ValueError(&#x27;Unknown action or route&#x27;)
+    if action == &#x27;WAIT&#x27;:
+        return tick+1, zone
+    next_zone = &#x27;amber&#x27; if (zone, route) == (&#x27;blue&#x27;, &#x27;side&#x27;) else forward[zone]
+    return tick+1, next_zone
+
+start = (2, &#x27;blue&#x27;)
+contrasts = {}
+for route in (&#x27;main&#x27;, &#x27;side&#x27;):
+    policy_branch = transition(start, &#x27;WAIT&#x27;, route)
+    forced_branch = transition(start, &#x27;ADVANCE&#x27;, route)
+    contrasts[route] = int(forced_branch[1] == &#x27;green&#x27;) - int(policy_branch[1] == &#x27;green&#x27;)
+assert contrasts == {&#x27;main&#x27;: 1, &#x27;side&#x27;: 0}
+print(&#x27;Action contrast with route fixed within each pair:&#x27;, contrasts)
+</code></pre><h4>Output</h4><pre tabindex="0"><code>Action contrast with route fixed within each pair: {&#x27;main&#x27;: 1, &#x27;side&#x27;: 0}</code></pre></details><h4>Think it through</h4><p>How would you transfer this distinction to a document QA system and to a simulator generated from a process description?</p><details><summary>Discuss the reasoning</summary><p>For a document question, cite the passage supporting an observation or rule, and mark assumptions needed for a hypothetical answer. For a generated simulator, freeze the initial state, rule version, and any random inputs before changing one action. Agreement with one historical outcome alone cannot validate its alternative-action branch.</p></details></article></section><section class="panel" id="workbench" data-module="8" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>Create a reproducibility handoff for a one-page memo. Verify the frozen input, run a versioned scorer in a fresh Python process and compare the result with the expected counts you can derive from E, F, U and W. Test that an unannounced edit is rejected. In the memo give the error mechanism, the case IDs supporting it and the boundary of the claim.</p><details><summary>Show starter code</summary><pre tabindex="0"><code>from pathlib import Path
+from tempfile import TemporaryDirectory
+from hashlib import sha256
+
+cases = b&quot;&quot;&quot;id,kind,answer,ticks,model,p_kind,p_answer,p_ticks,p_model
+E,observed,yes,1|2,,observed,yes,2,
+F,conditional,green,2,advance-v1,conditional,green,2,advance-v1
+U,unresolved,unknown,,,unresolved,unknown,,
+W,observed,no,1|2,,observed,yes,1|2,
+&quot;&quot;&quot;
+with TemporaryDirectory() as folder:
+    path = Path(folder, &#x27;cases.csv&#x27;)
+    path.write_bytes(cases)
+    assert sha256(path.read_bytes()).hexdigest() == &#x27;e5f03e7ae4fdb97743a699af955852356c3d2f95bd5d1733e95a85987569d22d&#x27;
+    print(&#x27;Frozen input verified:&#x27;, path.name)
+# Add the evaluator, record its digest and rerun it independently of this process.
+</code></pre></details><details><summary>Get a hint</summary><p>Keep the expected counts in the manifest and compute the actual counts in the scorer. Compare the expected and actual results after a separate interpreter has read the CSV. Use the raw prefixes to check the scientific meaning of E and W.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code>from hashlib import sha256
+from pathlib import Path
+from tempfile import TemporaryDirectory
+import json
+import subprocess
+import sys
+
+cases = b&quot;&quot;&quot;id,kind,answer,ticks,model,p_kind,p_answer,p_ticks,p_model
+E,observed,yes,1|2,,observed,yes,2,
+F,conditional,green,2,advance-v1,conditional,green,2,advance-v1
+U,unresolved,unknown,,,unresolved,unknown,,
+W,observed,no,1|2,,observed,yes,1|2,
+&quot;&quot;&quot;
+script = &quot;&quot;&quot;import csv
+from pathlib import Path
+
+with Path(&#x27;cases.csv&#x27;).open(encoding=&#x27;utf-8&#x27;, newline=&#x27;&#x27;) as stream:
+    rows = list(csv.DictReader(stream))
+assert [r[&#x27;id&#x27;] for r in rows] == [&#x27;E&#x27;, &#x27;F&#x27;, &#x27;U&#x27;, &#x27;W&#x27;]
+fields = (&#x27;kind&#x27;, &#x27;answer&#x27;, &#x27;ticks&#x27;, &#x27;model&#x27;)
+short = full = 0
+for row in rows:
+    short += row[&#x27;answer&#x27;] == row[&#x27;p_answer&#x27;]
+    full += all(row[key] == row[&#x27;p_&#x27;+key] for key in fields)
+print(f&#x27;{len(rows)} cases, {short} short answers, {full} complete responses&#x27;)
+&quot;&quot;&quot;
+with TemporaryDirectory() as folder:
+    root = Path(folder)
+    (root/&#x27;cases.csv&#x27;).write_bytes(cases)
+    (root/&#x27;score.py&#x27;).write_bytes(script.encode(&#x27;utf-8&#x27;))
+    manifest = {&#x27;runtime&#x27;: &#x27;Python 3, standard library&#x27;, &#x27;command&#x27;: [&#x27;score.py&#x27;],
+                &#x27;expected&#x27;: &#x27;4 cases, 3 short answers, 2 complete responses&#x27;,
+                &#x27;sha256&#x27;: {&#x27;cases.csv&#x27;: &#x27;e5f03e7ae4fdb97743a699af955852356c3d2f95bd5d1733e95a85987569d22d&#x27;,
+                           &#x27;score.py&#x27;: &#x27;1e7c6e5e0edb16f04d23a5647b972dc559554fa1ccec0ca0034dfafed9c1c7ae&#x27;}}
+    (root/&#x27;manifest.json&#x27;).write_text(json.dumps(manifest), encoding=&#x27;utf-8&#x27;)
+    received = json.loads((root/&#x27;manifest.json&#x27;).read_text(encoding=&#x27;utf-8&#x27;))
+    def verified():
+        return all(sha256((root/name).read_bytes()).hexdigest() == expected
+                   for name, expected in received[&#x27;sha256&#x27;].items())
+    assert verified()
+    run = subprocess.run([sys.executable, *received[&#x27;command&#x27;]], cwd=root,
+                         check=True, text=True, capture_output=True)
+    assert run.stdout.strip() == received[&#x27;expected&#x27;]
+    print(run.stdout.strip())
+    (root/&#x27;cases.csv&#x27;).write_bytes(cases.replace(b&#x27;observed,yes,2,&#x27;, b&#x27;observed,yes,1|2,&#x27;, 1))
+    assert not verified()
+    print(&#x27;Edited input rejected&#x27;)
+</code></pre><pre tabindex="0"><code>4 cases, 3 short answers, 2 complete responses
+Edited input rejected</code></pre><p>On this frozen four-item teaching fixture, the candidate matched three short answers and two complete responses. E accounts for the difference because its evidence omits the previous tick. W fails both scores. These counts characterize this candidate sheet and these questions. They do not estimate accuracy on new episodes.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-08/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Provide a one-page memo, a handoff bundle with visible prefixes, human-readable questions, reference and candidate answers, transition rule, manifest and scorer, and a brief oral defense. Have another reader run the command and note their interpreter version, output and any clarification required.</p><h3>What the artifact should show</h3><ul><li>A reader reconstructs E and W from the raw prefixes, checks both digests, and independently reproduces the 3/4 and 2/4 scores.</li><li>The claim names the four-case fixture and identifies the single evidence omission that separates the scores.</li><li>In the defense, distinguish observation, prediction under a policy, and the modeled effect of changing an action. Explain one assumption that alters the last result.</li></ul><h3>Questions for the meeting</h3><ul><li>Which piece of evidence would make U answerable as a conditional prediction? What further observation would establish the actual next zone?</li><li>Would the next study learn more from new episodes or new questions about the same episodes? Choose a unit of generalization and name the test set before developing the next rule.</li></ul></section><section class="next"><h2>After the defense</h2><p>A concrete next study asks whether requiring both adjacent observations reduces unsupported entry claims on unseen runs with occasional missing ticks. Freeze the event definition and both answer policies. Reserve whole episode groups, keep suffixes hidden, and have independent readers label answerability and acceptable evidence before scoring. Report unsupported claims together with erroneous abstentions. Return to the mentoring meeting with the blinded case inventory and the first disagreement to adjudicate.</p><div class="links"><a href="../module-07/">← Previous module</a><a href="../stage-04/">Stage overview</a><a href="../index.html">Course roadmap</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

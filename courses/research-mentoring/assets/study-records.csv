@@ -1,0 +1,36 @@
+id,kind,subject,field,value,unit
+F1,filing_source,prior filing,site_name,Orchard Annex,text
+F2,filing_source,prior filing,container_count,12,containers
+F3,filing_source,prior filing,sample_mass,2.5,kg
+F4,filing_source,reviewed inventory,reusable_container_count,9,containers
+R1,filing_rule,revised filing,site_name,unchanged,text
+R2,filing_rule,revised filing,reusable_container_count,restricted_scope,containers
+R3,filing_rule,revised filing,sample_mass,unit_change,g
+Q1,queue_setting,opening,opening,5,folders
+Q2,queue_setting,intake,arrivals,2,folders
+Q3,queue_setting,scanner,capacity,3,folders/shift
+Q4,queue_log,observed shift,end_backlog,4,folders
+C1,queue_reference,logged conditions,baseline,4,folders
+C2,queue_reference,no intake,arrivals=0,2,folders
+C3,queue_reference,double capacity,capacity=6,1,folders
+C4,queue_reference,scanner paused,capacity=0,7,folders
+C5,queue_reference,busy intake,arrivals=5,7,folders
+C6,queue_reference,spare capacity,capacity=9,0,folders
+A0,cart_sample,Amber,second_0,0|0,m|bit
+A1,cart_sample,Amber,second_1,2|0,m|bit
+A2,cart_sample,Amber,second_2,2|1,m|bit
+A3,cart_sample,Amber,second_3,3|0,m|bit
+B0,cart_sample,Birch,second_0,0|0,m|bit
+B1,cart_sample,Birch,second_1,1|1,m|bit
+B2,cart_sample,Birch,second_2,2|1,m|bit
+B3,cart_sample,Birch,second_3,2|0,m|bit
+K0,cart_sample,Cedar,second_0,0|0,m|bit
+K1,cart_sample,Cedar,second_1,1|?,m|bit
+K2,cart_sample,Cedar,second_2,2|1,m|bit
+K3,cart_sample,Cedar,second_3,3|0,m|bit
+G1,cart_reference,Amber,0-1,No,label
+G2,cart_reference,Amber,1-2,Yes,label
+G3,cart_reference,Amber,2-3,No,label
+G4,cart_reference,Birch,1-2,No,label
+G5,cart_reference,Cedar,0-1,Unknown,label
+G6,cart_reference,Cedar,1-2,Unknown,label

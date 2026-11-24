@@ -1,0 +1,304 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Compare lookup and execution on matched interventions · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 04 of 08</span><h1>Compare lookup and execution on matched interventions</h1><p>Design a held-out comparison, score numerical answers separately from scope decisions and cited evidence, and identify a case that needs a reliability check.</p></div></section><div class="entry"><p class="source"><a href="../stage-02/">Stage 02 · Answer questions with executable models</a></p><p>Module 03 produced a traceable two-station simulator. To evaluate what the runner adds, give it and a historical lookup method the same frozen batches, process clauses and change cards. Decide how an unsupported request will be scored before looking at the predictions.</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>The museum’s amber batch has arrivals at 0, 1, 2 and 3 minutes. The jade batch has arrivals at 0, 15 and 30. Their recorded final labeling times under the original four-minute scans and seven-minute labels are 32 and 41. Each intervention is a separate hypothetical starting from the original batch.</p><article class="worked" id="example-1"><h3>Hold out whole batches and their related questions</h3><p>A paraphrase can carry the answer from one split into another. If two questions are about the same tray arrivals and the same underlying run, group them even when the wording or proposed intervention changes. Use the three-tray batch from Module 03 for development. Reserve both new batches, including every related change card and paraphrase, for this comparison. Both methods may read the historical record at evaluation time because the task explicitly provides it.</p><div class="notation"><code>G(D) ∩ G(E) = ∅     G(S) = {g(q) : q ∈ S}</code><p>D is the development set, E the held-out evaluation set, and g(q) the original batch family behind question q. G(S) collects the families in split S. The empty intersection checks family separation. A family must follow the actual underlying batch even if someone renames a question.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>questions = [
+    (&quot;prototype-change&quot;, &quot;prototype&quot;, &quot;development&quot;),
+    (&quot;prototype-reworded&quot;, &quot;prototype&quot;, &quot;development&quot;),
+    (&quot;A1&quot;, &quot;amber&quot;, &quot;evaluation&quot;), (&quot;A2&quot;, &quot;amber&quot;, &quot;evaluation&quot;),
+    (&quot;J1&quot;, &quot;jade&quot;, &quot;evaluation&quot;), (&quot;J2&quot;, &quot;jade&quot;, &quot;evaluation&quot;),
+]
+def shared_families(rows):
+    dev = {family for _, family, split in rows if split == &quot;development&quot;}
+    test = {family for _, family, split in rows if split == &quot;evaluation&quot;}
+    return dev &amp; test
+
+assert not shared_families(questions)
+leaked = questions + [(&quot;A1-another-phrasing&quot;, &quot;amber&quot;, &quot;development&quot;)]
+assert shared_families(leaked) == {&quot;amber&quot;}
+print(&quot;Families detected after the planted leak:&quot;, shared_families(leaked))</code></pre><h4>Output</h4><pre tabindex="0"><code>Families detected after the planted leak: {&#x27;amber&#x27;}</code></pre></details><h4>Think it through</h4><p>If the same question appears with the tray colors renamed and the arrival order unchanged, what would determine its split?</p><details><summary>Discuss the reasoning</summary><p>Its source batch and generation history. A renamed copy of the amber instance stays with amber. The program detects overlap only when the family IDs are assigned correctly.</p></details></article><article class="worked" id="example-2"><h3>Run two methods on the same four cards</h3><p>The fixed lexical lookup baseline ranks historical finish records by the number of distinct words shared with the question, breaking ties by record ID. It returns the finish from the highest-ranked record. Both archive summaries contain “batch”, “final” and “finish”. The named batch picks the correct historical record. This deliberately simple baseline tests how often an archived number happens to work. The execution method applies the change to the original inputs and returns the last trace event. Both share a scope check. A request to add a worker needs an assignment rule absent from P1–P3, so both should abstain. The numeric reference for A1 was calculated separately: the scans finish at 4, 8, 12 and 16, and three-minute labels finish at 7, 11, 15 and 19.</p><div class="notation"><code>ŷᴸ(q) = H[g(q)]     ŷˣ(q) = Fₙ(Iq(xg(q)))</code><p>H is the historical finish retrieved for the named batch in this fixture. Iq applies the intervention named in q to that batch’s inputs or settings. Fₙ reads the simulated last finish. L denotes lookup and X denotes execution. On A2, delaying the last arrival from 3 to 4 leaves its minute-12 scan start unchanged, so both methods return 32.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+def run_change(arrivals, field, value):
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None  # The supplied clauses do not define this change.
+    if field == &quot;delay_last&quot;:
+        if value &lt; 0:
+            raise ValueError(&quot;Delay must be nonnegative.&quot;)
+        changed = [*arrivals[:-1], arrivals[-1] + value]
+        return simulate(changed)
+    settings = {field: value}
+    return simulate(arrivals, **settings)
+
+batches = {
+    &quot;amber&quot;: {&quot;arrivals&quot;: [0, 1, 2, 3], &quot;historical_end&quot;: 32},
+    &quot;jade&quot;: {&quot;arrivals&quot;: [0, 15, 30], &quot;historical_end&quot;: 41},
+}
+# Each query has an ID, batch family, changed field and proposed value.
+cards = [
+    (&quot;A1&quot;, &quot;amber&quot;, &quot;label&quot;, 3),
+    (&quot;A2&quot;, &quot;amber&quot;, &quot;delay_last&quot;, 1),
+    (&quot;J1&quot;, &quot;jade&quot;, &quot;scan&quot;, 2),
+    (&quot;J2&quot;, &quot;jade&quot;, &quot;extra_labeler&quot;, 1),
+]
+# Hand-checked targets are kept separate from inputs issued to the methods.
+reference = {&quot;A1&quot;: 19, &quot;A2&quot;: 32, &quot;J1&quot;: 39, &quot;J2&quot;: None}
+
+import re
+
+def words(line):
+    return set(re.findall(r&quot;[a-z0-9]+&quot;, line.casefold()))
+
+def lexical_finish(question):
+    archive = {f&quot;H-{f}&quot;: (f&quot;{f} batch final label finish at minute &quot;
+                          f&quot;{record[&#x27;historical_end&#x27;]}&quot;, record[&quot;historical_end&quot;])
+               for f, record in batches.items()}
+    def order(eid):
+        overlap = len(words(question) &amp; words(archive[eid][0]))
+        return (-overlap, eid)
+    hit = min(archive, key=order)
+    return archive[hit][1], {hit}, None
+
+def predict(method, card):
+    case, family, field, value = card
+    batch = batches[family]
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None, set(), None
+    if method == &quot;lookup&quot;:
+        question = f&quot;For {family} batch, final finish with {field} changed to {value}?&quot;
+        return lexical_finish(question)
+    if method != &quot;execute&quot;:
+        raise ValueError(&quot;Unrecognized method&quot;)
+    trace = run_change(batch[&quot;arrivals&quot;], field, value)
+    sources = {&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, case}
+    return trace[-1][-1], sources, trace
+
+for card in cards:
+    baseline = predict(&quot;lookup&quot;, card)
+    tool = predict(&quot;execute&quot;, card)
+    print(card[0], &quot;lookup&quot;, baseline[0], &quot;execute&quot;, tool[0], &quot;target&quot;, reference[card[0]])
+assert [predict(&quot;execute&quot;, q)[0] for q in cards] == [19, 32, 39, None]
+assert [predict(&quot;lookup&quot;, q)[0] for q in cards] == [32, 32, 41, None]</code></pre><h4>Output</h4><pre tabindex="0"><code>A1 lookup 32 execute 19 target 19
+A2 lookup 32 execute 32 target 32
+J1 lookup 41 execute 39 target 39
+J2 lookup None execute None target None</code></pre></details><h4>Think it through</h4><p>Why keep the A2 question when both methods return the same number?</p><details><summary>Discuss the reasoning</summary><p>It is an unchanged-outcome control. Execution can show that the last tray was already waiting. Lookup reproduces the same number by repeating history. The numerical match alone cannot distinguish the two explanations.</p></details></article><article class="worked" id="example-3"><h3>Separate the numeric result, the evidence and the scope decision</h3><p>Grade each row against its independently checked answer card. For the three supported requests, check the exact final minute. Separately check that the source IDs include the process clauses and the intervention card. This is a citation-completeness test. A reader still has to inspect the cited clauses and trace to check the derivation. For the out-of-scope request, score whether the method withheld a number. Report coverage over all four requests so an abstention stays visible.</p><div class="notation"><code>Aₙ = correct supported numbers / supported requests     C = numeric outputs / all requests</code><p>Aₙ counts a missing numerical prediction on a supported request as incorrect. C is numerical-answer coverage. Here there are three supported requests and one unsupported request. On supported requests, both methods return numbers for 3/3. On the complete set their numerical coverage is 3/4. Scope accuracy compares the decision to return a number with the reference scope on all four requests.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>batches = {
+    &quot;amber&quot;: {&quot;arrivals&quot;: [0, 1, 2, 3], &quot;historical_end&quot;: 32},
+    &quot;jade&quot;: {&quot;arrivals&quot;: [0, 15, 30], &quot;historical_end&quot;: 41},
+}
+# Each query has an ID, batch family, changed field and proposed value.
+cards = [
+    (&quot;A1&quot;, &quot;amber&quot;, &quot;label&quot;, 3),
+    (&quot;A2&quot;, &quot;amber&quot;, &quot;delay_last&quot;, 1),
+    (&quot;J1&quot;, &quot;jade&quot;, &quot;scan&quot;, 2),
+    (&quot;J2&quot;, &quot;jade&quot;, &quot;extra_labeler&quot;, 1),
+]
+# Hand-checked targets are kept separate from inputs issued to the methods.
+reference = {&quot;A1&quot;: 19, &quot;A2&quot;: 32, &quot;J1&quot;: 39, &quot;J2&quot;: None}
+
+# Frozen method outputs, shown as (answer in minutes, cited record IDs).
+predictions = {
+    &quot;lookup&quot;: [(32, {&quot;H-amber&quot;}), (32, {&quot;H-amber&quot;}), (41, {&quot;H-jade&quot;}), (None, set())],
+    &quot;execute&quot;: [(y, {&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, q}) if y is not None else (None, set())
+                for q, y in [(&quot;A1&quot;, 19), (&quot;A2&quot;, 32), (&quot;J1&quot;, 39), (&quot;J2&quot;, None)]],
+}
+for method, outputs in predictions.items():
+    numeric = evidence = scope = returned = eligible = 0
+    for card, (yhat, ids) in zip(cards, outputs):
+        case, target = card[0], reference[card[0]]
+        returned += yhat is not None
+        scope += (target is None) == (yhat is None)
+        if target is not None:
+            eligible += 1
+            numeric += yhat == target
+            evidence += {&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, case} &lt;= ids
+    print(method, f&quot;numeric {numeric}/{eligible}, cited {evidence}/{eligible},&quot;,
+          f&quot;scope {scope}/{len(cards)}, coverage {returned}/{len(cards)}&quot;)</code></pre><h4>Output</h4><pre tabindex="0"><code>lookup numeric 1/3, cited 0/3, scope 4/4, coverage 3/4
+execute numeric 3/3, cited 3/3, scope 4/4, coverage 3/4</code></pre></details><h4>Think it through</h4><p>Suppose A1 reports 18 with all the expected IDs. Which checks would that answer pass?</p><details><summary>Discuss the reasoning</summary><p>It passes scope and citation completeness, then fails the numerical check. Inspecting the trace would show where the answer departed from the process. Conversely, the lookup baseline gets A2’s number right while citing only the original historical record.</p></details></article></section><section class="panel" id="workbench" data-module="4" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>Make a four-row audit ledger by running both methods. For each supported request record numerical correctness, citation completeness and the trace. For the unsupported request record whether the method abstained. Then inject two independent test faults into the execution outputs: remove the change-card citation from A1 and add one minute to J1’s final answer. Verify that your evaluator distinguishes them.</p><details><summary>Show starter code</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+def run_change(arrivals, field, value):
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None  # The supplied clauses do not define this change.
+    if field == &quot;delay_last&quot;:
+        if value &lt; 0:
+            raise ValueError(&quot;Delay must be nonnegative.&quot;)
+        changed = [*arrivals[:-1], arrivals[-1] + value]
+        return simulate(changed)
+    settings = {field: value}
+    return simulate(arrivals, **settings)
+
+batches = {
+    &quot;amber&quot;: {&quot;arrivals&quot;: [0, 1, 2, 3], &quot;historical_end&quot;: 32},
+    &quot;jade&quot;: {&quot;arrivals&quot;: [0, 15, 30], &quot;historical_end&quot;: 41},
+}
+# Each query has an ID, batch family, changed field and proposed value.
+cards = [
+    (&quot;A1&quot;, &quot;amber&quot;, &quot;label&quot;, 3),
+    (&quot;A2&quot;, &quot;amber&quot;, &quot;delay_last&quot;, 1),
+    (&quot;J1&quot;, &quot;jade&quot;, &quot;scan&quot;, 2),
+    (&quot;J2&quot;, &quot;jade&quot;, &quot;extra_labeler&quot;, 1),
+]
+# Hand-checked targets are kept separate from inputs issued to the methods.
+reference = {&quot;A1&quot;: 19, &quot;A2&quot;: 32, &quot;J1&quot;: 39, &quot;J2&quot;: None}
+
+import re
+
+def words(line):
+    return set(re.findall(r&quot;[a-z0-9]+&quot;, line.casefold()))
+
+def lexical_finish(question):
+    archive = {f&quot;H-{f}&quot;: (f&quot;{f} batch final label finish at minute &quot;
+                          f&quot;{record[&#x27;historical_end&#x27;]}&quot;, record[&quot;historical_end&quot;])
+               for f, record in batches.items()}
+    def order(eid):
+        overlap = len(words(question) &amp; words(archive[eid][0]))
+        return (-overlap, eid)
+    hit = min(archive, key=order)
+    return archive[hit][1], {hit}, None
+
+def predict(method, card):
+    case, family, field, value = card
+    batch = batches[family]
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None, set(), None
+    if method == &quot;lookup&quot;:
+        question = f&quot;For {family} batch, final finish with {field} changed to {value}?&quot;
+        return lexical_finish(question)
+    if method != &quot;execute&quot;:
+        raise ValueError(&quot;Unrecognized method&quot;)
+    trace = run_change(batch[&quot;arrivals&quot;], field, value)
+    sources = {&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, case}
+    return trace[-1][-1], sources, trace
+
+outputs = {card[0]: predict(&quot;execute&quot;, card) for card in cards}
+for card in cards:
+    lookup_value, lookup_ids, _ = predict(&quot;lookup&quot;, card)
+    tool_value, tool_ids, _ = outputs[card[0]]
+    print(card[0], &quot;lookup&quot;, lookup_value, sorted(lookup_ids),
+          &quot;execute&quot;, tool_value, sorted(tool_ids))
+# Make a copy of outputs for each fault. Keep the original trace for comparison.</code></pre></details><details><summary>Get a hint</summary><p>Record the reason for a failure beside its Boolean check. A citation fault can leave the arithmetic correct. A numerical fault can leave the citations and the stored station events intact.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+def run_change(arrivals, field, value):
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None  # The supplied clauses do not define this change.
+    if field == &quot;delay_last&quot;:
+        if value &lt; 0:
+            raise ValueError(&quot;Delay must be nonnegative.&quot;)
+        changed = [*arrivals[:-1], arrivals[-1] + value]
+        return simulate(changed)
+    settings = {field: value}
+    return simulate(arrivals, **settings)
+
+batches = {
+    &quot;amber&quot;: {&quot;arrivals&quot;: [0, 1, 2, 3], &quot;historical_end&quot;: 32},
+    &quot;jade&quot;: {&quot;arrivals&quot;: [0, 15, 30], &quot;historical_end&quot;: 41},
+}
+# Each query has an ID, batch family, changed field and proposed value.
+cards = [
+    (&quot;A1&quot;, &quot;amber&quot;, &quot;label&quot;, 3),
+    (&quot;A2&quot;, &quot;amber&quot;, &quot;delay_last&quot;, 1),
+    (&quot;J1&quot;, &quot;jade&quot;, &quot;scan&quot;, 2),
+    (&quot;J2&quot;, &quot;jade&quot;, &quot;extra_labeler&quot;, 1),
+]
+# Hand-checked targets are kept separate from inputs issued to the methods.
+reference = {&quot;A1&quot;: 19, &quot;A2&quot;: 32, &quot;J1&quot;: 39, &quot;J2&quot;: None}
+
+import re
+
+def words(line):
+    return set(re.findall(r&quot;[a-z0-9]+&quot;, line.casefold()))
+
+def lexical_finish(question):
+    archive = {f&quot;H-{f}&quot;: (f&quot;{f} batch final label finish at minute &quot;
+                          f&quot;{record[&#x27;historical_end&#x27;]}&quot;, record[&quot;historical_end&quot;])
+               for f, record in batches.items()}
+    def order(eid):
+        overlap = len(words(question) &amp; words(archive[eid][0]))
+        return (-overlap, eid)
+    hit = min(archive, key=order)
+    return archive[hit][1], {hit}, None
+
+def predict(method, card):
+    case, family, field, value = card
+    batch = batches[family]
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None, set(), None
+    if method == &quot;lookup&quot;:
+        question = f&quot;For {family} batch, final finish with {field} changed to {value}?&quot;
+        return lexical_finish(question)
+    if method != &quot;execute&quot;:
+        raise ValueError(&quot;Unrecognized method&quot;)
+    trace = run_change(batch[&quot;arrivals&quot;], field, value)
+    sources = {&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, case}
+    return trace[-1][-1], sources, trace
+
+def check(card, output):
+    case, target = card[0], reference[card[0]]
+    yhat, citations, trace = output
+    if target is None:
+        return {&quot;scope&quot;: yhat is None}
+    return {&quot;scope&quot;: yhat is not None, &quot;number&quot;: yhat == target,
+            &quot;citations&quot;: {&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, case} &lt;= citations,
+            &quot;matches_trace&quot;: bool(trace) and yhat == trace[-1][-1]}
+
+for card in cards:
+    for method in [&quot;lookup&quot;, &quot;execute&quot;]:
+        result = predict(method, card)
+        print(card[0], method, check(card, result), &quot;trace&quot;, result[2])
+
+a1, j1 = cards[0], cards[2]
+y, ids, trace = predict(&quot;execute&quot;, a1)
+missing = check(a1, (y, ids - {&quot;A1&quot;}, trace))
+assert missing == {&quot;scope&quot;: True, &quot;number&quot;: True,
+                   &quot;citations&quot;: False, &quot;matches_trace&quot;: True}
+y, ids, trace = predict(&quot;execute&quot;, j1)
+shifted = check(j1, (y + 1, ids, trace))
+assert shifted == {&quot;scope&quot;: True, &quot;number&quot;: False,
+                   &quot;citations&quot;: True, &quot;matches_trace&quot;: False}
+print(&quot;A1 citation fault:&quot;, missing)
+print(&quot;J1 numerical fault:&quot;, shifted)</code></pre><pre tabindex="0"><code>A1 lookup {&#x27;scope&#x27;: True, &#x27;number&#x27;: False, &#x27;citations&#x27;: False, &#x27;matches_trace&#x27;: False} trace None
+A1 execute {&#x27;scope&#x27;: True, &#x27;number&#x27;: True, &#x27;citations&#x27;: True, &#x27;matches_trace&#x27;: True} trace [(1, 0, 0, 4, 4, 7), (2, 1, 4, 8, 8, 11), (3, 2, 8, 12, 12, 15), (4, 3, 12, 16, 16, 19)]
+A2 lookup {&#x27;scope&#x27;: True, &#x27;number&#x27;: True, &#x27;citations&#x27;: False, &#x27;matches_trace&#x27;: False} trace None
+A2 execute {&#x27;scope&#x27;: True, &#x27;number&#x27;: True, &#x27;citations&#x27;: True, &#x27;matches_trace&#x27;: True} trace [(1, 0, 0, 4, 4, 11), (2, 1, 4, 8, 11, 18), (3, 2, 8, 12, 18, 25), (4, 4, 12, 16, 25, 32)]
+J1 lookup {&#x27;scope&#x27;: True, &#x27;number&#x27;: False, &#x27;citations&#x27;: False, &#x27;matches_trace&#x27;: False} trace None
+J1 execute {&#x27;scope&#x27;: True, &#x27;number&#x27;: True, &#x27;citations&#x27;: True, &#x27;matches_trace&#x27;: True} trace [(1, 0, 0, 2, 2, 9), (2, 15, 15, 17, 17, 24), (3, 30, 30, 32, 32, 39)]
+J2 lookup {&#x27;scope&#x27;: True} trace None
+J2 execute {&#x27;scope&#x27;: True} trace None
+A1 citation fault: {&#x27;scope&#x27;: True, &#x27;number&#x27;: True, &#x27;citations&#x27;: False, &#x27;matches_trace&#x27;: True}
+J1 numerical fault: {&#x27;scope&#x27;: True, &#x27;number&#x27;: False, &#x27;citations&#x27;: True, &#x27;matches_trace&#x27;: False}</code></pre><p>On this four-card exercise, lookup gets 1/3 supported numbers correct and execution gets 3/3. Both withhold a number for J2. The two injected faults show that arithmetic and citation completeness test different properties. A trace can still be consistent with an incorrectly translated program, a possibility carried into the next module.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-04/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Bring one frozen batch-level comparison ledger with case IDs, original arrivals, change cards, historical finishes, both predictions, source IDs and traces. Ask the mentor to accept the grouped comparison as evidence about these two batches or identify a specific evaluation flaw.</p><h3>What the artifact should show</h3><ul><li>Related questions share a split and both methods receive the same case information.</li><li>The report gives numerical correctness on three eligible cards, scope decisions on four and coverage on four.</li><li>The unchanged outcome, unsupported change and two fault injections each have a traceable interpretation.</li></ul><h3>Questions for the meeting</h3><ul><li>Which case looks successful if you score only the final number?</li><li>What additional independent check would distinguish a correct rule from a simulator tuned to reproduce history?</li></ul></section><section class="next"><h2>Carry this forward</h2><p>Pass Module 05 the original clauses, four frozen intervention cards, historical finish per batch, hand-checked reference answers, method outputs and station traces. Preserve the original and fault-injected versions separately. The next review can ask whether agreement with a historical run is enough to trust an intervention.</p><div class="links"><a href="../module-03/">← Previous module</a><a href="../stage-02/">Stage overview</a><a href="../module-05/">Next module →</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

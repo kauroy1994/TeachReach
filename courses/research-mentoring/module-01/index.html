@@ -1,0 +1,155 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Frame a document-reuse question · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 01 of 08</span><h1>Frame a document-reuse question</h1><p>Define a unit of reuse, locate a source value and its governing passages, and state a claim about moving that value that could fail an audit.</p></div></section><div class="entry"><p class="source"><a href="../stage-01/">Stage 01 · Represent rules and their sources</a></p><p>Start with a problem familiar from a CS degree. Two records have different field names. In a database migration you might already know the intended correspondence. In regulatory document reuse, establishing that correspondence is part of the research problem. A reviewer needs to see which edition says what, where a value came from and what remains uncertain.</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>The teaching case uses an invented filing standard for lab instrument maintenance. A fictional publishing office issues Editions A and B. Every clause, person and filing below is synthetic. The old filing contains an item code, service day, technician note and signer name. The new edition changes how some of this information is recorded. Work entirely within the supplied excerpts.</p><article class="worked" id="example-1"><h3>Choose one decision a reviewer could check</h3><p>Take the question “Can we reuse this filing?” and narrow it to a single decision. Can the value Q17 in the old item-code field fill the new instrument-ID field unchanged? Identify the filing, edition, source component, target component and proposed operation. These details let a second person examine the very same claim. A conclusion about one component leaves the rest of the dossier open.</p><div class="notation"><code>u = (filing, source edition, source field, target edition, target field, operation)</code><p>u denotes one proposed move. Here u = (F7, A, item_code, B, instrument_id, copy). The actual source value is F7[A, item_code] = Q17. F7 has four populated source fields, but u concerns exactly one of them.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>clauses = {
+    &quot;A1&quot;: &quot;Item code identifies the instrument.&quot;,
+    &quot;A2&quot;: &quot;Service day is the calendar day when maintenance ended.&quot;,
+    &quot;A3&quot;: &quot;Technician note may describe completed or planned work.&quot;,
+    &quot;A4&quot;: &quot;Signer name identifies the person who signed the log.&quot;,
+    &quot;B1&quot;: &quot;Copy the Edition A item code unchanged into instrument ID.&quot;,
+    &quot;B2&quot;: &quot;Copy the Edition A service day unchanged into completion day.&quot;,
+}
+form = {
+    &quot;item_code&quot;: &quot;Q17&quot;,
+    &quot;service_day&quot;: &quot;2040-02-07&quot;,
+    &quot;technician_note&quot;: &quot;Replace gasket.&quot;,
+    &quot;signer_name&quot;: &quot;Signer P&quot;,
+}
+
+unit = (&quot;F7&quot;, &quot;A&quot;, &quot;item_code&quot;, &quot;B&quot;, &quot;instrument_id&quot;, &quot;copy&quot;)
+filing, old, source, new, target, operation = unit
+print(filing, old, source, repr(form[source]), new, target, operation)
+print(&quot;populated source fields:&quot;, len(form))
+assert form[source] == &quot;Q17&quot; and len(form) == 4</code></pre><h4>Output</h4><pre tabindex="0"><code>F7 A item_code &#x27;Q17&#x27; B instrument_id copy
+populated source fields: 4</code></pre></details><h4>Think it through</h4><p>The instrument ID can be filled correctly. Does this establish that filing F7 can be submitted under the new edition?</p><details><summary>Discuss the reasoning</summary><p>The evidence concerns only one proposed field move. A whole-filing claim would also need a target-field inventory and evidence that each applicable requirement was met. Keep the decision at the granularity you actually checked.</p></details></article><article class="worked" id="example-2"><h3>Trace a value through both editions</h3><p>Read the two passages side by side. A1 defines the old item code as the instrument identifier. B1 explicitly instructs the filer to copy that old value unchanged. Record both clause IDs beside the value’s location in F7. Repeat the exercise with A2 and B2. A phrase about a date can describe a due date, a start date or a completion date. In this case the old clause identifies the end of maintenance and the new one names its source.</p><div class="notation"><code>e(u) = (source-value location, source-definition clause, target-instruction clause)</code><p>e(u) records the evidence for a proposed move. For the completion day it is (F7.service_day, A2, B2). Reading F7 yields 2040-02-07. Reading A2 and B2 justifies preserving that day unchanged. The two moves therefore need two distinct source locations and four clause references.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>clauses = {
+    &quot;A1&quot;: &quot;Item code identifies the instrument.&quot;,
+    &quot;A2&quot;: &quot;Service day is the calendar day when maintenance ended.&quot;,
+    &quot;A3&quot;: &quot;Technician note may describe completed or planned work.&quot;,
+    &quot;A4&quot;: &quot;Signer name identifies the person who signed the log.&quot;,
+    &quot;B1&quot;: &quot;Copy the Edition A item code unchanged into instrument ID.&quot;,
+    &quot;B2&quot;: &quot;Copy the Edition A service day unchanged into completion day.&quot;,
+}
+form = {
+    &quot;item_code&quot;: &quot;Q17&quot;,
+    &quot;service_day&quot;: &quot;2040-02-07&quot;,
+    &quot;technician_note&quot;: &quot;Replace gasket.&quot;,
+    &quot;signer_name&quot;: &quot;Signer P&quot;,
+}
+candidates = [
+    (&quot;item_code&quot;, &quot;instrument_id&quot;, &quot;A1&quot;, &quot;B1&quot;),
+    (&quot;service_day&quot;, &quot;completion_day&quot;, &quot;A2&quot;, &quot;B2&quot;),
+]
+
+for source, target, old_ref, new_ref in candidates:
+    print(target, &quot;&lt;-&quot;, &quot;F7.&quot; + source, repr(form[source]))
+    for key in (old_ref, new_ref):
+        print(key, clauses[key])
+assert {old for _, _, old, _ in candidates} == {&quot;A1&quot;, &quot;A2&quot;}</code></pre><h4>Output</h4><pre tabindex="0"><code>instrument_id &lt;- F7.item_code &#x27;Q17&#x27;
+A1 Item code identifies the instrument.
+B1 Copy the Edition A item code unchanged into instrument ID.
+completion_day &lt;- F7.service_day &#x27;2040-02-07&#x27;
+A2 Service day is the calendar day when maintenance ended.
+B2 Copy the Edition A service day unchanged into completion day.</code></pre></details><h4>Think it through</h4><p>A reviewer has the text of A2 and B2 but cannot locate the day in F7. What part of the argument survives?</p><details><summary>Discuss the reasoning</summary><p>The reviewer can examine the field correspondence. They still lack evidence for a particular date in this filing. A valid correspondence and an available source value are separate premises.</p></details></article><article class="worked" id="example-3"><h3>Try to break the reuse claim</h3><p>Choose a modest, falsifiable claim for a prototype. For the two correspondences already read and approved by a person, it copies only if the old value and both clause texts are available. Deliberately remove B2. An implementation that still copies the completion day would violate the claim. Restoring B2 should restore that one move. Testing source availability this way is a first step. A program that finds a clause ID can still misunderstand its meaning.</p><div class="notation"><code>ready(u) = has_value(u) ∧ has_source_clause(u) ∧ has_target_clause(u)</code><p>∧ means that all three checks must hold. The items being checked here are preapproved correspondence rows. On intact F7 both copies are ready. With B2 absent, one of two is ready and the completion-day row needs review.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>clauses = {
+    &quot;A1&quot;: &quot;Item code identifies the instrument.&quot;,
+    &quot;A2&quot;: &quot;Service day is the calendar day when maintenance ended.&quot;,
+    &quot;A3&quot;: &quot;Technician note may describe completed or planned work.&quot;,
+    &quot;A4&quot;: &quot;Signer name identifies the person who signed the log.&quot;,
+    &quot;B1&quot;: &quot;Copy the Edition A item code unchanged into instrument ID.&quot;,
+    &quot;B2&quot;: &quot;Copy the Edition A service day unchanged into completion day.&quot;,
+}
+form = {
+    &quot;item_code&quot;: &quot;Q17&quot;,
+    &quot;service_day&quot;: &quot;2040-02-07&quot;,
+    &quot;technician_note&quot;: &quot;Replace gasket.&quot;,
+    &quot;signer_name&quot;: &quot;Signer P&quot;,
+}
+candidates = [
+    (&quot;item_code&quot;, &quot;instrument_id&quot;, &quot;A1&quot;, &quot;B1&quot;),
+    (&quot;service_day&quot;, &quot;completion_day&quot;, &quot;A2&quot;, &quot;B2&quot;),
+]
+
+def inspect(form, candidate, clauses):
+    source, target, old_ref, new_ref = candidate
+    value = form.get(source)
+    if value is None or value == &quot;&quot;:
+        return (target, &quot;review&quot;, &quot;source value missing&quot;)
+    if old_ref not in clauses or new_ref not in clauses:
+        return (target, &quot;review&quot;, &quot;clause unavailable&quot;)
+    return (target, &quot;copy&quot;, value)
+
+reduced = {key: text for key, text in clauses.items() if key != &quot;B2&quot;}
+result = [inspect(form, row, reduced) for row in candidates]
+for row in result:
+    print(row)
+assert [row[1] for row in result] == [&quot;copy&quot;, &quot;review&quot;]</code></pre><h4>Output</h4><pre tabindex="0"><code>(&#x27;instrument_id&#x27;, &#x27;copy&#x27;, &#x27;Q17&#x27;)
+(&#x27;completion_day&#x27;, &#x27;review&#x27;, &#x27;clause unavailable&#x27;)</code></pre></details><h4>Think it through</h4><p>A developer replaces B2 with an unrelated passage but leaves the same dictionary key. Will this test catch the mistake?</p><details><summary>Discuss the reasoning</summary><p>No. The test checks whether the preapproved reference can be resolved. A reviewer must separately verify that the retrieved text authorizes the operation, including the edition and the meaning of the field.</p></details></article></section><section class="panel" id="workbench" data-module="1" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>Audit the two proposed copies under three conditions. Begin with the intact filing. In a second run withhold B2. In a third restore the clauses and remove only the item-code value. Predict which target can still be filled in each run. Produce a ledger row for each candidate with the source path, target field, clause IDs and decision.</p><details><summary>Show starter code</summary><pre tabindex="0"><code>clauses = {
+    &quot;A1&quot;: &quot;Item code identifies the instrument.&quot;,
+    &quot;A2&quot;: &quot;Service day is the calendar day when maintenance ended.&quot;,
+    &quot;A3&quot;: &quot;Technician note may describe completed or planned work.&quot;,
+    &quot;A4&quot;: &quot;Signer name identifies the person who signed the log.&quot;,
+    &quot;B1&quot;: &quot;Copy the Edition A item code unchanged into instrument ID.&quot;,
+    &quot;B2&quot;: &quot;Copy the Edition A service day unchanged into completion day.&quot;,
+}
+form = {
+    &quot;item_code&quot;: &quot;Q17&quot;,
+    &quot;service_day&quot;: &quot;2040-02-07&quot;,
+    &quot;technician_note&quot;: &quot;Replace gasket.&quot;,
+    &quot;signer_name&quot;: &quot;Signer P&quot;,
+}
+candidates = [
+    (&quot;item_code&quot;, &quot;instrument_id&quot;, &quot;A1&quot;, &quot;B1&quot;),
+    (&quot;service_day&quot;, &quot;completion_day&quot;, &quot;A2&quot;, &quot;B2&quot;),
+]
+
+runs = [
+    (&quot;intact&quot;, form, clauses),
+    (&quot;without B2&quot;, form, {k: v for k, v in clauses.items() if k != &quot;B2&quot;}),
+    (&quot;without item code&quot;, {k: v for k, v in form.items() if k != &quot;item_code&quot;}, clauses),
+]
+for name, record, available in runs:
+    print(name, sorted(record), sorted(available))
+# Add the ledger rows and compare them to your predictions.</code></pre></details><details><summary>Get a hint</summary><p>Set aside the missing value and missing passage in separate runs. A missing passage should not change a move that cites a different passage.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code>clauses = {
+    &quot;A1&quot;: &quot;Item code identifies the instrument.&quot;,
+    &quot;A2&quot;: &quot;Service day is the calendar day when maintenance ended.&quot;,
+    &quot;A3&quot;: &quot;Technician note may describe completed or planned work.&quot;,
+    &quot;A4&quot;: &quot;Signer name identifies the person who signed the log.&quot;,
+    &quot;B1&quot;: &quot;Copy the Edition A item code unchanged into instrument ID.&quot;,
+    &quot;B2&quot;: &quot;Copy the Edition A service day unchanged into completion day.&quot;,
+}
+form = {
+    &quot;item_code&quot;: &quot;Q17&quot;,
+    &quot;service_day&quot;: &quot;2040-02-07&quot;,
+    &quot;technician_note&quot;: &quot;Replace gasket.&quot;,
+    &quot;signer_name&quot;: &quot;Signer P&quot;,
+}
+candidates = [
+    (&quot;item_code&quot;, &quot;instrument_id&quot;, &quot;A1&quot;, &quot;B1&quot;),
+    (&quot;service_day&quot;, &quot;completion_day&quot;, &quot;A2&quot;, &quot;B2&quot;),
+]
+
+def inspect(form, candidate, clauses):
+    source, target, old_ref, new_ref = candidate
+    value = form.get(source)
+    if value is None or value == &quot;&quot;:
+        return (target, &quot;review&quot;, &quot;source value missing&quot;)
+    if old_ref not in clauses or new_ref not in clauses:
+        return (target, &quot;review&quot;, &quot;clause unavailable&quot;)
+    return (target, &quot;copy&quot;, value)
+
+runs = [
+    (&quot;intact&quot;, form, clauses),
+    (&quot;without B2&quot;, form, {k: v for k, v in clauses.items() if k != &quot;B2&quot;}),
+    (&quot;without item code&quot;, {k: v for k, v in form.items() if k != &quot;item_code&quot;}, clauses),
+]
+outcomes = []
+for name, record, available in runs:
+    decisions = []
+    for candidate in candidates:
+        source, target, a, b = candidate
+        _, decision, detail = inspect(record, candidate, available)
+        print(name, &quot;F7.&quot; + source, target, [a, b], decision, detail)
+        decisions.append(decision)
+    outcomes.append(decisions)
+assert outcomes == [[&quot;copy&quot;, &quot;copy&quot;], [&quot;copy&quot;, &quot;review&quot;], [&quot;review&quot;, &quot;copy&quot;]]</code></pre><pre tabindex="0"><code>intact F7.item_code instrument_id [&#x27;A1&#x27;, &#x27;B1&#x27;] copy Q17
+intact F7.service_day completion_day [&#x27;A2&#x27;, &#x27;B2&#x27;] copy 2040-02-07
+without B2 F7.item_code instrument_id [&#x27;A1&#x27;, &#x27;B1&#x27;] copy Q17
+without B2 F7.service_day completion_day [&#x27;A2&#x27;, &#x27;B2&#x27;] review clause unavailable
+without item code F7.item_code instrument_id [&#x27;A1&#x27;, &#x27;B1&#x27;] review source value missing
+without item code F7.service_day completion_day [&#x27;A2&#x27;, &#x27;B2&#x27;] copy 2040-02-07</code></pre><p>On the intact packet both target fields receive a value. With B2 absent, only instrument ID can be filled. With the old item code absent, only completion day can be filled. Both individual failures need a human follow-up, but one calls for a passage and the other for a value from the filing.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-01/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Bring the four-field source inventory, one six-part decision unit, two passage pairs and the six audit rows from the exercise.</p><h3>What the artifact should show</h3><ul><li>Give a pinpoint source location for each value and preserve the edition and clause IDs for its proposed move.</li><li>Show which claims survived each evidence-removal test and why.</li><li>Record the exact reuse claim you and your mentor will pursue, plus one observation that would overturn it.</li></ul><h3>Questions for the meeting</h3><ul><li>What evidence would distinguish a renamed field from a field with a different meaning?</li><li>Which parts of your hand audit could a program repeat, and where does someone still need to read the passage?</li></ul></section><section class="next"><h2>Carry this forward</h2><p>Give Module 02 your two confirmed copies with their evidence pointers. Carry forward the unresolved technician note and signer name. Those components will test what to do when the new edition splits an old field or requests additional metadata.</p><div class="links"><a href="../syllabus.html">Syllabus</a><a href="../stage-01/">Stage overview</a><a href="../module-02/">Next module →</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

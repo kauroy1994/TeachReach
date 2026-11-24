@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Decide which moves the evidence allows · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 02 of 08</span><h1>Decide which moves the evidence allows</h1><p>Represent a cross-edition correspondence, distinguish a field match from an authorized action and leave an actionable review request when a needed fact is missing.</p></div></section><div class="entry"><p class="source"><a href="../stage-01/">Stage 01 · Represent rules and their sources</a></p><p>Module 01 established why two parts of F7 could be copied unchanged. The old filing also contains a signer’s name and the note “Replace gasket.” Neither fits neatly into the new fields. Keep the same source-and-clause discipline, then make the condition for using each proposed move explicit.</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>Continue the fictional maintenance-filing standard. New clause B3 asks for the signer’s role from a role attestation for this filing. B4 separates work performed from work planned and permits routing a note when its timing is explicit or its author confirms it. These invented clauses and the examples below describe only this exercise.</p><article class="worked" id="example-1"><h3>Give each field an edition and a relation</h3><p>Represent a field by its edition and its local name. Join an old field to each plausible new field with an edge labeled by the clauses that explain the correspondence. The graph can record two possibilities for a note without pretending both are admissible. Inspect the labels on the signer edge. A4 describes a name, while B3 requires a role. The edge identifies where to investigate a gap.</p><div class="notation"><code>v = (edition, field),    m = (source node, target node, clause IDs)</code><p>v names a schema field and m names a proposed move. In the fixture there are four Edition A nodes and five candidate edges. The extra edge exists because technician_note has two possible destinations. Counting candidate edges says nothing yet about how many fields may be filled.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>clauses = {
+    &quot;A1&quot;: &quot;Item code identifies the instrument.&quot;,
+    &quot;A2&quot;: &quot;Service day is the calendar day when maintenance ended.&quot;,
+    &quot;A3&quot;: &quot;Technician note may describe completed or planned work.&quot;,
+    &quot;A4&quot;: &quot;Signer name identifies the person who signed the log.&quot;,
+    &quot;B1&quot;: &quot;Copy the Edition A item code unchanged into instrument ID.&quot;,
+    &quot;B2&quot;: &quot;Copy the Edition A service day unchanged into completion day.&quot;,
+    &quot;B3&quot;: &quot;Record the signer&#x27;s role from a role attestation for this filing.&quot;,
+    &quot;B4&quot;: (&quot;Route the old note to work performed or work planned when its &quot;
+           &quot;timing is explicit in the note or confirmed by its author.&quot;),
+}
+form = {
+    &quot;item_code&quot;: &quot;Q17&quot;,
+    &quot;service_day&quot;: &quot;2040-02-07&quot;,
+    &quot;technician_note&quot;: &quot;Replace gasket.&quot;,
+    &quot;signer_name&quot;: &quot;Signer P&quot;,
+}
+# An edge is (source node, target node, evidence that defines the move).
+edges = [
+    ((&quot;A&quot;, &quot;item_code&quot;), (&quot;B&quot;, &quot;instrument_id&quot;), (&quot;A1&quot;, &quot;B1&quot;)),
+    ((&quot;A&quot;, &quot;service_day&quot;), (&quot;B&quot;, &quot;completion_day&quot;), (&quot;A2&quot;, &quot;B2&quot;)),
+    ((&quot;A&quot;, &quot;signer_name&quot;), (&quot;B&quot;, &quot;signer_role&quot;), (&quot;A4&quot;, &quot;B3&quot;)),
+    ((&quot;A&quot;, &quot;technician_note&quot;), (&quot;B&quot;, &quot;work_performed&quot;), (&quot;A3&quot;, &quot;B4&quot;)),
+    ((&quot;A&quot;, &quot;technician_note&quot;), (&quot;B&quot;, &quot;work_planned&quot;), (&quot;A3&quot;, &quot;B4&quot;)),
+]
+
+for old, new, refs in edges:
+    assert old[0] == &quot;A&quot; and new[0] == &quot;B&quot;
+    assert old[1] in form and all(r in clauses for r in refs)
+    print(old, &quot;-&gt;&quot;, new, refs)
+assert len({old for old, _, _ in edges}) == 4
+assert len(edges) == 5</code></pre><h4>Output</h4><pre tabindex="0"><code>(&#x27;A&#x27;, &#x27;item_code&#x27;) -&gt; (&#x27;B&#x27;, &#x27;instrument_id&#x27;) (&#x27;A1&#x27;, &#x27;B1&#x27;)
+(&#x27;A&#x27;, &#x27;service_day&#x27;) -&gt; (&#x27;B&#x27;, &#x27;completion_day&#x27;) (&#x27;A2&#x27;, &#x27;B2&#x27;)
+(&#x27;A&#x27;, &#x27;signer_name&#x27;) -&gt; (&#x27;B&#x27;, &#x27;signer_role&#x27;) (&#x27;A4&#x27;, &#x27;B3&#x27;)
+(&#x27;A&#x27;, &#x27;technician_note&#x27;) -&gt; (&#x27;B&#x27;, &#x27;work_performed&#x27;) (&#x27;A3&#x27;, &#x27;B4&#x27;)
+(&#x27;A&#x27;, &#x27;technician_note&#x27;) -&gt; (&#x27;B&#x27;, &#x27;work_planned&#x27;) (&#x27;A3&#x27;, &#x27;B4&#x27;)</code></pre></details><h4>Think it through</h4><p>A graph viewer draws both note edges with arrows. Could a caller write the note into both destinations?</p><details><summary>Discuss the reasoning</summary><p>The arrows record candidates. B4 requires the filer to distinguish completed work from future work. An ambiguous old note supplies neither timing decision. Preserve both possibilities for review and leave both target fields unfilled.</p></details></article><article class="worked" id="example-2"><h3>Identify the missing metadata</h3><p>Under A4, the old field identifies the signer. A name cannot establish which role that person held for F7. B3 identifies the missing evidence. Ask for an attestation tied to this filing and this signer, then retain its reference alongside A4 and B3. A role attestation for a different filing is an informative near miss that your procedure should reject.</p><div class="notation"><code>role(F7, p) = r when an attestation records (F7, p, r, reference)</code><p>p denotes the signer and r denotes the recorded role. With only the old name there are zero matching attestations. Adding (F7, Signer P, service lead, R1) gives one match. Replacing F7 with F8 gives zero again. This small example assumes at most one unambiguous supplied attestation.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>def role_for(filing_id, signer, attestation=None):
+    # A separate attestation records (filing, signer, role, evidence reference).
+    if attestation is not None:
+        owner, person, role, ref = attestation
+        if (owner, person) == (filing_id, signer) and role and ref:
+            return role, (ref,), &quot;enter attested role&quot;
+    return None, (), &quot;obtain a role attestation for this filing and signer&quot;
+
+old_only = role_for(&quot;F7&quot;, &quot;Signer P&quot;)
+other_filing = role_for(&quot;F7&quot;, &quot;Signer P&quot;, (&quot;F8&quot;, &quot;Signer P&quot;, &quot;lead&quot;, &quot;R8&quot;))
+matched = role_for(&quot;F7&quot;, &quot;Signer P&quot;, (&quot;F7&quot;, &quot;Signer P&quot;, &quot;service lead&quot;, &quot;R1&quot;))
+for result in (old_only, other_filing, matched):
+    print(result)
+assert [row[0] for row in (old_only, other_filing, matched)] == [None, None, &quot;service lead&quot;]</code></pre><h4>Output</h4><pre tabindex="0"><code>(None, (), &#x27;obtain a role attestation for this filing and signer&#x27;)
+(None, (), &#x27;obtain a role attestation for this filing and signer&#x27;)
+(&#x27;service lead&#x27;, (&#x27;R1&#x27;,), &#x27;enter attested role&#x27;)</code></pre></details><h4>Think it through</h4><p>Both records mention Signer P. Why would reusing the role from F8 weaken the audit of F7?</p><details><summary>Discuss the reasoning</summary><p>B3 asks for a role attestation for the specific filing. The signer might have held a different role on F8. Citing F8 would prove that another record exists without supplying the premise that F7 requires.</p></details></article><article class="worked" id="example-3"><h3>Resolve an ambiguous destination</h3><p>The old note “Replace gasket.” can be read as an instruction for the future or shorthand for work already done. Ask what evidence would distinguish those readings. In this fixture the author supplies a dated clarification N1 attached to the exact F7 note and confirms that it describes planned work. That permits one route. The code accepts an already-reviewed clarification. Reading an arbitrary note and deciding whether its timing is explicit would be a separate task.</p><div class="notation"><code>D(before clarification) = {work_performed, work_planned},    D(after N1) = {work_planned}</code><p>D is the set of destinations still consistent with the evidence for this note. Its size changes from two to one. In the first case the next action is to ask the author. In the second, cite the old note, A3, B4 and N1 and write to work_planned.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>def route_note(filing, note, confirmed_timing=None):
+    # The only old note in this exercise is ambiguous as written.
+    # A dated clarification is represented by (filing, exact note, timing, reference).
+    routes = {&quot;completed&quot;: &quot;work_performed&quot;, &quot;planned&quot;: &quot;work_planned&quot;}
+    if confirmed_timing is not None:
+        owner, tied_note, timing, ref = confirmed_timing
+        if (owner, tied_note) == (filing, note) and timing in routes and ref:
+            return routes[timing], (ref,), &quot;copy clarified note&quot;
+    return None, (), &quot;ask the author when the work occurred&quot;
+
+note = &quot;Replace gasket.&quot;
+before = route_note(&quot;F7&quot;, note)
+after = route_note(&quot;F7&quot;, note, (&quot;F7&quot;, note, &quot;planned&quot;, &quot;N1&quot;))
+unrelated = route_note(&quot;F7&quot;, note, (&quot;F8&quot;, note, &quot;planned&quot;, &quot;N2&quot;))
+print(before, after, unrelated, sep=&quot;\n&quot;)
+assert before[0] is None and unrelated[0] is None
+assert after[:2] == (&quot;work_planned&quot;, (&quot;N1&quot;,))</code></pre><h4>Output</h4><pre tabindex="0"><code>(None, (), &#x27;ask the author when the work occurred&#x27;)
+(&#x27;work_planned&#x27;, (&#x27;N1&#x27;,), &#x27;copy clarified note&#x27;)
+(None, (), &#x27;ask the author when the work occurred&#x27;)</code></pre></details><h4>Think it through</h4><p>A suggested mapping sends every note beginning with “Replace” to work_planned. What counterexample would you seek?</p><details><summary>Discuss the reasoning</summary><p>Ask for an old shorthand note starting with “Replace” whose author explicitly confirms the work was already completed. If the proposed shortcut misroutes even that case, its assumed link between wording and timing fails.</p></details></article></section><section class="panel" id="workbench" data-module="2" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>Build a decision ledger for the unresolved role and note in F7. Run the supplied three evidence scenarios in order. Give every row a source component, target field or candidate fields, clause IDs, finding and next action. Attach the supplemental reference when one is used. Count the pending reviews and explain why the two confirmed direct copies from Module 01 are unaffected.</p><details><summary>Show starter code</summary><pre tabindex="0"><code>filing = &quot;F7&quot;
+signer = &quot;Signer P&quot;
+note = &quot;Replace gasket.&quot;
+# R1 is a synthetic role attestation for F7. N1 is the author&#x27;s dated
+# clarification of F7&#x27;s note, made available only in the final case.
+role_record = (filing, signer, &quot;service lead&quot;, &quot;R1&quot;)
+note_record = (filing, note, &quot;planned&quot;, &quot;N1&quot;)
+cases = [
+    (&quot;old filing only&quot;, None, None),
+    (&quot;matching role&quot;, role_record, None),
+    (&quot;role and clarified note&quot;, role_record, note_record),
+]
+
+for label, role_doc, note_doc in cases:
+    print(label, &quot;role evidence:&quot;, role_doc, &quot;note evidence:&quot;, note_doc)
+# Write the two ledger rows for each scenario and count pending reviews.</code></pre></details><details><summary>Get a hint</summary><p>For a pending role, leave its target value empty and request a filing-specific attestation. For pending timing, preserve both candidate destinations and request the author’s clarification. Changing one piece of evidence should affect only the row that uses it.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code>filing = &quot;F7&quot;
+signer = &quot;Signer P&quot;
+note = &quot;Replace gasket.&quot;
+# R1 is a synthetic role attestation for F7. N1 is the author&#x27;s dated
+# clarification of F7&#x27;s note, made available only in the final case.
+role_record = (filing, signer, &quot;service lead&quot;, &quot;R1&quot;)
+note_record = (filing, note, &quot;planned&quot;, &quot;N1&quot;)
+cases = [
+    (&quot;old filing only&quot;, None, None),
+    (&quot;matching role&quot;, role_record, None),
+    (&quot;role and clarified note&quot;, role_record, note_record),
+]
+
+def role_for(filing_id, signer, attestation=None):
+    # A separate attestation records (filing, signer, role, evidence reference).
+    if attestation is not None:
+        owner, person, role, ref = attestation
+        if (owner, person) == (filing_id, signer) and role and ref:
+            return role, (ref,), &quot;enter attested role&quot;
+    return None, (), &quot;obtain a role attestation for this filing and signer&quot;
+
+def route_note(filing, note, confirmed_timing=None):
+    # The only old note in this exercise is ambiguous as written.
+    # A dated clarification is represented by (filing, exact note, timing, reference).
+    routes = {&quot;completed&quot;: &quot;work_performed&quot;, &quot;planned&quot;: &quot;work_planned&quot;}
+    if confirmed_timing is not None:
+        owner, tied_note, timing, ref = confirmed_timing
+        if (owner, tied_note) == (filing, note) and timing in routes and ref:
+            return routes[timing], (ref,), &quot;copy clarified note&quot;
+    return None, (), &quot;ask the author when the work occurred&quot;
+
+def ledger_row(source, target, clauses, extra, value, action):
+    return {&quot;source_component&quot;: source, &quot;target_field&quot;: target,
+            &quot;clause_ids&quot;: clauses, &quot;supplemental_refs&quot;: extra,
+            &quot;finding&quot;: &quot;ready&quot; if value is not None else &quot;review&quot;,
+            &quot;value&quot;: value, &quot;next_action&quot;: action}
+
+pending = []
+for label, role_doc, note_doc in cases:
+    role, refs, action = role_for(filing, signer, role_doc)
+    rows = [ledger_row(&quot;F7.signer_name&quot;, &quot;signer_role&quot;, (&quot;A4&quot;, &quot;B3&quot;),
+                       refs, role, action)]
+    target, refs, action = route_note(filing, note, note_doc)
+    rows.append(ledger_row(&quot;F7.technician_note&quot;,
+                           target or (&quot;work_performed&quot;, &quot;work_planned&quot;),
+                           (&quot;A3&quot;, &quot;B4&quot;), refs, note if target else None, action))
+    pending.append(sum(row[&quot;finding&quot;] == &quot;review&quot; for row in rows))
+    print(label)
+    for row in rows:
+        print(row)
+assert pending == [2, 1, 0]</code></pre><pre tabindex="0"><code>old filing only
+{&#x27;source_component&#x27;: &#x27;F7.signer_name&#x27;, &#x27;target_field&#x27;: &#x27;signer_role&#x27;, &#x27;clause_ids&#x27;: (&#x27;A4&#x27;, &#x27;B3&#x27;), &#x27;supplemental_refs&#x27;: (), &#x27;finding&#x27;: &#x27;review&#x27;, &#x27;value&#x27;: None, &#x27;next_action&#x27;: &#x27;obtain a role attestation for this filing and signer&#x27;}
+{&#x27;source_component&#x27;: &#x27;F7.technician_note&#x27;, &#x27;target_field&#x27;: (&#x27;work_performed&#x27;, &#x27;work_planned&#x27;), &#x27;clause_ids&#x27;: (&#x27;A3&#x27;, &#x27;B4&#x27;), &#x27;supplemental_refs&#x27;: (), &#x27;finding&#x27;: &#x27;review&#x27;, &#x27;value&#x27;: None, &#x27;next_action&#x27;: &#x27;ask the author when the work occurred&#x27;}
+matching role
+{&#x27;source_component&#x27;: &#x27;F7.signer_name&#x27;, &#x27;target_field&#x27;: &#x27;signer_role&#x27;, &#x27;clause_ids&#x27;: (&#x27;A4&#x27;, &#x27;B3&#x27;), &#x27;supplemental_refs&#x27;: (&#x27;R1&#x27;,), &#x27;finding&#x27;: &#x27;ready&#x27;, &#x27;value&#x27;: &#x27;service lead&#x27;, &#x27;next_action&#x27;: &#x27;enter attested role&#x27;}
+{&#x27;source_component&#x27;: &#x27;F7.technician_note&#x27;, &#x27;target_field&#x27;: (&#x27;work_performed&#x27;, &#x27;work_planned&#x27;), &#x27;clause_ids&#x27;: (&#x27;A3&#x27;, &#x27;B4&#x27;), &#x27;supplemental_refs&#x27;: (), &#x27;finding&#x27;: &#x27;review&#x27;, &#x27;value&#x27;: None, &#x27;next_action&#x27;: &#x27;ask the author when the work occurred&#x27;}
+role and clarified note
+{&#x27;source_component&#x27;: &#x27;F7.signer_name&#x27;, &#x27;target_field&#x27;: &#x27;signer_role&#x27;, &#x27;clause_ids&#x27;: (&#x27;A4&#x27;, &#x27;B3&#x27;), &#x27;supplemental_refs&#x27;: (&#x27;R1&#x27;,), &#x27;finding&#x27;: &#x27;ready&#x27;, &#x27;value&#x27;: &#x27;service lead&#x27;, &#x27;next_action&#x27;: &#x27;enter attested role&#x27;}
+{&#x27;source_component&#x27;: &#x27;F7.technician_note&#x27;, &#x27;target_field&#x27;: &#x27;work_planned&#x27;, &#x27;clause_ids&#x27;: (&#x27;A3&#x27;, &#x27;B4&#x27;), &#x27;supplemental_refs&#x27;: (&#x27;N1&#x27;,), &#x27;finding&#x27;: &#x27;ready&#x27;, &#x27;value&#x27;: &#x27;Replace gasket.&#x27;, &#x27;next_action&#x27;: &#x27;copy clarified note&#x27;}</code></pre><p>The old filing alone leaves both rows pending. Adding R1 resolves the role alone. Adding N1 then resolves the destination for the note. The two direct-copy rows rely on A1/B1 and A2/B2 and use neither new item. The decline from two pending reviews to zero describes this fixture and the two rows being tested.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-02/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Bring the five candidate edges, the two direct-copy decisions from Module 01 and the role-and-note ledger before and after the extra evidence arrives.</p><h3>What the artifact should show</h3><ul><li>Separate a candidate field correspondence from a permitted action and show the exact clause and filing-level evidence for each action.</li><li>Produce distinct, specific requests for missing metadata and ambiguous meaning.</li><li>Record which conditions may be checked automatically, which require human interpretation and how the evidence for a resolved review will be preserved.</li></ul><h3>Questions for the meeting</h3><ul><li>Which single change to the supplemental evidence would force one resolved row back into review?</li><li>If the filing contained two different role attestations for the same signer, what further decision would you need before making an automatic assignment?</li></ul></section><section class="next"><h2>Carry this forward</h2><p>Pass the ledger columns source_component, target_field, clause_ids, finding and next_action into Module 03. A new workflow document will pose a related question. Given stated conditions and a changed input, which step may execute, which evidence permits it, and where must execution pause?</p><div class="links"><a href="../module-01/">← Previous module</a><a href="../stage-01/">Stage overview</a><a href="../module-03/">Next module →</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

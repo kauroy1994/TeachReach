@@ -1,0 +1,57 @@
+{
+  "n": 7,
+  "title": "Read an event from a simulated trajectory",
+  "goal": "Annotate a virtual cart’s zone transitions and use the annotations to answer questions about its past, make conditional predictions, and identify futures the available evidence leaves open.",
+  "bridge": "After testing an answer or a simulated process, ask what an independent reader could point to as evidence. A document offers passages. A simulated trajectory offers a sequence of observations. Reuse the case identifier, the information cutoff and the practice of tracing an answer back to its inputs. This time the order of the observations is part of the evidence.",
+  "case": "In this fictional exercise a virtual parcel cart occupies one colored zone at each integer tick. A log records the zone at the end of each tick. A run can follow different commands after the visible log ends. There is no physical cart. The examples and outputs are constructed for this module.",
+  "lessons": [
+    {
+      "title": "Distinguish entering a zone from occupying it",
+      "prose": "A cart can spend several ticks in blue and enter blue only once during that stay. Define an entry as a change between two adjacent recorded ticks. In run A, ticks 0 and 1 are amber and tick 2 is blue. The annotation for entering blue belongs at tick 2 and cites ticks 1 and 2. The first logged position supplies a starting state. Without an earlier position you cannot establish an entry into that starting zone.",
+      "formula": "enter(z,t) ⇔ x(t−1) ≠ z and x(t) = z",
+      "symbols": "x(t) is the observed color at the end of tick t. The formula requires both ticks to be present and adjacent. The arrow of time matters because swapping the two observations changes the destination. An absent observation can make an event at that tick unresolved.",
+      "code": "log = {0: 'amber', 1: 'amber', 2: 'blue', 3: 'blue', 5: 'green'}\n\ndef entry_at(log, tick, color):\n    if tick not in log or tick-1 not in log:\n        return 'unresolved', ()\n    entered = log[tick] == color and log[tick-1] != color\n    return ('yes' if entered else 'no'), (tick-1, tick)\n\nassert entry_at(log, 2, 'blue') == ('yes', (1, 2))\nassert entry_at(log, 3, 'blue') == ('no', (2, 3))\nassert entry_at(log, 5, 'green') == ('unresolved', ())\nprint('Entry at tick 2:', entry_at(log, 2, 'blue'))\n",
+      "question": "Another annotator labels “entered green at tick 5” because the last logged color was blue at tick 3. Which part of the event definition is missing?",
+      "answer": "The color at tick 4 is missing. The cart could have entered green at 4 or at 5. Tick 5 alone supports “occupied green at tick 5.” Keep the entry time unresolved."
+    },
+    {
+      "title": "Predict under a policy and change one action",
+      "prose": "Freeze run A at tick 2. An agent’s state here is its clock tick and zone. Its policy chooses WAIT in blue and ADVANCE elsewhere. A transition function applies that action to the state. From the same blue state, compare the policy’s WAIT choice with a forced ADVANCE. The difference is a what-if statement inside the stipulated model. A forecast of the actual run also needs the assumption that the agent follows that policy and that the transition table represents its motion.",
+      "formula": "sₜ = (t, zone)     aₜ = π(sₜ)     sₜ₊₁ = T(sₜ, aₜ)",
+      "symbols": "π reads the current state and selects an action. T produces the next state. In model advance-v1, WAIT keeps the zone and ADVANCE follows amber → blue → green → amber. A forced action replaces the policy choice at that tick. Both branches start from the identical observed state.",
+      "code": "advance = {'amber': 'blue', 'blue': 'green', 'green': 'amber'}\n\ndef policy(state):\n    _, zone = state\n    return 'WAIT' if zone == 'blue' else 'ADVANCE'\n\ndef transition(state, action):\n    tick, zone = state\n    if action == 'WAIT':\n        return tick+1, zone\n    if action == 'ADVANCE':\n        return tick+1, advance[zone]\n    raise ValueError('Unknown action')\n\nstart = (2, 'blue')\nchosen = policy(start)\nordinary = transition(start, chosen)\nforced = transition(start, 'ADVANCE')\nassert chosen == 'WAIT' and ordinary == (3, 'blue')\nassert forced == (3, 'green')\nprint('Same start:', start, 'Policy action:', ordinary, 'Forced advance:', forced)\n",
+      "question": "Suppose the later log shows amber at tick 3. What does that establish about the model and the action actually taken?",
+      "answer": "Neither action in this two-action model takes blue to amber in one tick. The observation conflicts with a prediction from this state under the specified transition model. It does not identify the real command. A hidden route choice, a different transition rule or an observation error could account for the conflict."
+    },
+    {
+      "title": "Change the hidden suffix to expose time leakage",
+      "prose": "Build two continuations of the same visible prefix. One ends in green at tick 3 and one in amber. An answer that claims to know the cart’s actual tick-3 zone from that shared prefix must fail on at least one continuation. Use the same idea as a test: changing only hidden data should leave the prefix answer unchanged. Keep questions and prefixes from the same episode together when creating development and evaluation partitions, including alternative continuations derived from the same initial run.",
+      "formula": "prefix(a,c) = prefix(b,c) ⇒ answer(a≤c,q) = answer(b≤c,q)",
+      "symbols": "The cutoff c is the last visible tick, and q is the same question with the same assumptions in both runs. For this exercise the answerer is deterministic. An evidence pointer for an observed fact must reference a tick at or before c.",
+      "code": "from itertools import takewhile\n\nruns = {'A-green': ['amber', 'amber', 'blue', 'green'],\n        'A-amber': ['amber', 'amber', 'blue', 'amber']}\ncut = 2\nvisible = {k: tuple(takewhile(lambda row: row[0] <= cut, enumerate(zones)))\n           for k, zones in runs.items()}\nassert visible['A-green'] == visible['A-amber']\nactual_next = {zones[cut+1] for zones in runs.values()}\nassert actual_next == {'green', 'amber'}\n# A candidate that copies tick 3 changes when only the hidden suffix changes.\nleaky_outputs = [zones[cut+1] for zones in runs.values()]\nassert len(set(leaky_outputs)) == 2\nprint('Same prefix:', visible['A-green'], 'Possible continuations:', sorted(actual_next))\n",
+      "question": "If two differently worded questions about run A go to different partitions, what can a high score conceal?",
+      "answer": "An answerer could recognize the episode from earlier examples. Group both wordings and their shared-prefix variants under the original episode ID before partitioning. To measure transfer across new episodes, reserve whole groups."
+    }
+  ],
+  "exercise": {
+    "prompt": "Create a four-item answer sheet. E asks whether run A entered blue at tick 2. F asks for its tick-3 zone under one advance step. U asks for its actual tick-3 zone with no command supplied. W asks whether run B entered green at tick 2. Each response contains a status, short answer, evidence ticks and optional model ID. Enforce the cutoff before computing the responses, then change both hidden suffixes and rerun.",
+    "starter": "runs = {'A': ['amber', 'amber', 'blue', 'green'],\n        'B': ['blue', 'green', 'green', 'amber']}\ncut = 2\nprefix = {key: zones[:cut+1] for key, zones in runs.items()}\nassert prefix['B'][1:] == ['green', 'green']\nprint('Visible inputs:', prefix)\n# Derive E and W from adjacent ticks, F from the named rule, and U from the information limit.\n",
+    "hint": "For W compare the two green observations before naming an event. For U an empty set of citations indicates that there is no support for a definite future color. Keep the reason for abstaining in the explanation.",
+    "solution": "runs = {'A': ['amber', 'amber', 'blue', 'green'],\n        'B': ['blue', 'green', 'green', 'amber']}\nadvance = {'amber': 'blue', 'blue': 'green', 'green': 'amber'}\n\ndef answer_sheet(runs):\n    p = {key: zones[:3] for key, zones in runs.items()}\n    def entered(zones, color):\n        result = zones[2] == color and zones[1] != color\n        return 'observed', ('yes' if result else 'no'), (1, 2), None\n    return {'E': entered(p['A'], 'blue'),\n            'F': ('conditional', advance[p['A'][2]], (2,), 'advance-v1'),\n            'U': ('unresolved', 'unknown', (), None),\n            'W': entered(p['B'], 'green')}\n\nsheet = answer_sheet(runs)\nassert [sheet[k][1] for k in ('E', 'F', 'U', 'W')] == ['yes', 'green', 'unknown', 'no']\nchanged = {k: zones[:3] + ['blue'] for k, zones in runs.items()}\nassert sheet == answer_sheet(changed)\nassert all(t <= 2 for _, _, ticks, _ in sheet.values() for t in ticks)\nfor key, answer in sheet.items():\n    print(key, answer)\n",
+    "interpretation": "The two unchanged answers about observed events cite both sides of the transition. Only the conditional prediction supplies a model. U remains unresolved even in the continuation where the advance rule happens to predict the recorded color."
+  },
+  "meeting": {
+    "deliverable": "Bring the two visible prefixes, an event definition, the four-item answer sheet and a suffix-swap test. Include the observed ticks and assumptions beside each answer.",
+    "criteria": [
+      "A reader can reproduce E and W from two adjacent ticks without reading the hidden continuation.",
+      "F names its starting tick and transition rule. U explains why the prefix admits multiple actual futures.",
+      "The log distinguishes an absent reading, continuous occupancy and an observed entry.",
+      "For a what-if claim, specify the common start state, changed action, transition rule and one assumption needed to apply the result beyond this toy model."
+    ],
+    "questions": [
+      "If a human annotator disagrees with W, which two raw records and which word in the question should the mentor inspect first?",
+      "Should the next evaluation add missing-tick examples or new combinations of commands? Choose the uncertainty that matters for the intended question."
+    ]
+  },
+  "handoff": "Give Module 08 the visible sequences, question IDs, four reference answers, cutoff, transition rule and suffix-swap check. A reader will judge candidate answers against both their short values and their evidence."
+}

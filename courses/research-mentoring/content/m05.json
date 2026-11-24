@@ -1,0 +1,57 @@
+{
+  "n": 5,
+  "title": "When a changed queue exposes a wrong answer",
+  "goal": "Construct a what-if question that distinguishes two competing scheduling rules, calculate its expected answer independently, and use an event trace to locate the first discrepancy.",
+  "bridge": "Module 04 compared two methods on the same questions. Take one frozen answer and the source rule used to score it. Before accepting a simulator that reproduced the original day, ask which change to that day would distinguish its scheduling rule from a plausible shortcut. Treat the LLM-generated simulator as a fixed program. The example supplies the candidate code directly so you can test its behavior offline.",
+  "case": "A fictional museum has one inspector and one scanner, each handling one object at a time. Objects arrive together at minute zero in a fixed order. Every object must finish inspection before it can scan. The stations can work on different objects at the same time. Ignore movement and setup time. The question asks when the final scan finishes. All times and results below are invented for this exercise.",
+  "lessons": [
+    {
+      "title": "Find two explanations for the same recorded day",
+      "prose": "Objects A and B each take four minutes to inspect and three minutes to scan. Inspection finishes at minutes 4 and 8. The scan finishes at minutes 7 and 11. One candidate starts an object’s scan as soon as that object finishes inspection. A second waits until both the object and the scanner are ready. The original day gives both candidates exactly the same two finish times.",
+      "formula": "Iₖ = Iₖ₋₁ + aₖ     shortcutₖ = Iₖ + sₖ     Fₖ = max(Iₖ, Fₖ₋₁) + sₖ",
+      "symbols": "k numbers the objects in arrival order. aₖ and sₖ are inspection and scan durations. Iₖ is inspection finish time. Fₖ is scan finish time under the stated one-scanner rule. Both initial finish times are zero. Times are measured from the opening of the queue.",
+      "code": "inspection_done = 0\nscanner_free = 0\nfor item in (\"A\", \"B\"):\n    inspection_done += 4\n    shortcut = inspection_done + 3\n    scanner_free = max(inspection_done, scanner_free) + 3\n    print(item, \"inspection done\", inspection_done,\n          \"shortcut\", shortcut, \"one scanner\", scanner_free)\nassert scanner_free == shortcut == 11\n",
+      "question": "If the museum supplies a dozen more days with the same two durations and no scanner queue, which line of the candidate remains untested?",
+      "answer": "When every object arrives at scanning after the scanner is free, starting at inspection completion always happens to work. Those days cannot show whether the candidate waits for an occupied scanner. Choose a change that makes the second object finish inspection while the first is still scanning."
+    },
+    {
+      "title": "Write the expected outcome before running the change",
+      "prose": "Keep arrivals, inspection times, order and staffing fixed. Change scan duration from three minutes to six for both objects. A scans from minute 4 through minute 10. B finishes inspection at minute 8, waits for A and scans from 10 through 16. Record this expected result by hand before comparing either candidate. Use a one-object run as a control because contention between scans is impossible there.",
+      "formula": "waitᴮ = max(0, Fᴬ − Iᴮ) = max(0, 10 − 8) = 2",
+      "symbols": "Fᴬ is the finish of A’s scan and Iᴮ is the finish of B’s inspection. waitᴮ is the number of minutes B must wait after its inspection. A waiting time of zero allows scanning to start immediately.",
+      "code": "# Independent expected final minutes from a hand-drawn schedule.\ncases = [(\"original two\", 2, 3, 11), (\"slower scanner\", 2, 6, 16),\n         (\"one object control\", 1, 6, 10)]\ndef candidate(objects, scan_minutes):\n    # This candidate schedules the last scan at its inspection finish.\n    return 4 * objects + scan_minutes\n\nfor name, objects, scan, expected in cases:\n    observed = candidate(objects, scan)\n    print(name, \"expected\", expected, \"candidate\", observed,\n          \"error in minutes\", observed - expected)\n",
+      "question": "The candidate gives 14 instead of 16 but passes the one-object control. What conclusion can this comparison support?",
+      "answer": "It omits two minutes on the changed two-object question. Passing the one-object case is consistent with a defect that appears when scans overlap. Inspect the candidate’s per-object start times to distinguish an early start from another error that happens to produce the same finish time."
+    },
+    {
+      "title": "Locate the first impossible event",
+      "prose": "A wrong final minute gives little guidance about where to look. Record the proposed start and finish of each scan. Then check whether each start occurs after inspection and after the preceding scan finishes. Compare scan durations just below, at and just above the inspection duration. Include a relabeled object to check that scheduling depends on order and duration alone.",
+      "formula": "startₖ ≥ Iₖ     startₖ ≥ finishₖ₋₁     finishₖ = startₖ + sₖ",
+      "symbols": "startₖ and finishₖ describe one proposed scan in the trace. The inequalities are physical constraints of the fictional single-scanner room. The first object has previous finish time zero.",
+      "code": "def inspect_trace(labels, scan_minutes):\n    prior_finish = 0\n    for index, item in enumerate(labels, start=1):\n        inspection_done = 4 * index\n        start = inspection_done       # proposed by the candidate\n        finish = start + scan_minutes\n        if start < prior_finish:\n            return (index, start, prior_finish)\n        prior_finish = finish\n    return None\n\nfor minutes in (3, 4, 5):\n    violation = inspect_trace([\"A\", \"B\"], minutes)\n    print(\"scan minutes\", minutes, \"first overlap\", violation)\nassert inspect_trace([\"A\", \"B\"], 5) == inspect_trace([\"X\", \"Y\"], 5)\n",
+      "question": "Why include the case where scanning takes exactly four minutes? Which event first violates the scheduling rule at five minutes?",
+      "answer": "At four minutes the second scan may begin exactly when the first one ends, so equality is allowed. At five minutes the first scan finishes at minute 9, but the candidate starts the second at minute 8. Its first impossible event is the second scan start. Renaming both objects leaves that event unchanged."
+    }
+  ],
+  "exercise": {
+    "prompt": "The museum now asks about three objects. First all scans take three minutes. Next, only the middle scan takes seven. Finally move that longer duration to the last object. Before executing code, list the expected scan finishes in each case. Find the first impossible event in the candidate’s changed run and explain the value of moving the delay.",
+    "starter": "plans = {\"original\": [3, 3, 3], \"middle delay\": [3, 7, 3],\n         \"last delay\": [3, 3, 7]}\nfor case, scan_durations in plans.items():\n    inspect_ends = [4, 8, 12]\n    predicted = [done + scan for done, scan in zip(inspect_ends, scan_durations)]\n    print(case, \"candidate finish times\", predicted)\n",
+    "hint": "Mark the minute when each object and the scanner become available. The third inspection can finish while the second scan is still underway. Moving the delay to the last scan cannot change either earlier finish.",
+    "solution": "plans = {\"original\": [3, 3, 3], \"middle delay\": [3, 7, 3],\n         \"last delay\": [3, 3, 7]}\n# Independent expected finishes, calculated before running either rule.\nexpected = {\"original\": [7, 11, 15], \"middle delay\": [7, 15, 18],\n            \"last delay\": [7, 11, 19]}\nfor case, scans in plans.items():\n    scanner_free = 0\n    replay = []\n    shortcut = []\n    for inspected, duration in zip([4, 8, 12], scans):\n        shortcut.append(inspected + duration)\n        scanner_free = max(inspected, scanner_free) + duration\n        replay.append(scanner_free)\n    print(case, \"candidate\", shortcut, \"checked\", replay)\n    assert replay == expected[case]\n",
+    "interpretation": "The shortcut prints [7, 15, 15] for the middle delay. It starts the third scan at 12, three minutes before the scanner is free. The independently checked schedule ends at 18. Moving the delay to the last object leaves the first two finishes unchanged, and both rules end at 19. This control helps locate a waiting-time error in the middle-delay case."
+  },
+  "meeting": {
+    "deliverable": "Bring a frozen original answer, the one rule it may have learned incorrectly, two hand-calculated schedules, a control and the shortest trace that exhibits the first impossible event.",
+    "criteria": [
+      "Write the question, units, resources, ordering, and which input changed.",
+      "Derive an expected result from the room’s rules before looking at candidate output.",
+      "Show one changed case that separates the two rules and one case on which they should agree. State why."
+    ],
+    "questions": [
+      "Which everyday questions could both scheduling rules answer correctly?",
+      "If the changed day had two scanners, which assumption in your expected answer would you need to replace?",
+      "Could a candidate pass your final-minute check and still produce an impossible intermediate event?"
+    ]
+  },
+  "handoff": "For Module 06, carry the question, candidate answer, independently expected answer and scenario ID. Label which questions share the same underlying process change. The next module uses a separate fictional archive to practice paired evaluation of two existing reporting policies."
+}

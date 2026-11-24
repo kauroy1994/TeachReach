@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Read an event from a simulated trajectory · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 07 of 08</span><h1>Read an event from a simulated trajectory</h1><p>Annotate a virtual cart’s zone transitions and use the annotations to answer questions about its past, make conditional predictions, and identify futures the available evidence leaves open.</p></div></section><div class="entry"><p class="source"><a href="../stage-04/">Stage 04 · Reason from agent trajectories</a></p><p>After testing an answer or a simulated process, ask what an independent reader could point to as evidence. A document offers passages. A simulated trajectory offers a sequence of observations. Reuse the case identifier, the information cutoff and the practice of tracing an answer back to its inputs. This time the order of the observations is part of the evidence.</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>In this fictional exercise a virtual parcel cart occupies one colored zone at each integer tick. A log records the zone at the end of each tick. A run can follow different commands after the visible log ends. There is no physical cart. The examples and outputs are constructed for this module.</p><article class="worked" id="example-1"><h3>Distinguish entering a zone from occupying it</h3><p>A cart can spend several ticks in blue and enter blue only once during that stay. Define an entry as a change between two adjacent recorded ticks. In run A, ticks 0 and 1 are amber and tick 2 is blue. The annotation for entering blue belongs at tick 2 and cites ticks 1 and 2. The first logged position supplies a starting state. Without an earlier position you cannot establish an entry into that starting zone.</p><div class="notation"><code>enter(z,t) ⇔ x(t−1) ≠ z and x(t) = z</code><p>x(t) is the observed color at the end of tick t. The formula requires both ticks to be present and adjacent. The arrow of time matters because swapping the two observations changes the destination. An absent observation can make an event at that tick unresolved.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>log = {0: &#x27;amber&#x27;, 1: &#x27;amber&#x27;, 2: &#x27;blue&#x27;, 3: &#x27;blue&#x27;, 5: &#x27;green&#x27;}
+
+def entry_at(log, tick, color):
+    if tick not in log or tick-1 not in log:
+        return &#x27;unresolved&#x27;, ()
+    entered = log[tick] == color and log[tick-1] != color
+    return (&#x27;yes&#x27; if entered else &#x27;no&#x27;), (tick-1, tick)
+
+assert entry_at(log, 2, &#x27;blue&#x27;) == (&#x27;yes&#x27;, (1, 2))
+assert entry_at(log, 3, &#x27;blue&#x27;) == (&#x27;no&#x27;, (2, 3))
+assert entry_at(log, 5, &#x27;green&#x27;) == (&#x27;unresolved&#x27;, ())
+print(&#x27;Entry at tick 2:&#x27;, entry_at(log, 2, &#x27;blue&#x27;))
+</code></pre><h4>Output</h4><pre tabindex="0"><code>Entry at tick 2: (&#x27;yes&#x27;, (1, 2))</code></pre></details><h4>Think it through</h4><p>Another annotator labels “entered green at tick 5” because the last logged color was blue at tick 3. Which part of the event definition is missing?</p><details><summary>Discuss the reasoning</summary><p>The color at tick 4 is missing. The cart could have entered green at 4 or at 5. Tick 5 alone supports “occupied green at tick 5.” Keep the entry time unresolved.</p></details></article><article class="worked" id="example-2"><h3>Predict under a policy and change one action</h3><p>Freeze run A at tick 2. An agent’s state here is its clock tick and zone. Its policy chooses WAIT in blue and ADVANCE elsewhere. A transition function applies that action to the state. From the same blue state, compare the policy’s WAIT choice with a forced ADVANCE. The difference is a what-if statement inside the stipulated model. A forecast of the actual run also needs the assumption that the agent follows that policy and that the transition table represents its motion.</p><div class="notation"><code>sₜ = (t, zone)     aₜ = π(sₜ)     sₜ₊₁ = T(sₜ, aₜ)</code><p>π reads the current state and selects an action. T produces the next state. In model advance-v1, WAIT keeps the zone and ADVANCE follows amber → blue → green → amber. A forced action replaces the policy choice at that tick. Both branches start from the identical observed state.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>advance = {&#x27;amber&#x27;: &#x27;blue&#x27;, &#x27;blue&#x27;: &#x27;green&#x27;, &#x27;green&#x27;: &#x27;amber&#x27;}
+
+def policy(state):
+    _, zone = state
+    return &#x27;WAIT&#x27; if zone == &#x27;blue&#x27; else &#x27;ADVANCE&#x27;
+
+def transition(state, action):
+    tick, zone = state
+    if action == &#x27;WAIT&#x27;:
+        return tick+1, zone
+    if action == &#x27;ADVANCE&#x27;:
+        return tick+1, advance[zone]
+    raise ValueError(&#x27;Unknown action&#x27;)
+
+start = (2, &#x27;blue&#x27;)
+chosen = policy(start)
+ordinary = transition(start, chosen)
+forced = transition(start, &#x27;ADVANCE&#x27;)
+assert chosen == &#x27;WAIT&#x27; and ordinary == (3, &#x27;blue&#x27;)
+assert forced == (3, &#x27;green&#x27;)
+print(&#x27;Same start:&#x27;, start, &#x27;Policy action:&#x27;, ordinary, &#x27;Forced advance:&#x27;, forced)
+</code></pre><h4>Output</h4><pre tabindex="0"><code>Same start: (2, &#x27;blue&#x27;) Policy action: (3, &#x27;blue&#x27;) Forced advance: (3, &#x27;green&#x27;)</code></pre></details><h4>Think it through</h4><p>Suppose the later log shows amber at tick 3. What does that establish about the model and the action actually taken?</p><details><summary>Discuss the reasoning</summary><p>Neither action in this two-action model takes blue to amber in one tick. The observation conflicts with a prediction from this state under the specified transition model. It does not identify the real command. A hidden route choice, a different transition rule or an observation error could account for the conflict.</p></details></article><article class="worked" id="example-3"><h3>Change the hidden suffix to expose time leakage</h3><p>Build two continuations of the same visible prefix. One ends in green at tick 3 and one in amber. An answer that claims to know the cart’s actual tick-3 zone from that shared prefix must fail on at least one continuation. Use the same idea as a test: changing only hidden data should leave the prefix answer unchanged. Keep questions and prefixes from the same episode together when creating development and evaluation partitions, including alternative continuations derived from the same initial run.</p><div class="notation"><code>prefix(a,c) = prefix(b,c) ⇒ answer(a≤c,q) = answer(b≤c,q)</code><p>The cutoff c is the last visible tick, and q is the same question with the same assumptions in both runs. For this exercise the answerer is deterministic. An evidence pointer for an observed fact must reference a tick at or before c.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>from itertools import takewhile
+
+runs = {&#x27;A-green&#x27;: [&#x27;amber&#x27;, &#x27;amber&#x27;, &#x27;blue&#x27;, &#x27;green&#x27;],
+        &#x27;A-amber&#x27;: [&#x27;amber&#x27;, &#x27;amber&#x27;, &#x27;blue&#x27;, &#x27;amber&#x27;]}
+cut = 2
+visible = {k: tuple(takewhile(lambda row: row[0] &lt;= cut, enumerate(zones)))
+           for k, zones in runs.items()}
+assert visible[&#x27;A-green&#x27;] == visible[&#x27;A-amber&#x27;]
+actual_next = {zones[cut+1] for zones in runs.values()}
+assert actual_next == {&#x27;green&#x27;, &#x27;amber&#x27;}
+# A candidate that copies tick 3 changes when only the hidden suffix changes.
+leaky_outputs = [zones[cut+1] for zones in runs.values()]
+assert len(set(leaky_outputs)) == 2
+print(&#x27;Same prefix:&#x27;, visible[&#x27;A-green&#x27;], &#x27;Possible continuations:&#x27;, sorted(actual_next))
+</code></pre><h4>Output</h4><pre tabindex="0"><code>Same prefix: ((0, &#x27;amber&#x27;), (1, &#x27;amber&#x27;), (2, &#x27;blue&#x27;)) Possible continuations: [&#x27;amber&#x27;, &#x27;green&#x27;]</code></pre></details><h4>Think it through</h4><p>If two differently worded questions about run A go to different partitions, what can a high score conceal?</p><details><summary>Discuss the reasoning</summary><p>An answerer could recognize the episode from earlier examples. Group both wordings and their shared-prefix variants under the original episode ID before partitioning. To measure transfer across new episodes, reserve whole groups.</p></details></article></section><section class="panel" id="workbench" data-module="7" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>Create a four-item answer sheet. E asks whether run A entered blue at tick 2. F asks for its tick-3 zone under one advance step. U asks for its actual tick-3 zone with no command supplied. W asks whether run B entered green at tick 2. Each response contains a status, short answer, evidence ticks and optional model ID. Enforce the cutoff before computing the responses, then change both hidden suffixes and rerun.</p><details><summary>Show starter code</summary><pre tabindex="0"><code>runs = {&#x27;A&#x27;: [&#x27;amber&#x27;, &#x27;amber&#x27;, &#x27;blue&#x27;, &#x27;green&#x27;],
+        &#x27;B&#x27;: [&#x27;blue&#x27;, &#x27;green&#x27;, &#x27;green&#x27;, &#x27;amber&#x27;]}
+cut = 2
+prefix = {key: zones[:cut+1] for key, zones in runs.items()}
+assert prefix[&#x27;B&#x27;][1:] == [&#x27;green&#x27;, &#x27;green&#x27;]
+print(&#x27;Visible inputs:&#x27;, prefix)
+# Derive E and W from adjacent ticks, F from the named rule, and U from the information limit.
+</code></pre></details><details><summary>Get a hint</summary><p>For W compare the two green observations before naming an event. For U an empty set of citations indicates that there is no support for a definite future color. Keep the reason for abstaining in the explanation.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code>runs = {&#x27;A&#x27;: [&#x27;amber&#x27;, &#x27;amber&#x27;, &#x27;blue&#x27;, &#x27;green&#x27;],
+        &#x27;B&#x27;: [&#x27;blue&#x27;, &#x27;green&#x27;, &#x27;green&#x27;, &#x27;amber&#x27;]}
+advance = {&#x27;amber&#x27;: &#x27;blue&#x27;, &#x27;blue&#x27;: &#x27;green&#x27;, &#x27;green&#x27;: &#x27;amber&#x27;}
+
+def answer_sheet(runs):
+    p = {key: zones[:3] for key, zones in runs.items()}
+    def entered(zones, color):
+        result = zones[2] == color and zones[1] != color
+        return &#x27;observed&#x27;, (&#x27;yes&#x27; if result else &#x27;no&#x27;), (1, 2), None
+    return {&#x27;E&#x27;: entered(p[&#x27;A&#x27;], &#x27;blue&#x27;),
+            &#x27;F&#x27;: (&#x27;conditional&#x27;, advance[p[&#x27;A&#x27;][2]], (2,), &#x27;advance-v1&#x27;),
+            &#x27;U&#x27;: (&#x27;unresolved&#x27;, &#x27;unknown&#x27;, (), None),
+            &#x27;W&#x27;: entered(p[&#x27;B&#x27;], &#x27;green&#x27;)}
+
+sheet = answer_sheet(runs)
+assert [sheet[k][1] for k in (&#x27;E&#x27;, &#x27;F&#x27;, &#x27;U&#x27;, &#x27;W&#x27;)] == [&#x27;yes&#x27;, &#x27;green&#x27;, &#x27;unknown&#x27;, &#x27;no&#x27;]
+changed = {k: zones[:3] + [&#x27;blue&#x27;] for k, zones in runs.items()}
+assert sheet == answer_sheet(changed)
+assert all(t &lt;= 2 for _, _, ticks, _ in sheet.values() for t in ticks)
+for key, answer in sheet.items():
+    print(key, answer)
+</code></pre><pre tabindex="0"><code>E (&#x27;observed&#x27;, &#x27;yes&#x27;, (1, 2), None)
+F (&#x27;conditional&#x27;, &#x27;green&#x27;, (2,), &#x27;advance-v1&#x27;)
+U (&#x27;unresolved&#x27;, &#x27;unknown&#x27;, (), None)
+W (&#x27;observed&#x27;, &#x27;no&#x27;, (1, 2), None)</code></pre><p>The two unchanged answers about observed events cite both sides of the transition. Only the conditional prediction supplies a model. U remains unresolved even in the continuation where the advance rule happens to predict the recorded color.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-07/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Bring the two visible prefixes, an event definition, the four-item answer sheet and a suffix-swap test. Include the observed ticks and assumptions beside each answer.</p><h3>What the artifact should show</h3><ul><li>A reader can reproduce E and W from two adjacent ticks without reading the hidden continuation.</li><li>F names its starting tick and transition rule. U explains why the prefix admits multiple actual futures.</li><li>The log distinguishes an absent reading, continuous occupancy and an observed entry.</li><li>For a what-if claim, specify the common start state, changed action, transition rule and one assumption needed to apply the result beyond this toy model.</li></ul><h3>Questions for the meeting</h3><ul><li>If a human annotator disagrees with W, which two raw records and which word in the question should the mentor inspect first?</li><li>Should the next evaluation add missing-tick examples or new combinations of commands? Choose the uncertainty that matters for the intended question.</li></ul></section><section class="next"><h2>Carry this forward</h2><p>Give Module 08 the visible sequences, question IDs, four reference answers, cutoff, transition rule and suffix-swap check. A reader will judge candidate answers against both their short values and their evidence.</p><div class="links"><a href="../module-06/">← Previous module</a><a href="../stage-04/">Stage overview</a><a href="../module-08/">Next module →</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

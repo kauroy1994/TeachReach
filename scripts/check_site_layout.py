@@ -153,6 +153,48 @@ async def check_module(page, route, report):
             await measure(child, route, name + " iframe", report)
 
 
+async def check_mentoring(page, route, report):
+    lab = page.locator("#workbench")
+    selects = lab.locator("select")
+    await selects.first.wait_for()
+    for select in await selects.all():
+        result = lab.locator(".wb-results")
+        table = await result.locator("table").element_handle()
+        await select.select_option(index=1)
+        if await table.evaluate("el => el.isConnected") or not await result.locator("tbody tr").count():
+            report(route, "workbench", "input change did not render a results table")
+        await measure(page, route, "workbench with changed input", report)
+        await select.select_option(index=0)
+    for selector in ("#seminar details", "#exercise details"):
+        for choice in await page.locator(selector).all():
+            control = choice.locator("summary")
+            await control.click()
+            if not await choice.evaluate("el => el.open"):
+                report(route, selector, "disclosure did not open")
+            await measure(page, route, "open disclosure", report)
+            await control.click()
+    await page.locator('.activity-nav a[href="#meeting"]').click()
+    if urlsplit(page.url).fragment != "meeting":
+        report(route, "mentor review", "direct activity link failed")
+
+
+async def check_directory(page, route, report):
+    await page.locator("#course-filter").select_option("research-mentoring")
+    rows = page.locator("[data-lesson]:visible")
+    if await rows.count() != 8:
+        report(route, "course filter", "expected eight visible mentoring modules")
+    await page.locator("#stage-filter").select_option("4")
+    if await rows.count() != 2:
+        report(route, "stage filter", "expected two modules in the final stage")
+    await page.locator("#lesson-search").fill("08")
+    if await rows.count() != 1:
+        report(route, "lesson search", "expected a single module")
+    await rows.locator('a[href$="#meeting"]').click()
+    if not page.url.endswith("module-08/#meeting"):
+        report(route, "activity link", "mentor review link failed")
+    await page.go_back()
+
+
 async def run_viewport(browser, args, paths, width, height):
     context = await browser.new_context(viewport={"width":width,"height":height},
                                         reduced_motion="reduce", service_workers="block")
@@ -184,7 +226,11 @@ async def run_viewport(browser, args, paths, width, height):
                 target = urljoin(args.url.rstrip("/") + "/", name)
                 if target not in links:
                     report(path, "entry", f"missing visible navigation to {name}")
-            if path.endswith("/slides.html"):
+            if path == "navigate.html":
+                await check_directory(page, path, report)
+            elif path.startswith("courses/research-mentoring/module-") and path.endswith("/index.html"):
+                await check_mentoring(page, path, report)
+            elif path.endswith("/slides.html"):
                 await check_deck(page, path, report)
             elif path.endswith("/index.html") and path.rsplit("/", 1)[0] in INTERACTIVE_SAMPLES:
                 await check_module(page, path, report)

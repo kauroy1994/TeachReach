@@ -1,0 +1,138 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>Turn a process description into a what-if tool · CS 696 · TeachReach</title><link rel="stylesheet" href="../../../assets/portal.css"><link rel="stylesheet" href="../assets/course.css"><script defer src="../assets/workbench.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body class="mentoring"><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 696</a></nav><a class="skip" href="#main">Skip to course content</a><div class="stripe"></div><header><a class="brand" href="../../../"><span class="icon">TR</span><span><small>Kaushik Roy, University of Alabama</small><strong>TeachReach</strong></span></a><nav aria-label="Course navigation"><a href="../index.html">Roadmap</a><a href="../syllabus.html">Syllabus</a></nav></header><main id="main"><section class="hero research-hero"><div><span class="eyebrow">CS 696 · Module 03 of 08</span><h1>Turn a process description into a what-if tool</h1><p>Translate a short procedure into a traceable simulator, issue a controlled intervention, and explain which parts of the answer come from source clauses and which come from execution.</p></div></section><div class="entry"><p class="source"><a href="../stage-02/">Stage 02 · Answer questions with executable models</a></p><p>Module 02 linked each proposed transformation to a source clause and recorded unresolved decisions. Take that same evidence ledger into a new setting. This time the target field is a simulator input or rule. A missing rule limits the questions your tool can answer.</p></div><nav class="activity-nav" aria-label="Module activities"><a href="#seminar">Worked examples</a><a href="#workbench">Workbench</a><a href="#exercise">Independent task</a><a href="#notebook">Notebook</a><a href="#meeting">Mentor review</a></nav><section class="panel" id="seminar"><h2>Worked examples</h2><p>A fictional museum sends image trays through scanning and labeling. P1 says both stations open at minute zero and trays are processed in arrival order, breaking ties by the given list order. P2 gives one scanner that starts the next waiting tray as soon as it is free and takes four minutes per tray. P3 gives one labeler and seven minutes of labeling per tray, with work starting as soon as the scan and labeler are both ready. All durations are fixed. Times below are minutes since opening.</p><article class="worked" id="example-1"><h3>Translate a clause into a start time</h3><p>The archive can answer how long labeling normally takes by looking up P3. It cannot simply look up when a tray would finish if labeling took three minutes. For that, you need a rule about waiting. Start with two trays arriving at minutes 0 and 2. Their scans finish at 4 and 8. At minute 8 the second scan is ready, but the labeler is still working on the first tray until minute 11. Trace that handoff before writing a loop.</p><div class="notation"><code>Lᵢ = max(Sᵢ, Fᵢ₋₁)     Fᵢ = Lᵢ + b</code><p>Sᵢ is the finish of tray i’s scan, Lᵢ the start of its labeling, and Fᵢ the finish of its labeling. F₀ = 0 is the station’s opening time. b = 7 is the labeling duration in P3. The maximum enforces both readiness conditions.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>scan_ends = [4, 8]  # Hand-computed from arrivals 0, 2 and P1–P2.
+label_free = 0
+intervals = []
+for scan_end in scan_ends:
+    start = max(scan_end, label_free)
+    label_free = start + 7
+    intervals.append((start, label_free))
+assert intervals == [(4, 11), (11, 18)]
+print(&quot;Labeling intervals:&quot;, intervals)</code></pre><h4>Output</h4><pre tabindex="0"><code>Labeling intervals: [(4, 11), (11, 18)]</code></pre></details><h4>Think it through</h4><p>If an implementation labels the second tray from minute 8 to minute 15, which clause would you show its author?</p><details><summary>Discuss the reasoning</summary><p>P3 assigns a single labeler. Starting tray 2 at minute 8 overlaps tray 1’s labeling interval from 4 to 11. A citation to the seven-minute duration alone would miss the error.</p></details></article><article class="worked" id="example-2"><h3>Keep the intermediate events in the tool output</h3><p>Add the scanner and keep one row per tray. The six columns are tray number, arrival, scan start, scan end, label start and label end. This function is supplied by the instructor. A language model could propose a function, but the research question here is whether a supplied tool answers the process question correctly. Check a hand-calculated case against the implementation before trusting its answer to a new question. A trace makes a wrong translation easier to locate than a single final number.</p><div class="notation"><code>Aᵢ = max(aᵢ, Bᵢ₋₁)     Bᵢ = Aᵢ + s     Lᵢ = max(Bᵢ, Fᵢ₋₁)</code><p>aᵢ is the arrival of tray i, Aᵢ and Bᵢ are the start and end of its scan, and s is the per-tray scan duration. B₀ = F₀ = 0. Each station can work on a different tray at the same time. The final result is the last tray’s Fᵢ.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+trace = simulate([0, 2, 9])
+assert trace == [(1, 0, 0, 4, 4, 11),
+                 (2, 2, 4, 8, 11, 18),
+                 (3, 9, 9, 13, 18, 25)]
+for row in trace:
+    print(row)</code></pre><h4>Output</h4><pre tabindex="0"><code>(1, 0, 0, 4, 4, 11)
+(2, 2, 4, 8, 11, 18)
+(3, 9, 9, 13, 18, 25)</code></pre></details><h4>Think it through</h4><p>Could a simulator that forces the scanner to wait for labeling of the preceding tray reproduce all three trace rows?</p><details><summary>Discuss the reasoning</summary><p>No. Tray 2 begins scanning at minute 4, while tray 1 is being labeled. A program that serializes the entire two-station workflow would already disagree on the second tray.</p></details></article><article class="worked" id="example-3"><h3>Run one intervention with the other inputs fixed</h3><p>Ask when the batch would finish if every scan took two minutes. The runner receives the named change, checks whether it is supported and calls the supplied function with the same arrival list. Keep the original and modified traces for comparison. This is a hand-written exercise in evaluating tool use by a language model. The intervention and simulator are supplied so you can inspect the answer without generating or executing new code.</p><div class="notation"><code>Δ = Fₙ(x; s′, b) − Fₙ(x; s, b)</code><p>x is the ordered vector of tray arrivals, n the number of trays, s′ the proposed scan duration, and b the unchanged labeling duration. A negative Δ means earlier completion. For arrivals 0, 2 and 9, changing s from 4 to 2 moves the last finish from 25 to 23.</p></div><details><summary>Inspect the Python and its output</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+def run_change(arrivals, field, value):
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None  # The supplied clauses do not define this change.
+    if field == &quot;delay_last&quot;:
+        if value &lt; 0:
+            raise ValueError(&quot;Delay must be nonnegative.&quot;)
+        changed = [*arrivals[:-1], arrivals[-1] + value]
+        return simulate(changed)
+    settings = {field: value}
+    return simulate(arrivals, **settings)
+
+arrivals = [0, 2, 9]
+before = simulate(arrivals)
+after = run_change(arrivals, &quot;scan&quot;, 2)
+assert arrivals == [0, 2, 9]
+assert [row[-1] for row in after] == [9, 16, 23]
+assert run_change(arrivals, &quot;extra_labeler&quot;, 1) is None
+print(&quot;Last finish:&quot;, before[-1][-1], &quot;-&gt;&quot;, after[-1][-1])
+print(&quot;Change in minutes:&quot;, after[-1][-1] - before[-1][-1])</code></pre><h4>Output</h4><pre tabindex="0"><code>Last finish: 25 -&gt; 23
+Change in minutes: -2</code></pre></details><h4>Think it through</h4><p>Why does cutting three scan times by two minutes move the final finish by only two minutes?</p><details><summary>Discuss the reasoning</summary><p>The faster scanner lets the first tray reach labeling two minutes earlier. In both runs the labeler then works continuously through all three trays. Further scanning savings leave subsequent trays waiting for that station.</p></details></article></section><section class="panel" id="workbench" data-module="3" data-source="../assets/study-records.csv"><h2>Research workbench</h2><p>Change an input and inspect the evidence behind the result. This activity uses a separate set of synthetic teaching records.</p><div data-lab></div><noscript><p>Open the study records to inspect the examples directly.</p></noscript><p class="source"><a href="../assets/study-records.csv" download>Download the synthetic study records (CSV)</a></p></section><section class="panel" id="exercise"><h2>Independent task</h2><p>For the same arrivals, compare two separate proposals: two-minute scans or three-minute labels. Predict the three label-finish times under each proposal before running the tool. Identify the first event where the traces differ from the historical run, then give a clause that explains the difference.</p><details><summary>Show starter code</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+def run_change(arrivals, field, value):
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None  # The supplied clauses do not define this change.
+    if field == &quot;delay_last&quot;:
+        if value &lt; 0:
+            raise ValueError(&quot;Delay must be nonnegative.&quot;)
+        changed = [*arrivals[:-1], arrivals[-1] + value]
+        return simulate(changed)
+    settings = {field: value}
+    return simulate(arrivals, **settings)
+
+arrivals = [0, 2, 9]
+print(&quot;Historical trace:&quot;, simulate(arrivals))
+for field, value in [(&quot;scan&quot;, 2), (&quot;label&quot;, 3)]:
+    trace = run_change(arrivals, field, value)
+    # Extract all label finishes and compare the first changed event.
+    print(field, &quot;first row&quot;, trace[0])</code></pre></details><details><summary>Get a hint</summary><p>Column 3, counting from zero, is the scan end. Column 5 is the label end. Compare the first tray under each change before examining waiting times on later trays.</p></details><details><summary>Compare with a worked solution</summary><pre tabindex="0"><code>def simulate(arrivals, scan=4, label=7):
+    if not arrivals or any(t &lt; 0 for t in arrivals):
+        raise ValueError(&quot;Provide nonnegative arrival minutes for at least one tray.&quot;)
+    if list(arrivals) != sorted(arrivals) or min(scan, label) &lt;= 0:
+        raise ValueError(&quot;Order trays by arrival and use positive durations.&quot;)
+    scan_free = label_free = 0
+    trace = []
+    for tray, arrival in enumerate(arrivals, start=1):
+        s0 = max(arrival, scan_free)
+        s1 = s0 + scan
+        l0 = max(s1, label_free)
+        l1 = l0 + label
+        trace.append((tray, arrival, s0, s1, l0, l1))
+        scan_free, label_free = s1, l1
+    return trace
+
+def run_change(arrivals, field, value):
+    if field not in {&quot;scan&quot;, &quot;label&quot;, &quot;delay_last&quot;}:
+        return None  # The supplied clauses do not define this change.
+    if field == &quot;delay_last&quot;:
+        if value &lt; 0:
+            raise ValueError(&quot;Delay must be nonnegative.&quot;)
+        changed = [*arrivals[:-1], arrivals[-1] + value]
+        return simulate(changed)
+    settings = {field: value}
+    return simulate(arrivals, **settings)
+
+arrivals = [0, 2, 9]
+old = simulate(arrivals)
+names = [&quot;tray&quot;, &quot;arrival&quot;, &quot;scan start&quot;, &quot;scan end&quot;, &quot;label start&quot;, &quot;label end&quot;]
+for field, value, expected in [(&quot;scan&quot;, 2, [9, 16, 23]),
+                               (&quot;label&quot;, 3, [7, 11, 16])]:
+    trace = run_change(arrivals, field, value)
+    assert [row[-1] for row in trace] == expected
+    first_change = next((new[0], names[j], a, b)
+                        for prior, new in zip(old, trace)
+                        for j, (a, b) in enumerate(zip(prior, new)) if a != b)
+    print(field, first_change, expected, &quot;delta&quot;, expected[-1] - old[-1][-1])
+assert simulate(arrivals) == old</code></pre><pre tabindex="0"><code>scan (1, &#x27;scan end&#x27;, 4, 2) [9, 16, 23] delta -2
+label (1, &#x27;label end&#x27;, 11, 7) [7, 11, 16] delta -9</code></pre><p>The scan proposal first changes tray 1’s scan end from 4 to 2 under the modified P2 duration. The label proposal first changes its label end from 11 to 7 under the modified P3 duration. Their separate batch-level changes are −2 and −9 minutes. These are results for the fictional process under its stated assumptions.</p></details></section><section class="panel" id="notebook"><h2>Research notebook</h2><p>Run the three worked examples in order, change an assumption in the independent task, and save your output for the meeting.</p><div class="links"><a href="study.ipynb">Download notebook (.ipynb)</a><a href="https://colab.research.google.com/github/kauroy1994/TeachReach/blob/main/courses/research-mentoring/module-03/study.ipynb">Open in Colab ↗</a></div></section><section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">Bring one source-to-rule table, the historical trace, and both intervention traces. Ask the mentor to approve the runner’s supported changes for a comparison or name the specific clause-to-code mapping that needs revision.</p><h3>What the artifact should show</h3><ul><li>Every change names its clause, parameter, unit and untouched inputs.</li><li>A hand calculation checks at least one waiting event at each station.</li><li>The runner reports an unsupported change explicitly and the conclusion is scoped to this process.</li></ul><h3>Questions for the meeting</h3><ul><li>What source passage licenses simultaneous work at the two stations?</li><li>What additional rule would the tool need before it could answer a question about a second labeler?</li></ul></section><section class="next"><h2>Carry this forward</h2><p>Freeze the museum packet, rule mapping and tested runner. Carry the ordered arrival list, named intervention and per-tray trace into Module 04, where retrieval and execution will face the same new batches.</p><div class="links"><a href="../module-02/">← Previous module</a><a href="../stage-02/">Stage overview</a><a href="../module-04/">Next module →</a></div></section></main><footer>TeachReach · CS 696 · Kaushik Roy, University of Alabama</footer></body></html>

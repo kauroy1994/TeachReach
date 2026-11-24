@@ -4,11 +4,15 @@
 
 Student website: https://kauroy1994.github.io/TeachReach/
 
+## CS 696 · Graduate Research Mentoring
+
+The [Fall 2026 independent study](courses/research-mentoring/) has four stages and eight modules. Each module pairs an executable Python notebook with a workbench using synthetic research examples and a mentor review. Edit the course JSON under `courses/research-mentoring/content/`, then run `python3 scripts/build_mentoring.py` and `python3 scripts/site_navigation.py`.
+
 ## CS 691 · Neurosymbolic Artificial Intelligence
 
 All 16 modules are available in [the course roadmap](courses/neurosymbolic-ai/). The four stages cover symbolic knowledge, neural–symbolic architectures, language models grounded in evidence, and evaluation and applications. The [syllabus](courses/neurosymbolic-ai/syllabus.html) links the original course description and research readings.
 
-Edit the CS 691 instructional material under `courses/neurosymbolic-ai/data/`, then run `python3 scripts/build_neurosymbolic.py`. Run `python3 scripts/check_curriculum.py` to check both courses. Each CS 691 module embeds its course's Google Form with its module already selected.
+Edit the CS 691 instructional material under `courses/neurosymbolic-ai/data/`, then run `python3 scripts/build_neurosymbolic.py`. Run `python3 scripts/check_curriculum.py` to check all courses. Each CS 691 module embeds its course's Google Form with its module already selected.
 
 ## CS 483/583 · Machine Learning Foundations syllabus
 
