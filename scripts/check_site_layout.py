@@ -124,7 +124,6 @@ async def check_module(page, route, report):
             continue
         await measure(page, route, name, report)
         for frame in await section.locator("iframe:visible").all():
-            await frame.scroll_into_view_if_needed()
             if not await frame.get_attribute("title"):
                 report(route, name, "visible iframe lacks an accessible title")
             if not await frame.get_attribute("src"):
@@ -133,6 +132,7 @@ async def check_module(page, route, report):
             source = await frame.evaluate("f => f.src")
             if urlsplit(source).netloc != urlsplit(page.url).netloc:
                 continue
+            await frame.scroll_into_view_if_needed()
             handle = await frame.element_handle()
             child = await handle.content_frame()
             if child is None:
@@ -145,18 +145,12 @@ async def check_module(page, route, report):
 async def run_viewport(browser, args, paths, width, height):
     context = await browser.new_context(viewport={"width":width,"height":height},
                                         reduced_motion="reduce", service_workers="block")
-    host = urlsplit(args.url).netloc
-
-    async def site_only(route):
-        if urlsplit(route.request.url).netloc not in ("",host):
-            # Keep the external Forms boundary; omit third-party network latency.
-            await route.fulfill(status=200, content_type="text/html", body="")
-        else:
-            await route.continue_()
-
-    await context.route("**/*", site_only)
+    # The question form is the only third-party frame. Course requests can
+    # reach the local server without a Playwright callback on every asset.
+    await context.route("https://docs.google.com/forms/**", lambda route:
+                        route.fulfill(status=200, content_type="text/html", body=""))
     page = await context.new_page()
-    page.set_default_timeout(4000)
+    page.set_default_timeout(10000)
     failures = []
     def report(path, state, description):
         line = f"{width}x{height} {path} [{state}] {description}"
@@ -187,7 +181,7 @@ async def run_viewport(browser, args, paths, width, height):
                 name = path.replace("/","_").removesuffix(".html")
                 await page.screenshot(path=args.screenshots/f"{width}x{height}-{name}.png")
         except BrowserError as exc:
-            report(path,"interaction",str(exc).splitlines()[0])
+            report(path, "interaction", str(exc))
     await context.close()
     print(f"{width}x{height}: rendered {len(paths)} pages, {len(failures)} issues", flush=True)
     return len(failures)

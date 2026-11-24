@@ -62,15 +62,24 @@
       one(".resource-body").scrollTop = 0;
       if (outline.open) outline.close();
     }
+    function showSlide(number) {
+      if (!Number.isInteger(number) || number < 1 || number > slides.length) return;
+      history.replaceState(history.state, "", "#" + number);
+      display();
+    }
     function advance(offset) {
-      const next = index + offset;
-      if (next >= 0 && next < slides.length) location.hash = String(next + 1);
+      showSlide(index + 1 + offset);
     }
     one("#back").addEventListener("click",() => advance(-1));
     one("#next").addEventListener("click",() => advance(1));
     one("[data-outline]").addEventListener("click",() => outline.showModal());
     one("[data-close]").addEventListener("click",() => outline.close());
-    outline.addEventListener("click", e => { if (e.target.closest("a")) outline.close(); });
+    outline.addEventListener("click", e => {
+      const link = e.target.closest('a[href^="#"]');
+      if (!link || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      showSlide(Number(link.hash.slice(1)));
+    });
     window.addEventListener("hashchange",display);
     window.addEventListener("keydown", e => {
       if (e.altKey || e.ctrlKey || e.metaKey || outline.open || e.target.closest("input,textarea,select")) return;
