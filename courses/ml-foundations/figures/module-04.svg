@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 480 270">
+<title id="title">Squared error for the constant-60 rule</title><desc id="desc">For zero through three study hours, squared errors are 100, 16, 0, and 36; the dashed line marks population risk 38.</desc>
+<rect width="480" height="270" rx="14" fill="#fff"/>
+<g font-family="system-ui, sans-serif">
+<text x="16" y="31" fill="#213647" font-size="22" font-weight="700" text-anchor="start">How costly is a constant guess of 60?</text>
+<text x="16" y="56" fill="#546676" font-size="17" font-weight="500" text-anchor="start">Squared error (points²)</text>
+<line x1="60.00" y1="199.00" x2="453.00" y2="199.00" stroke="#d6dfe5" stroke-width="1"/>
+<text x="49" y="205.0" fill="#546676" font-size="16" font-weight="500" text-anchor="end">0</text>
+<line x1="60.00" y1="141.50" x2="453.00" y2="141.50" stroke="#d6dfe5" stroke-width="1"/>
+<text x="49" y="147.5" fill="#546676" font-size="16" font-weight="500" text-anchor="end">50</text>
+<line x1="60.00" y1="84.00" x2="453.00" y2="84.00" stroke="#d6dfe5" stroke-width="1"/>
+<text x="49" y="90.00000000000001" fill="#546676" font-size="16" font-weight="500" text-anchor="end">100</text>
+<line x1="96.00" y1="199.00" x2="96.00" y2="84.00" stroke="#006d74" stroke-width="11"/>
+<circle cx="96.00" cy="84.00" r="5" fill="#006d74" stroke="white" stroke-width="2"/>
+<text x="96" y="74.00000000000001" fill="#006d74" font-size="18" font-weight="700" text-anchor="middle">100</text>
+<text x="96" y="224" fill="#213647" font-size="17" font-weight="500" text-anchor="middle">0 h</text>
+<line x1="201.00" y1="199.00" x2="201.00" y2="180.60" stroke="#006d74" stroke-width="11"/>
+<circle cx="201.00" cy="180.60" r="5" fill="#006d74" stroke="white" stroke-width="2"/>
+<text x="201" y="170.6" fill="#006d74" font-size="18" font-weight="700" text-anchor="middle">16</text>
+<text x="201" y="224" fill="#213647" font-size="17" font-weight="500" text-anchor="middle">1 h</text>
+<line x1="306.00" y1="199.00" x2="306.00" y2="199.00" stroke="#006d74" stroke-width="11"/>
+<circle cx="306.00" cy="199.00" r="5" fill="#006d74" stroke="white" stroke-width="2"/>
+<text x="306" y="189.0" fill="#006d74" font-size="18" font-weight="700" text-anchor="middle">0</text>
+<text x="306" y="224" fill="#213647" font-size="17" font-weight="500" text-anchor="middle">2 h</text>
+<line x1="411.00" y1="199.00" x2="411.00" y2="157.60" stroke="#006d74" stroke-width="11"/>
+<circle cx="411.00" cy="157.60" r="5" fill="#006d74" stroke="white" stroke-width="2"/>
+<text x="411" y="147.6" fill="#006d74" font-size="18" font-weight="700" text-anchor="middle">36</text>
+<text x="411" y="224" fill="#213647" font-size="17" font-weight="500" text-anchor="middle">3 h</text>
+<line x1="60.00" y1="155.30" x2="453.00" y2="155.30" stroke="#9e1b32" stroke-width="2" stroke-dasharray="6 4"/>
+<rect x="113" y="128" width="104" height="23" fill="white"/><text x="116" y="146" fill="#9e1b32" font-size="17" font-weight="700" text-anchor="start">Mean = 38</text>
+<text x="240" y="253" fill="#546676" font-size="17" font-weight="500" text-anchor="middle">Four equally likely study records</text>
+</g>
+</svg>

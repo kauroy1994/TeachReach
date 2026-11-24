@@ -81,7 +81,7 @@ def check():
             equal(loc + " summary", words(a.find("p")), m["summary"])
             equal(loc + " objectives and assessment", [words(li) for li in a.iter("li")], m["outcomes"] + m["assessment"])
             equal(loc + " labs", words(a.find("div/div/h3[.='Practice & in-class assessment']/../p")),
-                  "Module practice will target: " + "; ".join(m["labs"]) + ".")
+                  "Module practice covers " + "; ".join(m["labs"]) + ".")
             equal(loc + " availability", words(a.find("div/span")), "Lessons available" if live else "Syllabus preview")
 
     for m, card, row in zip(modules, cards, rows):
@@ -127,6 +127,10 @@ if __name__ == "__main__":
     check()
     from check_neurosymbolic import check as check_cs691
     check_cs691()
+    from check_site_links import check as check_links
+    check_links()
+    from build_ml_lessons import build
+    build(check_only=True)
     from site_navigation import directory
     if (ROOT / "navigate.html").read_text() != directory():
         sys.exit("Rebuild the lesson directory with python scripts/site_navigation.py")

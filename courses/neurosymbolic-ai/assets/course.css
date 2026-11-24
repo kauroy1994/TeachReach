@@ -1,6 +1,6 @@
 /* The course shares TeachReach's curriculum typography, colours and navigation. */
 [hidden] { display: none !important; }
-.nesy .tr-hero-art { min-width: 0; }
+.nesy .tr-hero-art { display:block; min-width:0; }
 .nesy .tr-flow-step { line-height: 1.4; }
 .nesy .tr-curr-panel { min-width: 0; margin: 1rem 0; }
 .nesy h2,.nesy h3 { line-height: 1.22; }
@@ -41,7 +41,7 @@
 .nesy .deck-foot,.nesy .resource-bar { display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; background:white; padding:.55rem clamp(.8rem,3vw,2.5rem); border-block:1px solid #e6dce0; flex:none; }
 .nesy .resource-bar a { font-weight:750; }
 .nesy .deck-foot { justify-content:space-between; }
-.nesy .deck-foot button { margin:0; }
+.nesy .deck-foot .controls,.nesy .deck-foot button { margin:0; }
 .nesy .deck-foot button:disabled { opacity:.52; cursor:default; }
 .nesy .resource-bar .title { flex:1; }
 .nesy .outline-list { display:grid; gap:.45rem; }
@@ -56,7 +56,7 @@
 .nesy .skip:focus { top:6px; }
 .nesy .tr-section-index { flex-wrap:wrap; }
 .nesy .resource-bar small { display:block; font-weight:700; color:#752239; }
-@media(max-width:760px) {
+@media(max-width:900px) {
  .nesy .tr-curr-header { position: static; }
  .nesy .tr-curr-top { flex-wrap:wrap; }
  .nesy .menu-toggle { display:inline-block; }
@@ -66,4 +66,8 @@
  .nesy .deck-foot .tr-cta { min-height:36px; padding:7px 11px; }
  .nesy .resource-bar { font-size:.84rem; }
  .nesy .mini-table td:first-child { white-space:normal; }
+}
+@media(max-width:420px) {
+ .nesy .resource-bar .title { flex-basis:100%; }
+ .nesy .resource-bar { gap:.35rem .7rem; }
 }

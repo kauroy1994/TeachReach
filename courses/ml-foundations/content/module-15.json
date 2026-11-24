@@ -1,0 +1,138 @@
+{
+  "n": 15,
+  "opening": "A practice app forecasts which students will solve a new problem. It assigns 90% to ten attempts, yet only six students solve it. How can the class check what that number means before relying on it?",
+  "recall": "Module 02 assigned probabilities, Module 04 set aside examples for testing, and Module 14 made a decision using a crossing probability. This lesson compares probabilities with observed outcomes before using them to choose an action.",
+  "recallQ": "If a cart planner raises its assumed success chance from 0.5 to 0.8, has the crossing itself become easier?",
+  "recallA": "Only the estimate changed. Independent observations under comparable conditions are needed to tell whether crossing success changed.",
+  "lessons": [
+    {
+      "title": "Keep the forecast separate from the result",
+      "explain": "Freeze the model before collecting the answers. A probability is a number between zero and one forecasting an event. After each attempt we can record whether it succeeded. One attempt can have only one outcome, even when many outcomes were plausible before it.",
+      "worked": "For ten independent fictional practice attempts, suppose the model gave each a probability of 0.9 for success. Six successes give an observed success fraction of 0.6. The model forecast nine successes in expectation.",
+      "notation": "Use pᵢ for the predicted probability on attempt i and yᵢ for the observed outcome, 1 for success and 0 for failure. Σᵢ pᵢ gives the expected count of successes.",
+      "code": "import torch\np = torch.full((10,), 0.9)\ny = torch.tensor([1,1,1,1,1,1,0,0,0,0])\nprint(\"expected count\", round(p.sum().item(), 2))\nprint(\"observed count\", y.sum().item())",
+      "q": "Does one failure on a prediction of 0.9 prove that the model is overconfident?",
+      "a": "A calibrated 0.9 forecast still allows failures. Check a group of comparable forecasts and report its size.",
+      "out": "expected count 9.0\nobserved count 6"
+    },
+    {
+      "title": "Read a reliability diagram",
+      "explain": "Calibration asks whether events predicted around p happen about that often across comparable cases. Group similar scores into bins, or intervals. On a reliability diagram each bin contributes a point with mean forecast on the horizontal axis and observed frequency on the vertical axis.",
+      "worked": "For five predictions of 0.4, two successes give (0.4, 0.4). For ten predictions of 0.9, six successes give (0.9, 0.6). The second point falls below the diagonal, indicating overprediction on these ten cases.",
+      "notation": "For bin B of size n, forecast = Σᵢ∈B pᵢ/n; frequency = Σᵢ∈B yᵢ/n. Equal coordinates lie on the diagonal y = x.",
+      "code": "groups = [(0.4, [1,1,0,0,0]), (0.9, [1]*6 + [0]*4)]\nfor forecast, observations in groups:\n    frequency = sum(observations) / len(observations)\n    print(\"n, x, y:\", len(observations), forecast, frequency)",
+      "q": "A bin of 20 predictions averaging 0.3 contains 10 successes. On which side of the diagonal does it fall?",
+      "a": "The point is (0.3, 0.5), above the diagonal. These events occurred more often than the forecasts suggested.",
+      "out": "n, x, y: 5 0.4 0.4\nn, x, y: 10 0.9 0.6"
+    },
+    {
+      "title": "Measure error without losing the individual bins",
+      "explain": "One summary is the weighted mean of absolute bin gaps. A larger bin contributes more because it contains more observations. Also report counts and the original points so the summary can be interpreted.",
+      "worked": "The gap for five 0.4 forecasts is zero; the gap for ten 0.9 forecasts is 0.3. Weight by 5/15 and 10/15. The estimated calibration error is 0.20, or 20 percentage points.",
+      "notation": "ECE = Σᵦ (nᵦ/N)|p̄ᵦ − ȳᵦ|. Bins are indexed by b, N is the total count, bars denote means, and vertical bars mean absolute value.",
+      "code": "bins = [(5, 0.4, 0.4), (10, 0.9, 0.6)]\ntotal = sum(n for n, p, rate in bins)\nece = sum(n * abs(p - rate) for n, p, rate in bins) / total\nprint(round(ece, 3))",
+      "q": "If you average the two absolute gaps without the counts, what do you get and why is it different?",
+      "a": "The unweighted mean is 0.15. It gives the five-case group just as much influence as the ten-case group.",
+      "out": "0.2"
+    },
+    {
+      "title": "Separate confidence, accuracy and uncertainty",
+      "explain": "Accuracy counts classifications that match the outcome. Calibration checks the probability assigned to an event. Observations can vary even with a good model. Limited training examples introduce additional uncertainty about the fitted rule. A single confidence number cannot identify which source dominates.",
+      "worked": "A classifier predicts success for all ten high-score cases. Changing its scores from 0.9 to 0.6 leaves six correct decisions at the 0.5 threshold. The probability errors change, which the Brier score captures.",
+      "notation": "Brier = (1/N) Σᵢ (pᵢ − yᵢ)². This is mean squared error for binary probabilities. Smaller is better.",
+      "code": "outcomes = [1]*6 + [0]*4\nfor p in [0.9, 0.6]:\n    accuracy = sum((p >= 0.5) == y for y in outcomes) / len(outcomes)\n    brier = sum((p - y)**2 for y in outcomes) / len(outcomes)\n    print(p, round(accuracy, 2), round(brier, 2))",
+      "q": "May we fit the new score of 0.6 here and call this group's Brier score an independent evaluation?",
+      "a": "This group supplied the replacement value. Estimate calibration parameters on validation examples and evaluate the frozen change on separate cases.",
+      "out": "0.9 0.6 0.33\n0.6 0.6 0.24"
+    },
+    {
+      "title": "Change one input deliberately",
+      "explain": "A stress test changes a plausible input while keeping track of what should stay constant. Test the recording process separately from the model. An error in a stored input can alter predictions even if the student's actual effort stays the same.",
+      "worked": "Recall the hand-picked score rule 20 + 10 × hours + 5 × sets. Ava has two hours and three sets. If a logging error drops one set, her prediction falls from 55 to 50 while her fictional observed score stays 60.",
+      "notation": "Δμ = μ(x′) − μ(x) is the prediction difference between a perturbed record x′ and the original x. The change here has units of score points.",
+      "code": "def predict(hours, sets):\n    return 20 + 10*hours + 5*sets\nactual = 60\nfor sets in (3, 2):\n    prediction = predict(2, sets)\n    print(\"logged sets, prediction, absolute error:\", sets, prediction, abs(actual-prediction))",
+      "q": "Does this test establish that completing one extra set raises an actual exam score by five points?",
+      "a": "It measures a change in the model's output after editing a record. It supplies no comparison of actual outcomes under an intervention on practice.",
+      "out": "logged sets, prediction, absolute error: 3 55 5\nlogged sets, prediction, absolute error: 2 50 10"
+    },
+    {
+      "title": "Change the population mix",
+      "explain": "Distribution shift means the data encountered during use differ from the data used to build or evaluate the model. First ask whether the proportions of familiar conditions changed. You can calculate the resulting average error even when the errors within each condition stay fixed.",
+      "worked": "Suppose short-form problems have a measured mean absolute error of 2 points and long-form problems 8 points. With 20% long-form the overall error is 3.2. With 70% long-form it is 6.2 if the within-type errors persist.",
+      "notation": "Overall MAE = (1 − w) MAEshort + w MAElong. MAE averages absolute errors; w is the fraction of long-form cases.",
+      "code": "short_error, long_error = 2, 8\nfor long_share in (0.2, 0.7):\n    overall = (1-long_share)*short_error + long_share*long_error\n    print(long_share, round(overall, 2))",
+      "q": "The new overall error is 9 points. Could changing only the mix of these fixed two groups explain it?",
+      "a": "A weighted average of 2 and 8 lies between 2 and 8. Check whether a within-group error changed, other groups appeared, or measurements differ.",
+      "out": "0.2 3.2\n0.7 6.2"
+    },
+    {
+      "title": "Ask who experiences the mistakes",
+      "explain": "A fairness-aware audit starts with the consequences of a particular decision. Suppose a tool flags attempts for optional help. A missed need is a false negative. Count misses among those actually needing help, then compare that rate across contexts such as different input interfaces.",
+      "worked": "On a fictional keyboard interface, 1 of 4 attempts needing help was missed. On a touch interface, 2 of 4 were missed. The observed miss rates differ by 25 percentage points. These small groups warrant follow-up on logging, labels, and more held-out cases.",
+      "notation": "FNR = FN/(TP + FN). FN counts missed needs, TP counts correctly flagged needs. If a group has zero actual needs, this rate is undefined.",
+      "code": "for interface, missed, flagged_need in [(\"keyboard\",1,3), (\"touch\",2,2)]:\n    needs = missed + flagged_need\n    rate = missed / needs if needs else None\n    print(interface, f\"{missed}/{needs}\", rate)",
+      "q": "If three new touch attempts did not need help, does the touch false-negative rate change?",
+      "a": "No. Its denominator contains only attempts that needed help. Track false-positive rates as a separate consequence for attempts that did not need help.",
+      "out": "keyboard 1/4 0.25\ntouch 2/4 0.5"
+    },
+    {
+      "title": "Explain the output and state what the test supports",
+      "explain": "For a linear score rule, multiplying each input by its weight shows the contribution to that prediction relative to zero inputs. A model can learn associations arising from background factors, so a useful explanation also records which claims the evidence supports.",
+      "worked": "Ava's rule gives a starting score of 20, plus 20 for her recorded hours and 15 for recorded sets. A student might complete more sets because of prior preparation. These records alone cannot tell what would happen to the same student if assigned extra practice.",
+      "notation": "For μ = b + w₁x₁ + w₂x₂, the contribution from feature j relative to zero is wⱼxⱼ. A one-unit edit holding other features fixed changes μ by wⱼ.",
+      "code": "import torch\nx = torch.tensor([2., 3.])\nw = torch.tensor([10., 5.])\ncontribution = x * w\nprint(\"hours and sets\", contribution.tolist())\nprint(\"predicted score\", 20 + contribution.sum().item())",
+      "q": "How could two differently scaled features make a raw weight comparison misleading?",
+      "a": "Hours and minutes describe the same duration. A coefficient of 10 points per hour is 1/6 point per minute. The contribution for a two-hour record stays 20 with either unit.",
+      "out": "hours and sets [20.0, 15.0]\npredicted score 55.0"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "A model gives ten predictions of 0.8 with five observed successes and twenty of 0.5 with ten successes. Locate the overconfident group and compute ECE.",
+      "hint": "Calculate the observed success fraction in each group before weighting the gaps.",
+      "a": "The first group's frequency is 0.5, a 0.3 overprediction. The second group has zero gap. ECE = (10/30) × 0.3 = 0.10."
+    },
+    {
+      "q": "Compare Brier scores when one outcome is 0 and two models assign 0.2 and 0.8.",
+      "hint": "Square the distance from each probability to zero.",
+      "a": "The scores are 0.04 and 0.64. The 0.2 forecast scores better on this case. Compare many held-out cases to evaluate the models."
+    },
+    {
+      "q": "Set logging drops the last practice set whenever a student uses a phone. Design a paired stress test for the score model.",
+      "hint": "Hold the observed score and all other inputs fixed.",
+      "a": "Take records with at least one set, evaluate original and one-set-lower copies, and compare predictions and absolute errors within each pair. Verify the error exists against independent logs and report counts by input device."
+    },
+    {
+      "q": "An evaluation set is 80% group A with MAE 3 and 20% B with MAE 7. Predict the MAE if the deployment mix becomes 50/50.",
+      "hint": "Assume the two within-group errors persist.",
+      "a": "The original average is 0.8 × 3 + 0.2 × 7 = 3.8. The new average is 5. Recheck both group-specific errors on fresh deployment examples."
+    },
+    {
+      "q": "A model misses 2 of 4 actual help needs in one group and 2 of 20 in another. What deserves follow-up?",
+      "hint": "Use actual needs as the denominator, then consider sample size.",
+      "a": "The observed miss rates are 50% and 10%. Investigate label quality, data collection and the decision threshold. The four-case denominator makes the first estimate especially unstable."
+    },
+    {
+      "q": "The model assigns a positive coefficient to extra practice. Can your report recommend extra practice as a proven way to raise scores?",
+      "hint": "Identify what changed in the stress test and what remained fixed.",
+      "a": "You can explain the model's response to editing practice counts. A causal recommendation requires a design and assumptions that address how practice was chosen and what outcomes would otherwise have occurred."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Can a well-calibrated model still be unhelpful?",
+      "a": "Yes. If half the attempts succeed, assigning 0.5 to everyone can match the overall frequency while giving no way to distinguish easier attempts from harder ones. Examine discrimination and the actual decisions as well."
+    },
+    {
+      "q": "Why do the bin boundaries matter?",
+      "a": "A wide bin can average together overprediction in one subgroup and underprediction in another. Very narrow bins may have just a few outcomes. Report the bin definition and count alongside every estimate."
+    },
+    {
+      "q": "When should the system defer a decision?",
+      "a": "A help tool might send uncertain cases for review. Pick the threshold using validation data and the costs of mistakes and review. Report how many cases it covers and how often it errs among both decided and deferred cases."
+    }
+  ],
+  "bridge": "Module 16 brings these checks into one reproducible score-prediction study. The report will compare models on the same unseen students and explain which findings the small fictional dataset can support.",
+  "bridgeQ": "Why save the split and evaluation rule before comparing your final models?",
+  "bridgeA": "A fixed split makes the comparison repeatable. Freezing the evaluation rule helps prevent a favorable test outcome from becoming the reason for choosing a model."
+}

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 288" role="img" aria-labelledby="title desc" font-family="Arial, Helvetica, sans-serif">
+  <title id="title">Two views of one rising signal</title>
+  <desc id="desc">Across readings 1, 2 and 3, the original values are 1, 2, 3. After adding five they are 6, 7, 8. The net change is plus two in both views.</desc>
+  <rect x="0" y="0" width="480" height="288" rx="12" fill="#FFFFFF" />
+  <text x="20" y="32" fill="#203346" font-size="23" text-anchor="start" font-weight="bold">Two views of one rising signal</text>
+  <text x="22" y="62" fill="#465B6D" font-size="17" text-anchor="start">Signal value</text>
+  <line x1="61" y1="233" x2="367" y2="233" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="48" y="238" fill="#465B6D" font-size="16" text-anchor="end">0</text>
+  <line x1="61" y1="195" x2="367" y2="195" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="48" y="200" fill="#465B6D" font-size="16" text-anchor="end">2</text>
+  <line x1="61" y1="157" x2="367" y2="157" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="48" y="162" fill="#465B6D" font-size="16" text-anchor="end">4</text>
+  <line x1="61" y1="119" x2="367" y2="119" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="48" y="124" fill="#465B6D" font-size="16" text-anchor="end">6</text>
+  <line x1="61" y1="81" x2="367" y2="81" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="48" y="86" fill="#465B6D" font-size="16" text-anchor="end">8</text>
+  <line x1="61" y1="233" x2="61" y2="81" stroke="#465B6D" stroke-width="1.5" stroke-linecap="round" />
+  <polyline points="94,214 212,195 330,176" fill="none" stroke="#9E1B32" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <circle cx="94" cy="214" r="6" fill="#9E1B32" />
+  <circle cx="212" cy="195" r="6" fill="#9E1B32" />
+  <circle cx="330" cy="176" r="6" fill="#9E1B32" />
+  <polyline points="94,119 212,100 330,81" fill="none" stroke="#006D71" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+  <rect x="88.5" y="113.5" width="11" height="11" fill="#006D71" />
+  <rect x="206.5" y="94.5" width="11" height="11" fill="#006D71" />
+  <rect x="324.5" y="75.5" width="11" height="11" fill="#006D71" />
+  <text x="349" y="181" fill="#9E1B32" font-size="17" text-anchor="start" font-weight="bold">Original</text>
+  <text x="349" y="86" fill="#006D71" font-size="17" text-anchor="start" font-weight="bold">Shifted</text>
+  <text x="94" y="255" fill="#465B6D" font-size="17" text-anchor="middle">1</text>
+  <text x="212" y="255" fill="#465B6D" font-size="17" text-anchor="middle">2</text>
+  <text x="330" y="255" fill="#465B6D" font-size="17" text-anchor="middle">3</text>
+  <text x="211" y="280" fill="#203346" font-size="17" text-anchor="middle">Reading</text>
+</svg>

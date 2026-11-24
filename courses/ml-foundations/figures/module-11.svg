@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 288" role="img" aria-labelledby="title desc" font-family="Arial, Helvetica, sans-serif">
+  <title id="title">Which keys can each query see?</title>
+  <desc id="desc">Rows are queries and columns are keys for the sequence red, blue, red. Causal masking gives weights 1,0,0; 0.330,0.670,0; and 0.401,0.198,0.401. Hatched cells are future positions.</desc>
+  <rect x="0" y="0" width="480" height="288" rx="12" fill="#FFFFFF" />
+  <text x="20" y="32" fill="#203346" font-size="23" text-anchor="start" font-weight="bold">Which keys can each query see?</text>
+  <defs>
+    <pattern id="mask" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#F1F4F6" />
+      <path d="M -2 2 l 4 -4 M 0 8 l 8 -8 M 6 10 l 4 -4" stroke="#D3DCE2" stroke-width="1" />
+    </pattern>
+  </defs>
+  <text x="22" y="66" fill="#465B6D" font-size="16" text-anchor="start">Query ↓</text>
+  <text x="283" y="62" fill="#465B6D" font-size="16" text-anchor="middle">Key position</text>
+  <text x="173" y="85" fill="#203346" font-size="17" text-anchor="middle">1 · red</text>
+  <text x="280" y="85" fill="#203346" font-size="17" text-anchor="middle">2 · blue</text>
+  <text x="387" y="85" fill="#203346" font-size="17" text-anchor="middle">3 · red</text>
+  <text x="26" y="127" fill="#203346" font-size="18" text-anchor="start" font-weight="bold">1 · red</text>
+  <rect x="124" y="96" width="98" height="46" rx="5" fill="#9E1B32" stroke="#D0DCE3" stroke-width="1" />
+  <text x="173" y="126" fill="#FFFFFF" font-size="19" text-anchor="middle" font-weight="bold">1</text>
+  <rect x="231" y="96" width="98" height="46" rx="5" fill="url(#mask)" stroke="#D0DCE3" stroke-width="1" />
+  <text x="280" y="126" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0</text>
+  <rect x="338" y="96" width="98" height="46" rx="5" fill="url(#mask)" stroke="#D0DCE3" stroke-width="1" />
+  <text x="387" y="126" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0</text>
+  <text x="26" y="179" fill="#203346" font-size="18" text-anchor="start" font-weight="bold">2 · blue</text>
+  <rect x="124" y="148" width="98" height="46" rx="5" fill="#ACD5D4" stroke="#D0DCE3" stroke-width="1" />
+  <text x="173" y="178" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0.330</text>
+  <rect x="231" y="148" width="98" height="46" rx="5" fill="#9E1B32" stroke="#D0DCE3" stroke-width="1" />
+  <text x="280" y="178" fill="#FFFFFF" font-size="19" text-anchor="middle" font-weight="bold">0.670</text>
+  <rect x="338" y="148" width="98" height="46" rx="5" fill="url(#mask)" stroke="#D0DCE3" stroke-width="1" />
+  <text x="387" y="178" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0</text>
+  <text x="26" y="231" fill="#203346" font-size="18" text-anchor="start" font-weight="bold">3 · red</text>
+  <rect x="124" y="200" width="98" height="46" rx="5" fill="#ACD5D4" stroke="#D0DCE3" stroke-width="1" />
+  <text x="173" y="230" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0.401</text>
+  <rect x="231" y="200" width="98" height="46" rx="5" fill="#D8EAEB" stroke="#D0DCE3" stroke-width="1" />
+  <text x="280" y="230" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0.198</text>
+  <rect x="338" y="200" width="98" height="46" rx="5" fill="#ACD5D4" stroke="#D0DCE3" stroke-width="1" />
+  <text x="387" y="230" fill="#203346" font-size="19" text-anchor="middle" font-weight="bold">0.401</text>
+  <rect x="125" y="261" width="23" height="14" fill="url(#mask)" stroke="#D0DCE3" />
+  <text x="157" y="274" fill="#465B6D" font-size="16" text-anchor="start">Future key · weight 0</text>
+</svg>

@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>CS 483/583 · Module 16 · Integrated Machine Learning Capstone · office</title><link rel="stylesheet" href="../assets/curriculum.css"><link rel="stylesheet" href="../../neurosymbolic-ai/assets/course.css"><link rel="stylesheet" href="../assets/ml-lessons.css"><script defer src="../../neurosymbolic-ai/assets/learning.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body data-tr-module="16" class="tr-curriculum nesy ml-lesson "><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 483/583</a><a target="_top" href="index.html">Module 16</a></nav><a class="skip" href="#main">Skip to content</a><header class="resource-bar"><div class="title"><small>TeachReach · CS 483/583 · Module 16</small>Integrated Machine Learning Capstone</div><a class="" href="index.html#office">← Module 16</a><button type="button" class="tr-cta outline" data-full>Full screen</button></header><main id="main" class="resource-body"><div class="portrait"><img src="../module-01/assets/professor_portrait.png" alt="Professor Kaushik Roy"><div><span class="tr-eyebrow">CS 483/583 · Module 16</span><h1>Virtual office hours</h1></div></div><label for="faq-search">Search this FAQ </label><input id="faq-search" type="search"><details data-faq id="faq-1"><summary>Why does the final model use fewer inputs than Module 01?</summary><p>Module 01 introduced weights by hand using both hours and sets. This capstone fits a separate one-feature line from training outcomes and compares both models on the same validation cases. More features do not automatically improve prediction.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-1">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Select on validation and lock the rule</h3><p>The fitted line predicts 60 for Ira and 70 for Jo, giving errors 1 and 1. The hand-picked rule predicts 40 and 75, giving errors 21 and 6. The constant&#x27;s errors are 1.5 and 6.5. The fitted line wins the predeclared comparison.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code># Each row holds a fictional student&#x27;s name, hours, completed sets, and score.
+train = [(&quot;Ava&quot;,2,3,60),(&quot;Ben&quot;,4,1,70),(&quot;Cam&quot;,5,2,75),
+         (&quot;Dee&quot;,0,1,52),(&quot;Eli&quot;,1,0,52),(&quot;Fin&quot;,3,2,66)]
+valid = [(&quot;Ira&quot;,2,0,61),(&quot;Jo&quot;,4,3,69)]
+test = [(&quot;Rin&quot;,1,1,58),(&quot;Sol&quot;,3,1,67),(&quot;Tay&quot;,5,3,68),(&quot;Uma&quot;,4,0,75)]
+import torch
+hours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)
+scores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)
+centered = hours - hours.mean()
+slope = (centered * (scores-scores.mean())).sum() / centered.square().sum()
+bias = scores.mean() - slope * hours.mean()
+baseline = scores.mean().item()
+def predict(h):
+    return bias.item() + slope.item()*h
+def mae(rows, prediction):
+    errors = [abs(prediction(h,sets)-y) for name,h,sets,y in rows]
+    return sum(errors) / len(errors)
+models = {&quot;training mean&quot;: lambda h,s: baseline,
+          &quot;Module 01 rule&quot;: lambda h,s: 20+10*h+5*s,
+          &quot;fitted hours&quot;: lambda h,s: predict(h)}
+validation_errors = {name: mae(valid, f) for name,f in models.items()}
+print(validation_errors)
+print(&quot;selected&quot;, min(validation_errors, key=validation_errors.get))</code></pre></div><details><summary>Reveal the output</summary><pre class="output">{&#x27;training mean&#x27;: 4.0, &#x27;Module 01 rule&#x27;: 13.5, &#x27;fitted hours&#x27;: 1.0}
+selected fitted hours</pre></details><h3>Check your understanding</h3><p>If the constant had beaten both rules on validation, what should you have selected?</p><details><summary>Reveal answer</summary><p>Select the constant under the written rule. A richer model must earn its place by predicting held-out outcomes well.</p></details><a class="" href="slides.html#6">Open the lesson</a></details></details><details data-faq id="faq-2"><summary>Why include a probability exercise when the main metric is MAE?</summary><p>MAE evaluates a point estimate. A distribution answers a different question, such as how plausible a score of 70 is at three hours. Stating a spread makes that assumption visible and gives us something new to check.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-2">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Interpret a probability only under its assumptions</h3><p>For four hours the mean is 70. A symmetric Gaussian centered at 70 puts half its mass at or above 70. For three hours the mean is 65; reaching 70 is one assumed standard deviation above it, an upper tail near 0.159.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code>import torch
+for h in [3., 4.]:
+    mu = torch.tensor(50 + 5*h)
+    distribution = torch.distributions.Normal(mu, torch.tensor(5.))
+    upper_tail = 1 - distribution.cdf(torch.tensor(70.))
+    print(h, round(upper_tail.item(), 3))</code></pre></div><details><summary>Reveal the output</summary><pre class="output">3.0 0.159
+4.0 0.5</pre></details><h3>Check your understanding</h3><p>Does 0.5 at four hours mean that half of future four-hour students have been shown to reach 70?</p><details><summary>Reveal answer</summary><p>That fraction follows from the assumed Gaussian curve. Check observed frequencies in a larger held-out sample and evaluate the assumed spread.</p></details><a class="" href="slides.html#8">Open the lesson</a></details></details><details data-faq id="faq-3"><summary>How would I reproduce the capstone independently?</summary><p>Copy the named rows and split, start the notebook from its first cell, and compare your two validation predictions for the fitted line with 60 and 70. Then check the four test predictions individually before comparing aggregate errors.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-3">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Write a claim someone else can check</h3><p>On the same four fictional students, the training-fitted hours line reduced test MAE from 6.75 to 4.25 points. It missed Tay by seven points. A fresh cohort and independently verified study logs could test whether the improvement persists. Someone repeating the study should be able to recover both the mean improvement and Tay&#x27;s result.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code># Each row holds a fictional student&#x27;s name, hours, completed sets, and score.
+train = [(&quot;Ava&quot;,2,3,60),(&quot;Ben&quot;,4,1,70),(&quot;Cam&quot;,5,2,75),
+         (&quot;Dee&quot;,0,1,52),(&quot;Eli&quot;,1,0,52),(&quot;Fin&quot;,3,2,66)]
+valid = [(&quot;Ira&quot;,2,0,61),(&quot;Jo&quot;,4,3,69)]
+test = [(&quot;Rin&quot;,1,1,58),(&quot;Sol&quot;,3,1,67),(&quot;Tay&quot;,5,3,68),(&quot;Uma&quot;,4,0,75)]
+import torch
+hours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)
+scores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)
+centered = hours - hours.mean()
+slope = (centered * (scores-scores.mean())).sum() / centered.square().sum()
+bias = scores.mean() - slope * hours.mean()
+baseline = scores.mean().item()
+def predict(h):
+    return bias.item() + slope.item()*h
+def mae(rows, prediction):
+    errors = [abs(prediction(h,sets)-y) for name,h,sets,y in rows]
+    return sum(errors) / len(errors)
+models = {&quot;training mean&quot;: lambda h,s: baseline,
+          &quot;Module 01 rule&quot;: lambda h,s: 20+10*h+5*s,
+          &quot;fitted hours&quot;: lambda h,s: predict(h)}
+winner = min(models, key=lambda name: mae(valid, models[name]))
+base_error = mae(test, models[&quot;training mean&quot;])
+final_error = mae(test, models[winner])
+print(winner, &quot;baseline MAE&quot;, base_error, &quot;model MAE&quot;, final_error)
+print(&quot;observed improvement&quot;, base_error-final_error)</code></pre></div><details><summary>Reveal the output</summary><pre class="output">fitted hours baseline MAE 6.75 model MAE 4.25
+observed improvement 2.5</pre></details><h3>Check your understanding</h3><p>A reviewer gets exactly your numbers but concludes that one more hour of study will raise anyone&#x27;s score by five points. What should you revise?</p><details><summary>Reveal answer</summary><p>Make the interpretation explicit: five is the fitted slope on fictional training records. A causal effect would require evidence about what would happen if study hours actually changed.</p></details><a class="" href="slides.html#10">Open the lesson</a></details></details><details data-faq id="faq-4"><summary>What could change if these were real students?</summary><p>The chosen records might underrepresent particular courses, schedules or testing conditions. A genuine evaluation would need an appropriate collection design, sufficiently sized independent cohorts, and a documented policy for any intended use.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-4">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Report a failure and test the recording assumption</h3><p>For students with at least four hours, the line&#x27;s errors are 7 and 5, averaging 6. For the two students below four hours they average 2.5. If a reporting bug adds one hour to each test record, each line prediction rises by five points. Recalculate all four errors rather than assuming each gets worse.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code># Each row holds a fictional student&#x27;s name, hours, completed sets, and score.
+train = [(&quot;Ava&quot;,2,3,60),(&quot;Ben&quot;,4,1,70),(&quot;Cam&quot;,5,2,75),
+         (&quot;Dee&quot;,0,1,52),(&quot;Eli&quot;,1,0,52),(&quot;Fin&quot;,3,2,66)]
+valid = [(&quot;Ira&quot;,2,0,61),(&quot;Jo&quot;,4,3,69)]
+test = [(&quot;Rin&quot;,1,1,58),(&quot;Sol&quot;,3,1,67),(&quot;Tay&quot;,5,3,68),(&quot;Uma&quot;,4,0,75)]
+import torch
+hours = torch.tensor([h for name,h,sets,y in train], dtype=torch.float64)
+scores = torch.tensor([y for name,h,sets,y in train], dtype=torch.float64)
+centered = hours - hours.mean()
+slope = (centered * (scores-scores.mean())).sum() / centered.square().sum()
+bias = scores.mean() - slope * hours.mean()
+baseline = scores.mean().item()
+def predict(h):
+    return bias.item() + slope.item()*h
+for minimum, maximum in [(0, 3), (4, 5)]:
+    errors = [abs(predict(h)-y) for name,h,s,y in test if minimum &lt;= h &lt;= maximum]
+    print(minimum, maximum, len(errors), sum(errors)/len(errors))
+shifted = [abs(predict(h+1)-y) for name,h,s,y in test]
+print(&quot;shifted errors&quot;, shifted, &quot;MAE&quot;, sum(shifted)/len(shifted))</code></pre></div><details><summary>Reveal the output</summary><pre class="output">0 3 2 2.5
+4 5 2 6.0
+shifted errors [2.0, 3.0, 12.0, 0.0] MAE 4.25</pre></details><h3>Check your understanding</h3><p>Can these two groups establish that studying longer causes larger prediction errors?</p><details><summary>Reveal answer</summary><p>Each group contains only two students. Study behavior was observed, and the groups may differ in other ways. Report the observed errors and test the pattern on fresh records.</p></details><a class="" href="slides.html#9">Open the lesson</a></details></details><p id="no-faq" hidden>No matching question. Try another phrase or ask below.</p><a class="tr-cta outline" href="index.html#question">Ask a question</a></main></body></html>

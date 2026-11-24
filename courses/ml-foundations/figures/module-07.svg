@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 480 270">
+<title id="title">Principal direction of four weekly study logs</title><desc id="desc">Projecting the four logs onto the rising diagonal preserves 8 of 8.5 hours squared of variance, or 94.1 percent.</desc>
+<rect width="480" height="270" rx="14" fill="#fff"/>
+<g font-family="system-ui, sans-serif">
+<text x="16" y="31" fill="#213647" font-size="22" font-weight="700" text-anchor="start">Which direction keeps the variation?</text>
+<text x="17" y="56" fill="#546676" font-size="16" font-weight="500" text-anchor="start">Practice hours</text>
+<line x1="51.00" y1="230.00" x2="216.00" y2="230.00" stroke="#d6dfe5" stroke-width="1"/>
+<line x1="51.00" y1="230.00" x2="51.00" y2="65.00" stroke="#d6dfe5" stroke-width="1"/>
+<text x="42" y="235" fill="#546676" font-size="15" font-weight="500" text-anchor="end">0</text>
+<text x="51" y="246" fill="#546676" font-size="15" font-weight="500" text-anchor="middle">0</text>
+<line x1="51.00" y1="180.00" x2="216.00" y2="180.00" stroke="#d6dfe5" stroke-width="1"/>
+<line x1="101.00" y1="230.00" x2="101.00" y2="65.00" stroke="#d6dfe5" stroke-width="1"/>
+<text x="42" y="185" fill="#546676" font-size="15" font-weight="500" text-anchor="end">2</text>
+<text x="101" y="246" fill="#546676" font-size="15" font-weight="500" text-anchor="middle">2</text>
+<line x1="51.00" y1="130.00" x2="216.00" y2="130.00" stroke="#d6dfe5" stroke-width="1"/>
+<line x1="151.00" y1="230.00" x2="151.00" y2="65.00" stroke="#d6dfe5" stroke-width="1"/>
+<text x="42" y="135" fill="#546676" font-size="15" font-weight="500" text-anchor="end">4</text>
+<text x="151" y="246" fill="#546676" font-size="15" font-weight="500" text-anchor="middle">4</text>
+<line x1="51.00" y1="80.00" x2="216.00" y2="80.00" stroke="#d6dfe5" stroke-width="1"/>
+<line x1="201.00" y1="230.00" x2="201.00" y2="65.00" stroke="#d6dfe5" stroke-width="1"/>
+<text x="42" y="85" fill="#546676" font-size="15" font-weight="500" text-anchor="end">6</text>
+<text x="201" y="246" fill="#546676" font-size="15" font-weight="500" text-anchor="middle">6</text>
+<line x1="51.00" y1="230.00" x2="216.00" y2="65.00" stroke="#006d74" stroke-width="3"/>
+<line x1="76.00" y1="180.00" x2="88.50" y2="192.50" stroke="#9e1b32" stroke-width="2" stroke-dasharray="4 2"/>
+<circle cx="76.00" cy="180.00" r="5" fill="#9e1b32" stroke="white" stroke-width="2"/>
+<line x1="101.00" y1="205.00" x2="88.50" y2="192.50" stroke="#9e1b32" stroke-width="2" stroke-dasharray="4 2"/>
+<circle cx="101.00" cy="205.00" r="5" fill="#9e1b32" stroke="white" stroke-width="2"/>
+<line x1="176.00" y1="80.00" x2="188.50" y2="92.50" stroke="#9e1b32" stroke-width="2" stroke-dasharray="4 2"/>
+<circle cx="176.00" cy="80.00" r="5" fill="#9e1b32" stroke="white" stroke-width="2"/>
+<line x1="201.00" y1="105.00" x2="188.50" y2="92.50" stroke="#9e1b32" stroke-width="2" stroke-dasharray="4 2"/>
+<circle cx="201.00" cy="105.00" r="5" fill="#9e1b32" stroke="white" stroke-width="2"/>
+<text x="118" y="264" fill="#546676" font-size="16" font-weight="500" text-anchor="middle">Reading hours</text>
+<text x="248" y="88" fill="#006d74" font-size="19" font-weight="700" text-anchor="start">Along the diagonal</text>
+<text x="248" y="117" fill="#213647" font-size="18" font-weight="500" text-anchor="start">8 h² of variance</text>
+<text x="248" y="160" fill="#9e1b32" font-size="19" font-weight="700" text-anchor="start">Across the diagonal</text>
+<text x="248" y="189" fill="#213647" font-size="18" font-weight="500" text-anchor="start">0.5 h² of variance</text>
+<text x="248" y="233" fill="#213647" font-size="21" font-weight="700" text-anchor="start">94.1% retained</text>
+</g>
+</svg>

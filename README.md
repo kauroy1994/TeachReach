@@ -18,7 +18,7 @@ The machine learning course is **Machine Learning Foundations: From Mathematics 
 - **Stage III — Foundations of Modern AI (09–13):** deep learning and representations; self-supervised learning and embeddings; sequence modeling, attention and transformers; language modeling and LLMs; generative models (VAEs, GANs, diffusion).
 - **Stage IV — Intelligent and Reliable Learning (14–16):** reinforcement learning; trustworthy ML; integrated machine-learning capstone.
 
-**Full syllabus:** `courses/ml-foundations/syllabus.html`. Stage overviews: `courses/ml-foundations/stage-01/` through `stage-04/`. Modules 01–03 are **released**. Modules 04–16 have **dedicated, navigable syllabus-preview pages** with the same seven-section layout and transparent in-development indicators.
+**Full syllabus:** `courses/ml-foundations/syllabus.html`. Stage overviews: `courses/ml-foundations/stage-01/` through `stage-04/`. All 16 modules include classroom slides, labs, exercises with worked answers, runnable notebooks, module FAQs, and a question form.
 
 **Every module includes formative practice exercises when released.** Students are **graded on a different instructor-administered in-class variant at the end of each module**. The website's correct-answer feedback is not a graded score. The syllabus includes a *proposed* allocation of 16 end-of-module assessments worth 80% total plus the integrated capstone worth 20%, subject to instructor confirmation.
 
@@ -58,7 +58,7 @@ The site is **static**: no Python, backend server, GPU, paid API key, or LLM acc
 
 **Office hours content:** Module 02's FAQ records live in `courses/ml-foundations/module-02/assets/content.js` as `window.TR_M2.faq`. Module 01's established office-hours speech and UI are reused, with no new subscriptions or student API keys.
 
-**Question inbox:** Google Forms writes submissions from the three released modules to the same spreadsheet. [Form and response-sheet details](question-service/SETUP.md).
+**Question inbox:** Google Forms writes submissions from all 16 CS 483/583 modules to the same spreadsheet. [Form and response-sheet details](question-service/SETUP.md).
 
 
 ## PyTorch example consistency
@@ -85,7 +85,7 @@ Students derive a Gaussian loss gradient for Ava’s fictional observed score of
 
 ## Curriculum release check
 
-Run `python3 scripts/check_curriculum.py` before publishing a module. It compares the catalog with the course roadmap, stage cards, syllabus rows, and planned module descriptions. A mismatch identifies the module and field and returns a failing exit code. GitHub Actions also runs the check on pushes and pull requests.
+Run `python3 scripts/check_curriculum.py` before publishing a module. It compares the catalog with the course roadmap, stage cards, syllabus rows, and published module descriptions. A mismatch identifies the module and field and returns a failing exit code. GitHub Actions also runs the check on pushes and pull requests.
 
 ## Future modules
 
@@ -98,3 +98,5 @@ GitHub Pages: Repository → Settings → Pages → Deploy from a branch → mai
 In Blackboard, add https://kauroy1994.github.io/TeachReach/courses/ml-foundations/module-01/ as a web link for Module 01, or the top-level TeachReach URL for the full course portal.
 
 **Theme:** UA Crimson Flame #9E1B32, Capstone Gray #828A8F, white. Course activities use locally stored practice progress and privacy-conscious shared question registration.
+
+For CS 483/583 Modules 04–16, edit the lesson JSON under `courses/ml-foundations/content/` and the matching scripts under `labs/`. Run `python scripts/build_ml_lessons.py --execute` in a CPU PyTorch environment to refresh example outputs and publishable pages. Run `python scripts/site_navigation.py` after catalog changes.

@@ -15,6 +15,15 @@
       }
     } catch { /* Keep the home link visible in an external learning platform. */ }
   }
+  for (const link of document.querySelectorAll('a[href*=".ipynb"]')) {
+    const target = new URL(link.href, location.href);
+    if (target.origin === location.origin && target.pathname.endsWith(".ipynb")) {
+      link.setAttribute("download", "");
+    } else if (target.hostname === "colab.research.google.com") {
+      link.target = "_blank";
+      link.rel = "noopener";
+    }
+  }
   const query = document.getElementById("lesson-search");
   if (!query) return;
   const filter = document.getElementById("course-filter");

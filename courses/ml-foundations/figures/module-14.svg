@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 288" role="img" aria-labelledby="title desc" font-family="Arial, Helvetica, sans-serif">
+  <title id="title">When does the detour pay off?</title>
+  <desc id="desc">The short route gives two points immediately for every discount. The detour gives four points one step later, so its discounted return is four times gamma. The routes tie at gamma 0.5. At 0.25 short wins; at 0.75 detour wins.</desc>
+  <rect x="0" y="0" width="480" height="288" rx="12" fill="#FFFFFF" />
+  <text x="20" y="32" fill="#203346" font-size="23" text-anchor="start" font-weight="bold">When does the detour pay off?</text>
+  <line x1="26" y1="63" x2="51" y2="63" stroke="#006D71" stroke-width="4" stroke-dasharray="6 4" stroke-linecap="round" />
+  <text x="59" y="69" fill="#203346" font-size="17" text-anchor="start">Short · 2 now</text>
+  <line x1="219" y1="63" x2="246" y2="63" stroke="#9E1B32" stroke-width="4" stroke-linecap="round" />
+  <text x="255" y="69" fill="#203346" font-size="17" text-anchor="start">Detour · 4 later</text>
+  <line x1="72" y1="221" x2="422" y2="221" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="57" y="227" fill="#465B6D" font-size="16" text-anchor="end">0</text>
+  <line x1="72" y1="191" x2="422" y2="191" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="57" y="197" fill="#465B6D" font-size="16" text-anchor="end">1</text>
+  <line x1="72" y1="161" x2="422" y2="161" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="57" y="167" fill="#465B6D" font-size="16" text-anchor="end">2</text>
+  <line x1="72" y1="131" x2="422" y2="131" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="57" y="137" fill="#465B6D" font-size="16" text-anchor="end">3</text>
+  <line x1="72" y1="101" x2="422" y2="101" stroke="#D0DCE3" stroke-width="1.5" stroke-linecap="round" />
+  <text x="57" y="107" fill="#465B6D" font-size="16" text-anchor="end">4</text>
+  <line x1="72" y1="221" x2="72" y2="101" stroke="#465B6D" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="72" y1="161" x2="422" y2="161" stroke="#006D71" stroke-width="4" stroke-dasharray="7 5" stroke-linecap="round" />
+  <line x1="72" y1="221" x2="422" y2="101" stroke="#9E1B32" stroke-width="4" stroke-linecap="round" />
+  <circle cx="159.5" cy="191.0" r="5" fill="#9E1B32" />
+  <circle cx="247.0" cy="161.0" r="5" fill="#9E1B32" />
+  <circle cx="334.5" cy="131.0" r="5" fill="#9E1B32" />
+  <text x="255.0" y="185" fill="#203346" font-size="17" text-anchor="start" font-weight="bold">Tie</text>
+  <text x="72" y="244" fill="#465B6D" font-size="16" text-anchor="middle">0</text>
+  <text x="159.5" y="244" fill="#465B6D" font-size="16" text-anchor="middle">0.25</text>
+  <text x="247.0" y="244" fill="#465B6D" font-size="16" text-anchor="middle">0.5</text>
+  <text x="334.5" y="244" fill="#465B6D" font-size="16" text-anchor="middle">0.75</text>
+  <text x="422" y="244" fill="#465B6D" font-size="16" text-anchor="middle">1</text>
+  <text x="20" y="92" fill="#465B6D" font-size="16" text-anchor="start">Return</text>
+  <text x="245" y="275" fill="#203346" font-size="18" text-anchor="middle">Discount γ</text>
+</svg>

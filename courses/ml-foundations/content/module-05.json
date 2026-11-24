@@ -1,0 +1,138 @@
+{
+  "n": 5,
+  "opening": "Stage I compared two rules someone supplied. Now three training students give hours and exam scores. Can the records themselves determine the line? And how should the output change if the question becomes “Will a student reach a target score?”",
+  "recall": "Use the four fictional records from Module 04. For the regression example we choose a new split: train on (0,50), (1,56), (2,60), and reserve (3,66) for evaluation. Every numeric result below refers to that split unless a new dataset is introduced.",
+  "recallQ": "Would it be fair to adjust the slope after looking at the reserved score of 66 and still call that score a final test?",
+  "recallA": "The revised slope would depend on that score. Keep it hidden during fitting and evaluate the fixed line once.",
+  "lessons": [
+    {
+      "title": "Choose what the output means",
+      "explain": "In regression the target is a number, such as exam points. In binary classification the target is one of two categories. We encode those categories as 0 and 1. A classifier may first report a probability and then convert it into a decision.",
+      "worked": "With a target score of 60, the observed scores 50, 56 and 60 produce labels 0, 0 and 1. A score of exactly 60 qualifies because the rule includes equality.",
+      "notation": "y is a numerical target. t = 1[y ≥ 60] is a binary target. The brackets here return one when the condition is true and zero otherwise.",
+      "code": "scores = [50, 56, 60]\nlabels = [int(score >= 60) for score in scores]\nprint(labels)",
+      "q": "One student scored 61 and another 95. What difference disappears if we keep only these labels?",
+      "a": "Both labels are 1. The labels retain whether the threshold was reached but lose how far each score was above it.",
+      "out": "[0, 0, 1]"
+    },
+    {
+      "title": "Measure the fit of a line",
+      "explain": "The slope w controls the change in a prediction per extra hour. The intercept b controls the prediction at zero hours. For each training row, compare the observed score to the predicted score. The difference is called a residual.",
+      "worked": "Try w=5 and b=50. The predictions for 0, 1, 2 hours are 50, 55 and 60. The observed-minus-predicted residuals are 0, 1 and 0, so the sum of squares is 1.",
+      "notation": "ŷᵢ = b + wxᵢ. The residual eᵢ = yᵢ − ŷᵢ. Least squares chooses w,b to minimize Σᵢ eᵢ². Dividing the sum by the fixed row count leaves the minimizing parameters unchanged.",
+      "code": "import torch\nx = torch.tensor([0.,1.,2.])\ny = torch.tensor([50.,56.,60.])\nresidual = y - (50 + 5*x)\nprint(residual.tolist(), residual.square().sum().item())",
+      "q": "Increase just the intercept by one point. What happens to all three residuals?",
+      "a": "Each prediction rises by 1, so each observed-minus-predicted residual falls by 1. The residuals become −1, 0, −1.",
+      "out": "[0.0, 1.0, 0.0] 1.0"
+    },
+    {
+      "title": "Let the training points determine the slope",
+      "explain": "Centering means subtracting the average. For any proposed slope w, slide the line up or down until its average prediction equals the average observed score. This choice minimizes squared error at that slope: a higher or lower intercept adds a common offset to every residual. The line now crosses (x̄, ȳ), so b = ȳ − w x̄. We can solve for the remaining unknown w using the derivative from Module 03.",
+      "worked": "The mean hours are 1 and mean score is 166/3. Centered hours are −1,0,1. The sum of centered cross-products is 10. The sum of squared centered hours is 2. The fitted slope is 5 and the intercept is 151/3, approximately 50.33.",
+      "notation": "Let dᵢ=xᵢ−x̄ and eᵢ=yᵢ−ȳ. The centered sum is Σ(eᵢ−wdᵢ)². Its derivative is −2Σdᵢ(eᵢ−wdᵢ). Setting this to zero gives w=Σdᵢeᵢ/Σdᵢ² when the denominator is positive.",
+      "code": "import torch\nx = torch.tensor([0.,1.,2.], dtype=torch.float64)\ny = torch.tensor([50.,56.,60.], dtype=torch.float64)\ndx, dy = x-x.mean(), y-y.mean()\nw = (dx*dy).sum()/dx.square().sum()\nb = y.mean()-w*x.mean()\nprint(\"slope and intercept\", round(w.item(),3), round(b.item(),3))",
+      "q": "If all training students studied exactly one hour, which step would fail?",
+      "a": "Every centered hour would be zero. The slope denominator would be zero. Those data can estimate a mean at one hour but cannot independently determine slope and intercept.",
+      "out": "slope and intercept 5.0 50.333"
+    },
+    {
+      "title": "Connect squared error to Gaussian likelihood",
+      "explain": "Module 02 assigned a Gaussian distribution to a numerical score. Give each training student a Gaussian centered on the line’s prediction with the same known standard deviation. Under independent observations, maximizing the joint likelihood gives the same fitted line as least squares.",
+      "worked": "With σ=10, one residual of 2 contributes 2²/(2×10²)=0.02 to the parameter-dependent negative log-likelihood. A residual of 4 contributes 0.08. The constant normalization term is identical when comparing these lines.",
+      "notation": "NLL = n log(σ√(2π)) + Σᵢ (yᵢ−ŷᵢ)²/(2σ²). Here n counts observations, σ is the shared standard deviation and log is the natural logarithm.",
+      "code": "import math\nscores = [50,56,60]\nfor intercept in (50, 151/3):\n    errors = [y-(intercept+5*x) for x,y in enumerate(scores)]\n    sse = sum(e*e for e in errors)\n    nll = len(scores)*math.log(10*math.sqrt(2*math.pi))+sse/200\n    print(round(sse,5), round(nll,5))",
+      "q": "If students have different known standard deviations, should every squared error still count equally in the likelihood?",
+      "a": "No. Each error is divided by its own 2σᵢ². A more precise observation receives greater weight under that model.",
+      "out": "1 9.66957\n0.66667 9.6679"
+    },
+    {
+      "title": "Turn a numerical score into a probability",
+      "explain": "A line can produce any real number. To predict the probability of an event, pass a linear score z through the sigmoid function. This maps every finite score to a number between zero and one. A score of zero maps to one half.",
+      "worked": "Use z = −2 + x, where x counts hours. For one, two and three hours, z equals −1, 0 and 1. The sigmoid gives probabilities of about 0.269, 0.500 and 0.731. A threshold of 0.5 inclusive gives labels 0, 1 and 1. These coefficients describe a classifier and have different units from the exam-score line.",
+      "notation": "z=b+wx; p=σ(z)=1/(1+exp(−z)). Here σ names the sigmoid function. Earlier, σ denoted Gaussian spread. The surrounding formula tells you which meaning applies.",
+      "code": "import torch\nx = torch.tensor([1.,2.,3.])\np = torch.sigmoid(x-2)\nprint([round(v,3) for v in p.tolist()])\nprint((p >= 0.5).int().tolist())",
+      "q": "At a decision threshold of 0.8, which of these three students would be classified as reaching the target?",
+      "a": "None. The highest probability is about 0.731, below 0.8. Changing the threshold changes decisions while leaving the probabilities unchanged.",
+      "out": "[0.269, 0.5, 0.731]\n[0, 1, 1]"
+    },
+    {
+      "title": "Score a probability against an observed category",
+      "explain": "The probability of the observed event is p when the label is 1 and 1−p when it is 0. Taking the negative natural logarithm makes a confident, wrong prediction especially costly. Averaging this loss across binary labels gives binary cross-entropy.",
+      "worked": "If p=0.8 and the event occurs, loss is −log(0.8)≈0.223. If the event does not occur, loss is −log(0.2)≈1.609. The same forecast earns different losses because the outcomes differ.",
+      "notation": "ℓ(p,t)=−[t log p + (1−t) log(1−p)], with t equal to 0 or 1 and 0<p<1. Under independent Bernoulli outcomes, summing this loss gives the negative log-likelihood.",
+      "code": "import math\np = 0.8\nfor t in (1,0):\n    prob_observed = p if t == 1 else 1-p\n    print(t, round(-math.log(prob_observed),3))",
+      "q": "A classifier gives p=0.2 and observes t=0. Which probability enters the logarithm?",
+      "a": "The observed event is the zero class. Its probability is 1−0.2=0.8 and the loss is about 0.223.",
+      "out": "1 0.223\n0 1.609"
+    },
+    {
+      "title": "Estimate the parameters of a binary classifier",
+      "explain": "Use a second fictional training sample. At zero extra practice hours, one of four students reaches a target. At one extra hour, three of four do. For a shared probability within a group, the binary likelihood is largest at the observed fraction. With two input levels we can fit a sigmoid through both fractions.",
+      "worked": "The odds of success are p/(1−p). At zero hours the odds are 1/3, so b=log(1/3). At one hour the odds are 3, so b+w=log(3). Subtract to get w=2 log(3). That estimates a group association from these eight records.",
+      "notation": "log(p/(1−p)) = b+wx. The intercept b is the log-odds at x=0. A one-unit increase in x multiplies the fitted odds by exp(w). More input levels typically require a numerical fit.",
+      "code": "import math\nfrom collections import Counter\nrows = [(0,t) for t in [0,0,0,1]] + [(1,t) for t in [0,1,1,1]]\ntotal = Counter(x for x,t in rows)\nsuccess = Counter(x for x,t in rows if t == 1)\nlog_odds = [math.log(success[x]/(total[x]-success[x])) for x in (0,1)]\nb, w = log_odds[0], log_odds[1]-log_odds[0]\nprint(round(b,3), round(w,3), round(math.exp(w),3))",
+      "q": "The fitted odds grow by a factor of nine. Did the fitted probability also grow by a factor of nine?",
+      "a": "No. Probability rose from 0.25 to 0.75, a factor of three. Odds rose from 1/3 to 3, a factor of nine.",
+      "out": "-1.099 2.197 9.0"
+    },
+    {
+      "title": "Evaluate the quantity the task asks for",
+      "explain": "For a numerical score, report a typical error in score units. Mean absolute error averages absolute residuals. For binary decisions, accuracy counts correct labels. For probability forecasts, log loss also measures the confidence attached to each outcome.",
+      "worked": "The fitted regression line predicts 196/3≈65.33 at three hours. The held-out score is 66, giving absolute error 2/3 of a point. Separately, the four binary forecasts below get three thresholded labels correct. Their log loss includes the error on the fourth forecast.",
+      "notation": "MAE = (1/n) Σ|yᵢ−ŷᵢ|. Accuracy = number correct / n. Mean binary log loss averages −log(probability of the observed class).",
+      "code": "import math\nprint(\"held-out absolute error\", round(abs(66-(151/3+5*3)),3))\np = [0.2,0.4,0.7,0.8]\nlabels = [0,0,1,0]\ncorrect = sum(int(prob>=0.5)==t for prob,t in zip(p,labels))\nloss = sum(-math.log(prob if t else 1-prob) for prob,t in zip(p,labels))\nprint(\"accuracy, log loss\", correct/len(p), round(loss/len(p),3))",
+      "q": "Two classifiers make the same correct/incorrect decisions but one confidently predicts an event that fails to occur. Which metric can expose the difference?",
+      "a": "Accuracy is identical when the decisions match. Log loss accounts for the probability assigned to the outcome, so it can penalize the overconfident error more.",
+      "out": "held-out absolute error 0.667\naccuracy, log loss 0.75 0.675"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Fit a least-squares line to (0,2), (1,4), (2,6). Predict at 3.",
+      "hint": "Compute each mean, then the two sums for the slope.",
+      "a": "The means are 1 and 4. Centered cross-products sum to 4 and centered squared inputs sum to 2. Thus w=2, b=4−2×1=2 and ŷ(3)=8."
+    },
+    {
+      "q": "A new pair of observations has residuals 2 and −4 under a Gaussian with σ=2. Find the part of the joint NLL that depends on the predicted means.",
+      "hint": "Divide the sum of squares by twice the variance.",
+      "a": "The squared residuals sum to 20. Twice the variance is 8, so the contribution is 20/8=2.5, in addition to the normalization term."
+    },
+    {
+      "q": "A logistic model has b=−2, w=1 and x=2. What is p, what is the class at a threshold of 0.5 inclusive, and what is the loss if t=0?",
+      "hint": "Start with the linear score.",
+      "a": "z=0, so p=1/(1+1)=0.5. The inclusive threshold selects class 1. The observed zero has probability 0.5, giving loss −log(0.5)≈0.693."
+    },
+    {
+      "q": "A model gives p=0.9 and p=0.2 for two events. Both events happen. Compute average log loss and accuracy at 0.5.",
+      "hint": "Both labels are one, so use the supplied probabilities.",
+      "a": "Mean loss = [−log(0.9)−log(0.2)]/2 ≈ 0.857. Only the first probability reaches the decision threshold, giving accuracy 1/2."
+    },
+    {
+      "q": "For ten new students, nine miss the target. A model predicts that everyone misses. How would you report the result?",
+      "hint": "Find the errors specifically among those who reach the target.",
+      "a": "Accuracy is 9/10, but the model finds 0 of 1 students who reach the target. Include the counts and compare against the always-miss baseline. One positive example cannot establish reliable detection performance."
+    },
+    {
+      "q": "Why does a fitted slope of five score points per hour fail to prove that assigning an extra hour will raise each student’s score by five?",
+      "hint": "Which quantity did the regression fit?",
+      "a": "It fit the association between hours and scores in the observed records. Other differences among students can affect both. A claim about assigning hours needs an intervention design or explicit causal assumptions."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Where did least squares come from?",
+      "a": "Start with a prediction error measured in score points. Squaring gives a smooth penalty and prevents positive and negative misses from canceling. Module 02 adds a probabilistic reason: under independent Gaussian errors with common variance, maximizing the likelihood selects the line with the smallest sum of squares."
+    },
+    {
+      "q": "Does logistic regression predict a number or a class?",
+      "a": "It first predicts a probability between zero and one. A separate threshold converts that probability into a class when a decision is needed. Raising the threshold can change the class while leaving the fitted model untouched."
+    },
+    {
+      "q": "Why not treat a predicted probability as a guarantee?",
+      "a": "A probability summarizes a model’s uncertainty about a category. A forecast of 0.8 still assigns probability 0.2 to the opposite outcome. Repeated held-out cases reveal whether such probabilities are useful in the population of interest."
+    }
+  ],
+  "bridge": "Both fitted models use a straight line inside their formulas. Module 06 asks how a different choice of model changes the decision. A neighboring record, a tree split, or a wide gap between classes can each suggest a boundary.",
+  "bridgeQ": "Suppose students reach a target only in the middle of the observed hours range. Can a single increasing sigmoid with one threshold label that middle region alone?",
+  "bridgeA": "No. As hours increase, an increasing sigmoid crosses a fixed threshold at most once. Selecting only the middle needs a rule with two boundaries, such as a tree with two splits."
+}

@@ -1,0 +1,157 @@
+{
+  "n": 6,
+  "opening": "A thresholded logistic model draws one boundary along an hours axis. What if nearby students share labels only in small pockets? We will keep the prediction question fixed and change how the classifier uses its training records.",
+  "recall": "Module 05 separated a probability from a decision. Here the observed binary label again means that a student reached a fictional target. The aim is to compare rules for predicting that label on held-out students.",
+  "recallQ": "Two models label the same student 1. Does that tell us they used the same reasoning?",
+  "recallA": "No. A line may have crossed a threshold, a nearby student may have label 1, or the student may have reached a tree leaf whose majority label is 1. We need the rule and its evidence to explain the decision.",
+  "lessons": [
+    {
+      "title": "Locate the nearest labeled record",
+      "explain": "Think of each training student as a point whose position is the number of extra study hours. To predict a new student, one-nearest-neighbor classification copies the label of the closest training point. The target label of the new student is unknown at prediction time.",
+      "worked": "Use a fresh tiny training set with hours [0,1,2,3,4] and labels [0,0,1,0,1]. A student at 2.1 hours is 0.1 hour from the positive record at 2, and 0.9 hour from the negative record at 3. The closest record predicts 1.",
+      "notation": "For one numerical feature, d(x,u)=|x−u| measures the distance between query x and training input u. Distances are nonnegative and smaller means closer.",
+      "code": "rows = [(0,0),(1,0),(2,1),(3,0),(4,1)]\nquery = 2.1\nnear = sorted(rows,key=lambda row:(abs(query-row[0]),row[0]))\nprint(\"nearest input and label\", near[0])",
+      "q": "Which training point is closest to a new input of 2.8, and which label does it contribute?",
+      "a": "The point at 3 is 0.2 hour away. Its label is 0. The point at 2 is farther away at 0.8 hour.",
+      "out": "nearest input and label (2, 1)"
+    },
+    {
+      "title": "Let k neighbors vote",
+      "explain": "A single point can carry a noisy label. Increasing k asks more neighbors for votes. A large neighborhood smooths small variations, but it can also erase a genuinely local pattern. Choose k on validation data.",
+      "worked": "For the query at 2.1, the three closest inputs are 2, 3 and 1. Their labels are 1,0,0. One neighbor predicts 1 while three neighbors predict 0.",
+      "notation": "Nₖ(x) denotes the k nearest records. For binary labels, their vote fraction is (1/k) Σᵢ∈Nₖ(x) yᵢ. With odd k, more than half the votes selects class 1. Resolve equal-distance neighbors consistently.",
+      "code": "rows = [(0,0),(1,0),(2,1),(3,0),(4,1)]\nranked = sorted(rows,key=lambda row:(abs(2.1-row[0]),row[0]))\nfor k in (1,3,5):\n    votes = [label for _,label in ranked[:k]]\n    print(k, votes, int(sum(votes)>k/2))",
+      "q": "With k equal to the full training set size, how much does the query location affect a majority prediction?",
+      "a": "It has no effect. Every query receives votes from the entire training set, giving its overall majority label.",
+      "out": "1 [1] 1\n3 [1, 0, 0] 0\n5 [1, 0, 0, 1, 0] 0"
+    },
+    {
+      "title": "Decide what distance should measure",
+      "explain": "The Euclidean distance between two points uses each feature’s difference, squares those differences, adds them, then takes the square root. Combining raw features with different units implicitly weights them. State what counts as a comparable change.",
+      "worked": "A query is (2 hours,4 exercises). A is (1,4), B is (2,2). In raw units their distances are 1 and 2. Express hours in minutes and the same distances become 60 and 2. A unit change alone would reverse the neighbor. In PyTorch, subtract the query from each candidate row, then take a vector norm across its two columns. This gives one distance per row.",
+      "notation": "d(x,u)=√Σⱼ(xⱼ−uⱼ)²; j visits each feature. Dividing a difference by a training-derived scale sⱼ expresses it in units of that scale. A feature with zero spread requires separate handling.",
+      "code": "import torch\nquery = torch.tensor([2., 4.])\ncandidates = torch.tensor([[1., 4.], [2., 2.]])\ndifferences = candidates - query\nprint(\"hours and exercises\", torch.linalg.vector_norm(differences, dim=1).tolist())\nscaled = differences * torch.tensor([60., 1.])\nprint(\"minutes and exercises\", torch.linalg.vector_norm(scaled, dim=1).tolist())",
+      "q": "If you standardize by the training spread of each feature, should the test set help calculate those spreads?",
+      "a": "Fit the scales on training data and reuse those values for validation, test and future students. Using the held-out feature distributions to set the scales changes the rule using evaluation information.",
+      "out": "hours and exercises [1.0, 2.0]\nminutes and exercises [60.0, 2.0]"
+    },
+    {
+      "title": "Use a question to divide the records",
+      "explain": "A decision tree sends each case down a sequence of tests. A terminal group is a leaf. A classifier can predict the majority label among training cases in its leaf. To find a useful split, compare how mixed the groups are before and after the question.",
+      "worked": "On a separate clean sample (0,0), (1,0), (3,1), (4,1), ask whether hours are below 2. The left leaf has labels 0,0 and the right has 1,1. A new student with 2.1 hours takes the right branch.",
+      "notation": "Let t be a split threshold. Left if x<t and right otherwise. A tree of depth one, often called a stump, asks one question on the path to a prediction.",
+      "code": "rows = [(0,0),(1,0),(3,1),(4,1)]\nleaves = [[y for x,y in rows if x<2],[y for x,y in rows if x>=2]]\nquery = 2.1\nleaf = leaves[int(query>=2)]\nprint(leaves, int(sum(leaf)>len(leaf)/2))",
+      "q": "At this particular split, where does a student with exactly 2 hours go?",
+      "a": "To the right leaf. The left condition is strictly below 2, so the equality case follows the other branch.",
+      "out": "[[0, 0], [1, 1]] 1"
+    },
+    {
+      "title": "Measure the information gained by splitting",
+      "explain": "Entropy is a number describing how mixed a group of labels is. A group containing only one label has entropy zero. A group split evenly between two labels has entropy one bit. A good split reduces the average child entropy, counting each child in proportion to its size.",
+      "worked": "The clean four-row group has entropy 1. Splitting below 2 produces two pure children, so the gain is 1 bit. Splitting below 0.5 makes one pure child of size one and a mixed child of size three. That gain is about 0.311 bits.",
+      "notation": "H(S)=−Σc p(c) log₂ p(c), where p(c) is a class fraction in group S and zero fractions contribute zero. Gain = H(parent) − Σchild [size(child)/size(parent)] H(child).",
+      "code": "from math import log2\nrows = [(0,0),(1,0),(3,1),(4,1)]\ndef entropy(labels):\n    ps = [labels.count(c)/len(labels) for c in set(labels)]\n    return -sum(p*log2(p) for p in ps)\nfor t in (0.5,2):\n    groups = [[y for x,y in rows if x<t],[y for x,y in rows if x>=t]]\n    after = sum(len(group)/len(rows)*entropy(group) for group in groups)\n    print(t, round(entropy([y for x,y in rows])-after,3))",
+      "q": "A split divides records into equal-sized groups, each with half positive and half negative labels. What is its information gain?",
+      "a": "The parent and both children have entropy 1 bit. Their weighted average stays 1 and the gain is zero.",
+      "out": "0.5 0.311\n2 1.0"
+    },
+    {
+      "title": "Choose a boundary with room on both sides",
+      "explain": "A support-vector machine can seek a linear boundary with the widest separation from the closest training points. Start with two separable classes on a line. Every threshold strictly between 1 and 3 separates our clean sample. Which leaves the most space around the boundary?",
+      "worked": "At threshold 1.5, the gaps to the closest opposite-class points are 0.5 and 1.5 hours. The smaller gap is 0.5. At 2, both gaps are 1. The points at 1 and 3 support the widest boundary.",
+      "notation": "In this one-dimensional separable example, margin(t)=min(t−1,3−t) for 1<t<3. The hard-margin separator maximizes this smaller distance. In more dimensions the distance is perpendicular to the separating plane.",
+      "code": "left, right = 1, 3\nfor threshold in (1.5,2.0,2.5):\n    gap = min(threshold-left, right-threshold)\n    print(threshold, gap)\nprint(\"midpoint\", (left+right)/2)",
+      "q": "Add a negative point at 1.8 without changing the other points. Where does the maximum-margin threshold move?",
+      "a": "The nearest negative and positive points across the gap are now 1.8 and 3. Their midpoint is 2.4. The margin becomes 0.6 hour.",
+      "out": "1.5 0.5\n2.0 1.0\n2.5 0.5\nmidpoint 2.0"
+    },
+    {
+      "title": "What happens when no straight threshold works?",
+      "explain": "A single threshold along hours cannot isolate a positive point surrounded by negatives. A soft-margin support-vector machine allows a penalty on points that fall inside the margin or on the wrong side. Encode a positive label as +1 and a negative label as −1. Multiply the label by the model’s score. A large positive product means the point lies well inside its correct side.",
+      "worked": "For hours 0, 1 and 2, the labels are negative, positive and negative. Try the score x − 1.5. Multiplying each score by its signed label gives 1.5, −0.5 and −0.5. The first point clears a margin of 1. The other two fall short by 1.5 each. A tree can represent a different pattern by labeling just the interval [0.5, 1.5) positive.",
+      "notation": "For a score f(x) = wx + b and signed label y, hinge loss is max(0, 1 − y f(x)). A linear soft-margin SVM can minimize ½‖w‖² + C Σᵢ max(0, 1 − yᵢ f(xᵢ)). C > 0 sets the cost of violations. The first term favors a wider margin when the constraints are satisfied.",
+      "code": "import torch\nhours = torch.tensor([0., 1., 2.])\nsigned_labels = torch.tensor([-1., 1., -1.])\nscores = hours - 1.5\nsigned_scores = signed_labels * scores\nhinge = (1 - signed_scores).clamp_min(0)\nprint(\"signed scores\", signed_scores.tolist())\nprint(\"hinge penalties\", hinge.tolist())\ntree = (hours >= 0.5) & (hours < 1.5)\nprint(\"tree classes\", tree.int().tolist())",
+      "q": "Does the tree’s perfect score on these three training cases prove that it will beat a single threshold on future students?",
+      "a": "No. The middle island might be a real pattern or a noisy label. Use validation cases to choose complexity and an untouched test set to assess the choice.",
+      "out": "signed scores [1.5, -0.5, -0.5]\nhinge penalties [0.0, 1.5, 1.5]\ntree classes [0, 1, 0]"
+    },
+    {
+      "title": "Combine predictions and inspect disagreements",
+      "explain": "An ensemble combines several fitted models. Majority voting gives one vote to each. Bagging trains members on resampled training records and averages their predictions or votes. In boosting, members are trained sequentially so later members address earlier errors; their contributions can carry different weights.",
+      "worked": "On three held-out students, suppose a neighbor rule, a stump and a margin rule predict [1,0,1], [1,1,0] and [0,0,0]. The three majorities are 1,0,0. Compare those to the true held-out labels [1,0,1]. The last two members agree on a wrong answer for the last student.",
+      "notation": "For J binary votes hⱼ(x), the positive fraction is Σⱼ hⱼ(x)/J. A weighted vote uses Σⱼ αⱼ hⱼ(x)/Σⱼ αⱼ, with positive weights αⱼ. A voting fraction alone need not be a calibrated probability.",
+      "code": "members = [[1,0,1], [1,1,0], [0,0,0]]\ntruth = [1,0,1]\nvotes = [int(sum(column)>len(column)/2) for column in zip(*members)]\nprint(\"majority\",votes)\nfor name, pred in [(\"neighbor\",members[0]),(\"ensemble\",votes)]:\n    print(name, sum(p==y for p,y in zip(pred,truth)), \"of\",len(truth))",
+      "q": "Can three copies of a classifier repair the same wrong prediction through majority voting?",
+      "a": "All three votes are identical. Their majority repeats the original error. Ensembles can benefit when members make different errors, but improvement needs to be measured.",
+      "out": "majority [1, 0, 0]\nneighbor 3 of 3\nensemble 2 of 3"
+    },
+    {
+      "title": "Choose between rules on fresh cases",
+      "explain": "A useful comparison gives every candidate the same training inputs and the same evaluation cases. Make explicit which behavior each assumes. Neighbors favor local agreement, a tree partitions feature ranges, and a linear SVM favors a margin. A validation win helps choose a model; a final test estimates the chosen model’s performance.",
+      "worked": "Fit a one-neighbor classifier to the five-row noisy sample. Compare it with a candidate stump that splits at 1.5, with majority prediction in either leaf. On two validation inputs, 1.8 and 3.1, the rules disagree on the second case. Comparing predictions row by row tells us how the totals arose.",
+      "notation": "Accuracy = correct predictions / number of cases. State the sample size along with the fraction. Two validation records provide a worked comparison with substantial uncertainty.",
+      "code": "train = [(0,0),(1,0),(2,1),(3,0),(4,1)]\nvalidation = [(1.8,1),(3.1,0)]\nfor x,y in validation:\n    neighbor = min(train,key=lambda row:(abs(row[0]-x),row[0]))[1]\n    leaf = [v for u,v in train if (u<1.5)==(x<1.5)]\n    stump = int(sum(leaf)>len(leaf)/2)\n    print(\"hours, observed, neighbor, stump:\",x,y,neighbor,stump)",
+      "q": "Suppose next term’s file contains only hours and exercise counts, with no scores. Which step of this supervised comparison becomes impossible?",
+      "a": "You can still compute distances and obtain a fitted classifier’s predictions. Without true labels, you cannot count correct predictions. The next module uses the geometry of those inputs to ask different questions.",
+      "out": "hours, observed, neighbor, stump: 1.8 1 1 1\nhours, observed, neighbor, stump: 3.1 0 0 1"
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Training hours 0, 2 and 3 have labels 0, 1 and 0. Predict at 2.2 for k=1 and k=3.",
+      "hint": "Sort by distance, then count votes.",
+      "a": "Distances to 2, 3 and 0 are 0.2, 0.8 and 2.2. One neighbor predicts 1. All three vote [1,0,0], giving class 0."
+    },
+    {
+      "q": "A parent has labels [0,0,1,1]. One split gives children [0,1] and [0,1]. Another gives [0,0] and [1,1]. Compute both gains.",
+      "hint": "An evenly mixed binary group has one bit of entropy and a pure group has zero.",
+      "a": "The mixed split keeps one bit after weighting the two equal groups, so gain=0. The pure split leaves zero bits, so gain=1. Choose the second by this criterion."
+    },
+    {
+      "q": "Negatives occur at 0 and 2 and positives at 6 and 8. Find the maximum-margin threshold and name the support points.",
+      "hint": "Use the nearest opposite-class points facing one another.",
+      "a": "The support points are 2 and 6. Their midpoint is 4, giving a distance of 2 to the nearest point on either side."
+    },
+    {
+      "q": "Three models vote [0,1,1] on a student. Now give the first classifier weight 3 and each of the others weight 1. Compare the decisions.",
+      "hint": "Add the total vote weight for each class.",
+      "a": "Equal voting gives class 1 by two votes to one. The weighted vote gives class 0, weight 3 against weight 2. Choose weights using training or validation evidence."
+    },
+    {
+      "q": "A tree with one leaf per training example fits all labels. A shallower tree makes two training errors. What else would you need to choose?",
+      "hint": "Use the split roles from Module 04.",
+      "a": "Compare both on independent validation cases with the metric chosen for the task. Extra leaves can capture a genuine exception or memorize noise. Once selected, report performance on untouched test data."
+    },
+    {
+      "q": "Why can converting just one feature from hours to minutes change kNN more dramatically than it changes a tree split on that feature?",
+      "hint": "Compare a distance formula with an ordered threshold.",
+      "a": "Scaling one feature changes its contribution to a multi-feature Euclidean distance and may change neighbor order. A tree split based on an ordered threshold can select exactly the same partition by converting that threshold to minutes."
+    },
+    {
+      "q": "A positive example has signed label +1 and receives score 0.4. Which side does the classifier choose, and what hinge loss does this point contribute?",
+      "hint": "Read the sign of the score first. Then compare label × score with the margin requirement of 1.",
+      "a": "The positive score gives the correct class. Its signed score is 0.4, so the hinge loss is max(0, 1 − 0.4) = 0.6. A correctly classified point can still lie inside the margin."
+    }
+  ],
+  "faq": [
+    {
+      "q": "How can kNN learn if there are no weights to fit?",
+      "a": "It retains labeled training examples and a distance rule. At prediction time their locations and labels determine the votes. The examples themselves affect every new decision, while choices such as scaling and k determine what neighborhood means."
+    },
+    {
+      "q": "What does a support vector contribute?",
+      "a": "In the clean one-dimensional example, the negative point at 1 and the positive point at 3 constrain how far a separating threshold can sit from either class. Moving either can move the midpoint. Removing a distant point at 0 leaves these two constraints intact."
+    },
+    {
+      "q": "Should an ensemble always be more accurate?",
+      "a": "No. Its members may repeat the same mistake or outvote the most accurate member. On the lesson’s three held-out examples, the neighbor alone gets all three right and the ensemble gets two. Examine agreement and errors on independent data."
+    },
+    {
+      "q": "How do I compare a tree and a neighbor model fairly?",
+      "a": "Give them the same training/validation/test split. Select the depth or neighbor count with validation cases, fit preprocessing using training data and evaluate the chosen procedure with the same held-out targets and metric."
+    }
+  ],
+  "bridge": "We used distances to make predictions by borrowing labels from neighbors. Module 07 keeps the distances but takes away the labels. Which students form groups, and which direction captures most of the variation in their records?",
+  "bridgeQ": "If a spreadsheet loses its target column, can we still identify which two students are closest? Can we still check their predicted labels for correctness?",
+  "bridgeA": "We can compute closeness from the input features once we choose scales and a distance. Scoring a label prediction requires the missing targets. Clustering uses the first kind of information to organize inputs."
+}

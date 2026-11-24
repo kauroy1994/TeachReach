@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#9e1b32"><title>CS 483/583 · Module 08 · Neural Networks and Backpropagation · office</title><link rel="stylesheet" href="../assets/curriculum.css"><link rel="stylesheet" href="../../neurosymbolic-ai/assets/course.css"><link rel="stylesheet" href="../assets/ml-lessons.css"><script defer src="../../neurosymbolic-ai/assets/learning.js"></script><link rel="stylesheet" href="../../../assets/navigation.css"><script defer src="../../../assets/navigation.js"></script></head><body data-tr-module="08" class="tr-curriculum nesy ml-lesson "><nav id="tr-global-nav" aria-label="TeachReach navigation"><a target="_top" href="../../../index.html">TeachReach Home</a><a target="_top" href="../../../navigate.html">Find a lesson</a><a target="_top" href="../index.html">CS 483/583</a><a target="_top" href="index.html">Module 08</a></nav><a class="skip" href="#main">Skip to content</a><header class="resource-bar"><div class="title"><small>TeachReach · CS 483/583 · Module 08</small>Neural Networks and Backpropagation</div><a class="" href="index.html#office">← Module 08</a><button type="button" class="tr-cta outline" data-full>Full screen</button></header><main id="main" class="resource-body"><div class="portrait"><img src="../module-01/assets/professor_portrait.png" alt="Professor Kaushik Roy"><div><span class="tr-eyebrow">CS 483/583 · Module 08</span><h1>Virtual office hours</h1></div></div><label for="faq-search">Search this FAQ </label><input id="faq-search" type="search"><details data-faq id="faq-1"><summary>How can a hidden unit learn if there is no label for it?</summary><p>The prediction loss depends on the hidden value. The chain rule measures how changing the hidden unit’s weight changes that final loss. Updating the weight lets the final label guide the intermediate feature.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-1">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Trace a gradient back to the first weight</h3><p>Start with the prediction error −0.5. A one-unit change in h changes ŷ at rate v=1.5. A change in a passes through the active ReLU at rate 1. Increasing w changes a at rate x=2. Multiplying gives the loss gradient −1.5 for w.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code>import torch
+w = torch.tensor(0.5,requires_grad=True)
+x = torch.tensor(2.)
+h = torch.relu(w*x)
+loss = (1.5*h-2)**2 / 2
+loss.backward()
+print(&quot;hand:&quot;, -0.5*1.5*1*2)
+print(&quot;autograd:&quot;, w.grad.item())</code></pre></div><details><summary>Reveal the output</summary><pre class="output">hand: -1.5
+autograd: -1.5</pre></details><h3>Check your understanding</h3><p>Why does the hidden weight receive a zero gradient from an example whose pre-activation is −2?</p><details><summary>Reveal answer</summary><p>Small changes in that pre-activation keep the hidden output at zero. The zero local slope multiplies the other factors on this path.</p></details><a class="" href="slides.html#6">Open the lesson</a></details></details><details data-faq id="faq-2"><summary>What does backward() actually change?</summary><p>It traverses the recorded computation and accumulates derivatives in each trainable parameter’s .grad field. An optimizer step changes the parameter values. Clearing old gradients before the next batch prevents accidental accumulation across updates.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-2">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Make an update and test the new loss</h3><p>With learning rate 0.1, w becomes 0.5−0.1×(−1.5)=0.65. The prediction becomes 1.95 and the loss becomes 0.00125. Check the actual loss after the change, especially if the step size is large.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code>import torch
+w = torch.tensor(0.5,requires_grad=True)
+def objective(weight):
+    prediction = 1.5*torch.relu(2*weight)
+    return (prediction-2)**2 / 2
+before = objective(w)
+before.backward()
+with torch.no_grad():
+    w -= 0.1*w.grad
+print(&quot;w:&quot;,round(w.item(),3))
+print(&quot;loss:&quot;,round(before.item(),5),&quot;to&quot;,round(objective(w).item(),5))</code></pre></div><details><summary>Reveal the output</summary><pre class="output">w: 0.65
+loss: 0.125 to 0.00125</pre></details><h3>Check your understanding</h3><p>What happens for the same example if η=1 instead of 0.1?</p><details><summary>Reveal answer</summary><p>w jumps to 2. The prediction becomes 6 and the loss becomes (6−2)²/2=8. A direction that helps for a small move can overshoot for a large one.</p></details><a class="" href="slides.html#7">Open the lesson</a></details></details><details data-faq id="faq-3"><summary>Does a ReLU output of zero mean the entire network has stopped learning?</summary><p>A single inactive unit supplies zero input-weight gradient from that example along that path. Other examples may activate it. Other units or the output bias can receive gradients from the same example.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-3">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Put a switch after a weighted sum</h3><p>Use the signed study difference as input. With weight 1 and bias 0, Bo at +1 produces a ReLU output of 1 and Ava at −1 produces 0. With bias −1, a positive output requires a reading surplus greater than 1 hour.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code>import torch
+x = torch.tensor([-1.,0.,1.,2.])
+a = x-1
+print(&quot;before activation:&quot;,a.tolist())
+print(&quot;step:&quot;,(a&gt;0).int().tolist())
+print(&quot;ReLU:&quot;,torch.relu(a).tolist())</code></pre></div><details><summary>Reveal the output</summary><pre class="output">before activation: [-2.0, -1.0, 0.0, 1.0]
+step: [0, 0, 0, 1]
+ReLU: [0.0, 0.0, 0.0, 1.0]</pre></details><h3>Check your understanding</h3><p>For x=3, w=2 and b=−4, what do the step and ReLU units return?</p><details><summary>Reveal answer</summary><p>The weighted sum is 2×3−4=2. The step returns 1 under our strict-positive threshold. ReLU returns 2.</p></details><a class="" href="slides.html#3">Open the lesson</a></details></details><details data-faq id="faq-4"><summary>Why use a known formula as the target when we could just calculate it?</summary><p>A known target lets us separate what the model family can express from ambiguity in labels. We can verify every prediction and locate a limitation of a straight line. Real applications require a separate reason to estimate an unknown rule from examples.</p><div class="controls"><button type="button" class="tr-cta outline" data-listen>Listen</button><button type="button" class="tr-cta outline" data-stop>Stop</button><a class="" href="#faq-4">Link to this answer</a></div><details><summary>Work through an example</summary><h3>Train and compare on the same held-out inputs</h3><p>Both models see the signed differences −2, −1, 0, 1, and 2 during training. Both receive the same held-out differences −1.5, −0.5, 0.5, 1.5 at evaluation. The targets follow the same known absolute-value rule on both sets. Inspect every prediction as well as the average error. The final four lines show which hidden unit responds on each side of zero.</p><div class="codebox"><button type="button" data-copy>Copy code</button><pre><code>import torch
+from torch import nn
+train_x = torch.tensor([[-2.],[-1.],[0.],[1.],[2.]])
+test_x = torch.tensor([[-1.5],[-0.5],[0.5],[1.5]])
+line = nn.Linear(1,1)
+net = nn.Sequential(nn.Linear(1,2,bias=False),nn.ReLU(),
+                    nn.Linear(2,1,bias=False))
+with torch.no_grad():
+    line.weight.zero_()
+    line.bias.zero_()
+    net[0].weight.copy_(torch.tensor([[0.6],[-0.3]]))
+    net[2].weight.fill_(0.6)
+for name, model in [(&quot;line&quot;,line),(&quot;network&quot;,net)]:
+    optimizer = torch.optim.SGD(model.parameters(),lr=0.1)
+    for step in range(120):
+        optimizer.zero_grad()
+        loss = ((model(train_x)-train_x.abs())**2).mean()
+        loss.backward()
+        optimizer.step()
+    with torch.no_grad():
+        pred = model(test_x)
+        print(name,&quot;predictions:&quot;, [round(y.item(),3) for y in pred.flatten()])
+        print(&quot;test MSE (4 decimals):&quot;,round(((pred-test_x.abs())**2).mean().item(),4))
+        if name == &quot;network&quot;:
+            hidden = model[:2](test_x)
+            for x_row, h_row in zip(test_x, hidden):
+                print(&quot;x&quot;, x_row.item(), &quot;hidden&quot;, [round(v, 3) for v in h_row.tolist()])</code></pre></div><details><summary>Reveal the output</summary><pre class="output">line predictions: [1.2, 1.2, 1.2, 1.2]
+test MSE (4 decimals): 0.29
+network predictions: [1.5, 0.5, 0.5, 1.5]
+test MSE (4 decimals): 0.0
+x -1.5 hidden [0.0, 1.411]
+x -0.5 hidden [0.0, 0.47]
+x 0.5 hidden [0.5, 0.0]
+x 1.5 hidden [1.5, 0.0]</pre></details><h3>Check your understanding</h3><p>A classmate trains on the four test labels too and reports an improvement on those same four. Which part of the comparison breaks?</p><details><summary>Reveal answer</summary><p>Those four labels now helped choose the parameters. Reserve fresh independent records to measure performance on examples the training procedure has not seen.</p></details><a class="" href="slides.html#8">Open the lesson</a></details></details><p id="no-faq" hidden>No matching question. Try another phrase or ask below.</p><a class="tr-cta outline" href="index.html#question">Ask a question</a></main></body></html>

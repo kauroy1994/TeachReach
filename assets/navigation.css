@@ -19,4 +19,7 @@ body.tr-slide-page .deck{height:calc(100dvh - var(--tr-nav-height))!important}
 .lesson-directory h4{margin:0 0 .35rem;font-size:1.06rem}
 .lesson-directory a{color:#7b1b32;text-decoration:underline;text-underline-offset:.15em}
 .lesson-directory .destinations a{font-size:.88rem;padding:.2rem .35rem}
-@media(max-width:420px){#tr-global-nav{font-size:12px}}
+@media(max-width:420px){
+  #tr-global-nav{font-size:12px;gap:2px;padding-inline:4px}
+  #tr-global-nav a{min-width:0;flex-shrink:1;padding-inline:4px;white-space:normal}
+}

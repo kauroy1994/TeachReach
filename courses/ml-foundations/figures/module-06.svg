@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 480 270">
+<title id="title">Two thresholds between negative and positive records</title><desc id="desc">With negative records at zero and one hour and positives at three and four, the smaller gap grows from 0.5 hour at threshold 1.5 to one hour at threshold 2.</desc>
+<rect width="480" height="270" rx="14" fill="#fff"/>
+<g font-family="system-ui, sans-serif">
+<text x="16" y="31" fill="#213647" font-size="21" font-weight="700" text-anchor="start">How much room does a boundary leave?</text>
+<circle cx="23" cy="47" r="5" fill="#006d74"/><text x="34" y="52" font-size="15" fill="#213647">Negative</text><rect x="124" y="42" width="10" height="10" fill="#213647"/><text x="142" y="52" font-size="15" fill="#213647">Positive</text>
+<text x="16" y="67" fill="#213647" font-size="18" font-weight="700" text-anchor="start">Candidate</text>
+<text x="462" y="67" fill="#9e1b32" font-size="17" font-weight="700" text-anchor="end">t = 1.5 h</text>
+<line x1="46.00" y1="91.00" x2="426.00" y2="91.00" stroke="#546676" stroke-width="2"/>
+<circle cx="56.00" cy="91.00" r="7" fill="#006d74" stroke="white" stroke-width="2"/>
+<circle cx="146.00" cy="91.00" r="7" fill="#006d74" stroke="white" stroke-width="2"/>
+<rect x="320" y="85" width="12" height="12" fill="#213647"/>
+<rect x="410" y="85" width="12" height="12" fill="#213647"/>
+<line x1="191.00" y1="75.00" x2="191.00" y2="106.00" stroke="#9e1b32" stroke-width="3"/>
+<line x1="146.00" y1="105.00" x2="191.00" y2="105.00" stroke="#9e1b32" stroke-width="2"/>
+<line x1="191.00" y1="105.00" x2="326.00" y2="105.00" stroke="#006d74" stroke-width="2"/>
+<text x="168.5" y="126" fill="#9e1b32" font-size="16" font-weight="700" text-anchor="middle">0.5 h</text>
+<text x="258.5" y="126" fill="#006d74" font-size="16" font-weight="700" text-anchor="middle">1.5 h</text>
+<text x="16" y="170" fill="#213647" font-size="18" font-weight="700" text-anchor="start">Widest margin</text>
+<text x="462" y="170" fill="#9e1b32" font-size="17" font-weight="700" text-anchor="end">t = 2 h</text>
+<line x1="46.00" y1="194.00" x2="426.00" y2="194.00" stroke="#546676" stroke-width="2"/>
+<circle cx="56.00" cy="194.00" r="7" fill="#006d74" stroke="white" stroke-width="2"/>
+<circle cx="146.00" cy="194.00" r="7" fill="#006d74" stroke="white" stroke-width="2"/>
+<rect x="320" y="188" width="12" height="12" fill="#213647"/>
+<rect x="410" y="188" width="12" height="12" fill="#213647"/>
+<line x1="236.00" y1="178.00" x2="236.00" y2="209.00" stroke="#9e1b32" stroke-width="3"/>
+<line x1="146.00" y1="208.00" x2="236.00" y2="208.00" stroke="#9e1b32" stroke-width="2"/>
+<line x1="236.00" y1="208.00" x2="326.00" y2="208.00" stroke="#006d74" stroke-width="2"/>
+<text x="191.0" y="229" fill="#9e1b32" font-size="16" font-weight="700" text-anchor="middle">1 h</text>
+<text x="281.0" y="229" fill="#006d74" font-size="16" font-weight="700" text-anchor="middle">1 h</text>
+<text x="56" y="254" fill="#546676" font-size="16" font-weight="500" text-anchor="middle">0 h</text>
+<text x="146" y="254" fill="#546676" font-size="16" font-weight="500" text-anchor="middle">1 h</text>
+<text x="326" y="254" fill="#546676" font-size="16" font-weight="500" text-anchor="middle">3 h</text>
+<text x="416" y="254" fill="#546676" font-size="16" font-weight="500" text-anchor="middle">4 h</text>
+<text x="236" y="254" fill="#546676" font-size="16" text-anchor="middle">2 h</text>
+</g>
+</svg>

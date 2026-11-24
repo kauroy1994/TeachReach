@@ -650,7 +650,7 @@ window.TR_M3 ={
       "question": "Why do the two weights get different gradients?",
       "answer": "The same mean slope reaches both weights. Ava’s two hours multiply the first weight and her three practice sets multiply the second. Each local multiplier scales the slope.",
       "formal": "∇w L = −0.05 [2, 3]",
-      "code": "print(-0.05 * torch.tensor([2., 3.]))",
+      "code": "import torch\n\nfeatures = torch.tensor([2., 3.])\nprint(\"weight gradients:\", -0.05 * features)",
       "check": "What gradient would an unused feature with value zero receive?",
       "topic": "Chain rule",
       "checkAnswer": "Zero for that weight on this example. The mean slope is multiplied by the feature value, and that value is zero."
@@ -680,7 +680,7 @@ window.TR_M3 ={
       "question": "Why call backward before updating the weights?",
       "answer": "All three derivatives belong to the original forward pass. PyTorch evaluates them on that graph, then the model uses them together in one descent step.",
       "formal": "θ′ = θ − η∇L(θ)",
-      "code": "loss.backward()\nwith torch.no_grad():\n    w -= eta * w.grad\n    b -= eta * b.grad",
+      "code": "import torch\n\nx = torch.tensor([2., 3.])\nw = torch.tensor([10., 5.], requires_grad=True)\nb = torch.tensor(20., requires_grad=True)\nmodel = torch.distributions.Normal(x @ w + b, 10.)\nloss = -model.log_prob(torch.tensor(60.))\nloss.backward()\nprint(\"weight gradients:\", w.grad, \"bias gradient:\", b.grad.item())\nwith torch.no_grad():\n    w -= 1.0 * w.grad\n    b -= 1.0 * b.grad\nprint(\"updated mean:\", (x @ w + b).item())",
       "check": "Why should a second training step compute a fresh loss?",
       "topic": "Autograd",
       "checkAnswer": "The updated parameters give a new mean and therefore a new slope. Run another forward pass to compute the gradient at the new parameters."

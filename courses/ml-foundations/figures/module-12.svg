@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 288" role="img" aria-labelledby="title desc" font-family="Arial, Helvetica, sans-serif">
+  <title id="title">Keep only the two likeliest tokens</title>
+  <desc id="desc">Original probabilities for desk, door and shelf are 0.600, 0.300 and 0.100. With top-k sampling at k=2 they become 0.667, 0.333 and 0.</desc>
+  <rect x="0" y="0" width="480" height="288" rx="12" fill="#FFFFFF" />
+  <text x="20" y="32" fill="#203346" font-size="23" text-anchor="start" font-weight="bold">Keep only the two likeliest tokens</text>
+  <rect x="30.0" y="56.0" width="12" height="12" fill="#006D71" />
+  <text x="49" y="68" fill="#203346" font-size="17" text-anchor="start">All tokens</text>
+  <rect x="177.0" y="56.0" width="12" height="12" fill="#9E1B32" />
+  <text x="197" y="68" fill="#203346" font-size="17" text-anchor="start">Top two</text>
+  <text x="73" y="113" fill="#203346" font-size="18" text-anchor="end" font-weight="bold">desk</text>
+  <rect x="91" y="97" width="265.2" height="12" rx="2" fill="#006D71" />
+  <text x="364.2" y="109" fill="#006D71" font-size="16" text-anchor="start" font-weight="bold">0.600</text>
+  <rect x="91" y="115" width="294.66666666666663" height="12" rx="2" fill="#9E1B32" />
+  <text x="393.66666666666663" y="127" fill="#9E1B32" font-size="16" text-anchor="start" font-weight="bold">0.667</text>
+  <text x="73" y="170" fill="#203346" font-size="18" text-anchor="end" font-weight="bold">door</text>
+  <rect x="91" y="154" width="132.6" height="12" rx="2" fill="#006D71" />
+  <text x="231.6" y="166" fill="#006D71" font-size="16" text-anchor="start" font-weight="bold">0.300</text>
+  <rect x="91" y="172" width="147.33333333333331" height="12" rx="2" fill="#9E1B32" />
+  <text x="246.33333333333331" y="184" fill="#9E1B32" font-size="16" text-anchor="start" font-weight="bold">0.333</text>
+  <text x="73" y="227" fill="#203346" font-size="18" text-anchor="end" font-weight="bold">shelf</text>
+  <rect x="91" y="211" width="44.2" height="12" rx="2" fill="#006D71" />
+  <text x="143.2" y="223" fill="#006D71" font-size="16" text-anchor="start" font-weight="bold">0.100</text>
+  <circle cx="91" cy="235" r="3" fill="#9E1B32" />
+  <text x="99" y="241" fill="#9E1B32" font-size="16" text-anchor="start" font-weight="bold">0</text>
+  <line x1="91" y1="89" x2="91" y2="245" stroke="#465B6D" stroke-width="1.5" stroke-linecap="round" />
+  <text x="91" y="273" fill="#465B6D" font-size="17" text-anchor="start">Next-token probability at temperature 1</text>
+</svg>

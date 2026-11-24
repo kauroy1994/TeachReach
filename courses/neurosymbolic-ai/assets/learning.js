@@ -1,9 +1,9 @@
-/* CS 691 classroom interactions. Lesson content is rendered as static HTML. */
+/* Shared classroom interactions. Lesson content is rendered as static HTML. */
 (() => {
   "use strict";
   const one = selector => document.querySelector(selector);
   const all = selector => [...document.querySelectorAll(selector)];
-  const storageKey = "teachreach-cs691-practice-";
+  const storageKey = document.body.classList.contains("ml-lesson") ? "teachreach-ml-practice-" : "teachreach-cs691-practice-";
   const readSetting = key => { try { return localStorage.getItem(key); } catch { return null; } };
   const writeSetting = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
   const embedded = new URLSearchParams(location.search).get("embed") === "1" && window.parent !== window;
