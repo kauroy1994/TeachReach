@@ -31,3 +31,14 @@
 @media(max-width:760px){.research-hero:has(figure){grid-template-columns:1fr}.trace-figure{max-width:460px;width:100%}.stages{grid-template-columns:1fr}.mentoring .people{margin-bottom:20px}.panel pre{padding:.72rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .wb-controls>div{max-width:100%;min-width:0}.wb-controls label{margin-bottom:.3rem}
+
+.wb-table{overflow-wrap:normal}
+@media(max-width:540px){
+  .wb-wide,.wb-wide caption,.wb-wide tbody,.wb-wide tbody tr{display:block}
+  .wb-wide thead{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%)}
+  .wb-wide tbody tr{margin:.55rem 0;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .wb-wide tbody :is(th,td){display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:.75rem;padding:.42rem .55rem;align-items:baseline;overflow-wrap:break-word}
+  .wb-wide tbody :is(th,td)::before{content:attr(data-label);font-size:.82rem;font-weight:650;color:#684e57}
+  .wb-wide tbody th{background:#f7eef0}
+  .wb-wide tbody td:last-child{border-bottom:0}
+}

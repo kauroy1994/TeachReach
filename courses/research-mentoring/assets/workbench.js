@@ -94,7 +94,7 @@
 
   function table(caption, headings, rows) {
     const el = node("table");
-    el.className = "wb-table";
+    el.className = headings.length > 2 ? "wb-table wb-wide" : "wb-table";
     el.append(node("caption", caption));
     const head = el.createTHead().insertRow();
     for (const label of headings) {
@@ -107,6 +107,7 @@
       const row = body.insertRow();
       values.forEach((value, index) => {
         const cell = node(index === 0 ? "th" : "td", String(value));
+        cell.dataset.label = headings[index];
         if (index === 0) cell.scope = "row";
         row.append(cell);
       });
