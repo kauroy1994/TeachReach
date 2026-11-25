@@ -54,14 +54,18 @@ def sample(module):
 
 
 WIDGET_SCRIPT = """
-window.turnstile = {
-  ready(fn) { fn(); },
-  render(host, settings) {
-    setTimeout(() => settings.callback('classroom-browser-test-token'), 0);
-    return 'test-widget';
-  },
-  remove() {}
-};
+const notifyReady = new URL(document.currentScript.src).searchParams.get("onload");
+setTimeout(() => {
+  window.turnstile = {
+    ready() { throw new Error("The asynchronous loader requires the onload callback."); },
+    render(host, settings) {
+      setTimeout(() => settings.callback('classroom-browser-test-token'), 0);
+      return 'test-widget';
+    },
+    remove() {}
+  };
+  window[notifyReady]();
+}, 25);
 """
 
 
@@ -77,6 +81,8 @@ def set_routes(context, site, reference):
         if host == local_host:
             return route.continue_()
         if host == TURNSTILE and req.resource_type == "script":
+            if mode.pop("block_widget_once", False):
+                return route.abort()
             return route.fulfill(content_type="application/javascript", body=WIDGET_SCRIPT)
         if host != urlsplit(WORKER).netloc:
             return route.fulfill(content_type="text/html", body="<p>External teaching resource</p>")
@@ -161,6 +167,11 @@ def check_browser(browser, site, width):
         page.goto(urljoin(site, office_route(module)))
         tutor = page.locator(HOST)
         custom = "How would you explain this evidence in different words for our discussion?"
+        mode["block_widget_once"] = True
+        ask(tutor, custom)
+        expect(tutor).to_contain_text("could not download", timeout=15000)
+        expect(tutor.get_by_role("textbox")).to_have_value(custom)
+        assert not requests, "An unverified question reached the Worker"
         ask(tutor, custom)
         expect(tutor).to_contain_text(reference["quote"][:65], timeout=15000)
         expect_citation(tutor, site, reference, reference["quote"])

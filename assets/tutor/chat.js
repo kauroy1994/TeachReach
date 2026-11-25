@@ -80,27 +80,35 @@ function link(text, url, target = "_blank") {
 }
 
 let apiPromise;
+let verificationAttempt = 0;
 function loadVerification() {
-  if (window.turnstile) return Promise.resolve(window.turnstile);
   if (apiPromise) return apiPromise;
   apiPromise = new Promise((resolve, reject) => {
     const script = element("script");
-    const timer = setTimeout(fail, 15000);
-    function fail() {
+    const callback = "teachReachTurnstileLoaded" + (++verificationAttempt);
+    const timer = setTimeout(() => fail("The verification service took too long to start. Try again."), 30000);
+    function cleanup() {
       clearTimeout(timer);
+      delete window[callback];
+      script.onerror = null;
+    }
+    function fail(message) {
+      cleanup();
       script.remove();
       apiPromise = undefined;
-      reject(new Error("The verification service could not load. Try again."));
+      reject(new Error(message));
     }
-    script.onload = () => {
-      if (!window.turnstile) return fail();
-      window.turnstile.ready(() => {
-        clearTimeout(timer);
-        resolve(window.turnstile);
-      });
+    // Turnstile calls this when its asynchronous API is ready to render a widget.
+    window[callback] = () => {
+      if (typeof window.turnstile?.render !== "function") {
+        fail("The verification service could not start. Try again.");
+        return;
+      }
+      cleanup();
+      resolve(window.turnstile);
     };
-    script.onerror = fail;
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.onerror = () => fail("The verification service could not download from challenges.cloudflare.com. Try again.");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=" + callback;
     document.head.append(script);
   });
   return apiPromise;
