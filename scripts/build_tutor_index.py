@@ -234,13 +234,27 @@ def syllabus(rows, course):
                 fragment="#" + anchor if anchor else "")
 
 
+# Reviewed alternative phrasings for student questions whose answers are printed on a slide.
+QUESTION_VARIANTS = {
+    ("ml-foundations/module-01", "What could an inbox filter predict about a new message?"): [
+        "How can previously labeled emails help a spam filter classify a new message?",
+        "How would emails that someone already marked as spam help an inbox filter learn what to do with a new message?",
+        "In the inbox example, how would previously labeled emails help a machine learning model make a prediction?",
+    ]
+}
+
+
 def prepared(rows):
     result, seen = [], set()
     for row in rows:
         if row.get("question"):
             key = row["question"], row["answer"]
             if key not in seen:
-                result.append({k: v for k, v in row.items() if k != "text"})
+                entry = {k: v for k, v in row.items() if k != "text"}
+                variants = QUESTION_VARIANTS.get((row["module"], row["question"]))
+                if variants:
+                    entry["variants"] = variants
+                result.append(entry)
                 seen.add(key)
     if not result or len(json_bytes(result)) >= 70 * 1024:
         raise ValueError("Empty or oversized answer bank for " + rows[0]["module"])

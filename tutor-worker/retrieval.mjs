@@ -40,7 +40,8 @@ export function retrieve(docs, postings, module, question, history) {
     const key = doc.text.trim();
     if (seen.has(key)) continue;
     seen.add(key);
-    selected.push({title: doc.title, url: doc.url, module: doc.module, text: key.slice(0, 2400)});
+    selected.push({title: doc.title, url: doc.url, module: doc.module, text: key.slice(0, 2400),
+      question: doc.question, answer: doc.answer});
     if (selected.length === 10) break;
   }
   return selected;

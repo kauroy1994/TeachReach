@@ -23,7 +23,7 @@ function courseLabel(path) {
 
 function prepared(module) {
   if (!cache.has(module)) {
-    const url = new URL("assets/tutor/answers/" + module + ".json", site);
+    const url = new URL("assets/tutor/answers/" + module + ".json?v=2", site);
     cache.set(module, fetch(url, {signal: AbortSignal.timeout(8000)}).then(async response => {
       if (!response.ok) throw new Error("Lesson unavailable");
       const rows = await response.json();
@@ -37,7 +37,9 @@ function prepared(module) {
 }
 
 function exactAnswer(rows, question) {
-  const matches = rows.filter(row => exactKey(row.question) === exactKey(question));
+  const key = exactKey(question);
+  const matches = rows.filter(row => exactKey(row.question) === key ||
+    row.variants?.some(variant => exactKey(variant).toLowerCase() === key.toLowerCase()));
   if (new Set(matches.map(row => row.answer)).size === 1) return matches[0];
 }
 
@@ -256,8 +258,28 @@ function attach(host) {
     turn.focus();
   }
 
-  function showPrepared(row) {
-    record(row.question, [{text:row.answer, references:[{title:row.title, url:row.url, quote:row.answer}]}]);
+  function showPrepared(row, question = row.question) {
+    record(question, [{text:row.answer, references:[{title:row.title, url:row.url, quote:row.answer}]}]);
+  }
+
+  function offerRelated(rows, question) {
+    const suggestions = related(rows, question, module);
+    if (suggestions.length) {
+      feedback.append(element("strong", "Related questions already answered in TeachReach"));
+      const list = element("ul");
+      for (const row of suggestions) {
+        const li = element("li");
+        const pick = element("button", row.question);
+        pick.type = "button";
+        pick.addEventListener("click", () => {
+          feedback.replaceChildren();
+          showPrepared(row);
+        });
+        li.append(pick);
+        list.append(li);
+      }
+      feedback.append(list);
+    }
   }
 
   form.addEventListener("submit", async event => {
@@ -279,44 +301,29 @@ function attach(host) {
     try {
       const local = await prepared(module);
       const match = exactAnswer(local, question);
-      if (match) return showPrepared(match);
+      if (match) return showPrepared(match, question);
       const other = (await Promise.all(modules.filter(m => m !== module).map(prepared))).flat();
       rows = [...local, ...other];
       const cross = exactAnswer(rows, question);
-      if (cross) return showPrepared(cross);
+      if (cross) return showPrepared(cross, question);
       const result = await liveAnswer(module, question, history, challenge, status);
       if (result.status === "answered") return record(question, result.claims);
       const turn = element("article", "", "tr-tutor-turn");
       turn.tabIndex = -1;
-      const fallback = element("p", "The TeachReach materials do not cover this. ");
+      const fallback = element("p", "I couldn’t verify an answer in the TeachReach materials I found. ");
       const register = registration();
       register.textContent = "Please register a new question.";
       fallback.append(register);
       turn.append(element("h3", question), fallback);
       log.append(turn);
       field.value = "";
+      offerRelated(rows, question);
       status.textContent = "No supported answer found.";
       turn.focus();
     } catch (err) {
       const known = [unavailable, "Verification", "The verification service", "The tutor has reached"];
       status.textContent = known.some(prefix => err?.message?.startsWith(prefix)) ? err.message : unavailable;
-      const suggestions = related(rows, question, module);
-      if (suggestions.length) {
-        feedback.append(element("strong", "Related questions already answered in TeachReach"));
-        const list = element("ul");
-        for (const row of suggestions) {
-          const li = element("li");
-          const pick = element("button", row.question);
-          pick.type = "button";
-          pick.addEventListener("click", () => {
-            feedback.replaceChildren();
-            showPrepared(row);
-          });
-          li.append(pick);
-          list.append(li);
-        }
-        feedback.append(list);
-      }
+      offerRelated(rows, question);
     } finally {
       pending = false;
       field.readOnly = false;

@@ -34,7 +34,7 @@ def check_entry_points():
             host = hosts[0]
             assert host.get("data-module") == module, path
             scripts = [el.get("src", "") for el in doc.iter("script") if el.get("type") == "module"]
-            assert any((path.parent / src).resolve() == ROOT / "assets/tutor/chat.js" for src in scripts), path
+            assert any((path.parent / urlsplit(src).path).resolve() == ROOT / "assets/tutor/chat.js" for src in scripts), path
             index = Page(path.parent / "index.html").root
             if course == "research-mentoring":
                 assert host.get("data-register") == "#register", path
@@ -162,6 +162,14 @@ def check_browser(browser, site, width):
         expect_citation(embedded, site, exact, exact["answer"])
         assert requests == [], "An exact existing answer consumed provider quota"
         check_layout(embedded)
+        paraphrase = "How can previously labeled emails help a spam filter classify a new message?"
+        ask(embedded, paraphrase)
+        answered = embedded.get_by_role("article").last
+        expect(answered.get_by_role("heading")).to_have_text(paraphrase)
+        expect(answered).to_contain_text("Examples of messages already marked as spam")
+        assert answered.locator(".tr-tutor-refs a").first.evaluate("el => el.href").endswith(
+            "/courses/ml-foundations/module-01/slides.html#2")
+        assert not requests
 
         module = "neurosymbolic-ai/module-01"
         page.goto(urljoin(site, office_route(module)))
@@ -181,7 +189,7 @@ def check_browser(browser, site, width):
 
         mode["value"] = "uncovered"
         ask(tutor, "Would that explanation also establish what happens on Planet Zagreus?")
-        expect(tutor).to_contain_text("TeachReach materials do not cover this")
+        expect(tutor).to_contain_text("couldn’t verify an answer")
         assert custom in requests[-1]["history"], requests[-1]
         register = tutor.get_by_role("link", name="Please register a new question.", exact=True)
         expect(register).to_be_visible()
@@ -196,7 +204,7 @@ def check_browser(browser, site, width):
         unanswered = "Can you restate the evidence needed to defend this research claim?"
         ask(mentor, unanswered)
         expect(mentor).to_contain_text("unavailable", timeout=15000, ignore_case=True)
-        assert "TeachReach materials do not cover this" not in mentor.inner_text()
+        assert "couldn’t verify an answer" not in mentor.inner_text()
         expect(mentor.get_by_role("textbox")).to_have_value(unanswered)
         check_layout(mentor)
         before = len(requests)

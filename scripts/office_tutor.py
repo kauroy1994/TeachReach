@@ -9,7 +9,7 @@ def tutor_markup(module, register):
 
 def add_tutor_assets(html):
     return html.replace("</head>", '<link rel="stylesheet" href="../../../assets/tutor/chat.css">'
-                        '<script type="module" src="../../../assets/tutor/chat.js"></script></head>', 1)
+                        '<script type="module" src="../../../assets/tutor/chat.js?v=3"></script></head>', 1)
 
 
 def add_office_tutor(page, html):

@@ -30,10 +30,10 @@ function make(options={}) {
     const params = JSON.parse(init.body);
     calls.push(params);
     if (options.failure) return new Response(null,{status:options.failure});
-    const output = calls.length === 1 ? (options.output || supported) : {supported: options.approve !== false};
+    const output = calls.length === 1 ? (options.output || supported) : {supported: options.approve !== false, directAnswerId: options.direct || ""};
     return Response.json({choices:[{finish_reason:"stop",message:{content: JSON.stringify(output)}}]});
   };
-  const handle = createTutor([doc], {axes:[0,123],matrix:[0,140]}, fetcher);
+  const handle = createTutor(options.docs || [doc], options.index || {axes:[0,123],matrix:[0,140]}, fetcher);
   const invoke = (path, body, headers={}, method=body ? "POST" : "GET") => handle(
     new Request("https://worker.example" + path, {method,
       headers:{Origin:courseSite,"CF-Connecting-IP":"192.0.2.1","Content-Type":"application/json",...headers},
@@ -69,6 +69,30 @@ test("Unknown source, unrelated quote, partial coverage, or a failed evidence ch
   const run=make();
   assert.deepEqual(await (await run.invoke("/ask",{...base,question:"zagreus"})).json(),{status:"uncovered"});
   assert.equal(run.calls.length,0);
+});
+
+test("A rejected paraphrase can recover an independently matched, verbatim course answer", async () => {
+  const read = file => JSON.parse(readFileSync(new URL("./generated/" + file, import.meta.url)));
+  const docs = read("sources.json"), index = read("search.json");
+  const question = "How do tagged emails teach an inbox filter to predict whether an incoming message is spam?";
+  const top = retrieve(docs, index, module, question, [])[0];
+  assert.ok(top.url.endsWith("ml-foundations/module-01/slides.html#2"));
+  for (const output of [{claims: []}, {claims:[{text:"A claim",evidence:[{id:"S1",quote:"Made-up evidence"}]}]}]) {
+    const run = make({docs, index, output, approve:false, direct:"S1"});
+    const result = await (await run.invoke("/ask", {...base, question})).json();
+    assert.equal(run.calls.length, 2);
+    const auditInput = JSON.parse(run.calls[1].messages[1].content);
+    assert.ok(auditInput.publishedAnswers.some(p => p.id === "S1" && p.answer === top.answer));
+    assert.equal(result.status, "answered");
+    assert.equal(result.claims[0].text, top.answer);
+    assert.equal(result.claims[0].references[0].url, top.url);
+  }
+  for (const direct of ["", "S999"]) {
+    const run = make({docs, index, output:{claims:[]}, approve:false, direct});
+    const result = await (await run.invoke("/ask", {...base,
+      question: "What was this spam filter’s accuracy on my university’s email last week?"})).json();
+    assert.deepEqual(result, {status:"uncovered"});
+  }
 });
 
 test("Verification, quotas, prerequisites and backend error paths fail safely", async () => {

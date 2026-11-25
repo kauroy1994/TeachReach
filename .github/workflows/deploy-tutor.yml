@@ -1,6 +1,13 @@
 name: Deploy office-hours tutor
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tutor-worker/*.mjs'
+      - 'tutor-worker/build_search.py'
+      - 'scripts/build_tutor_index.py'
+      - 'wrangler.jsonc'
 permissions:
   contents: read
 jobs:
@@ -12,6 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Test tutor with the current course index
+        run: |
+          python3 scripts/build_tutor_index.py --check
+          python3 scripts/build_tutor_index.py
+          python3 tutor-worker/build_search.py
+          node --test tutor-worker/*.test.mjs
       - name: Deploy the tutor to Cloudflare
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
