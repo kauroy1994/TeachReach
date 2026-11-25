@@ -142,6 +142,25 @@ test("Real course search finds material across courses, including follow-up cont
   assert.deepEqual(retrieve(docs,index,module,"constructor __proto__",[]).filter(d=> !d.url),[]);
 });
 
+test("Both prompts know the open module even when the question has no searchable subject", async () => {
+  const docs = JSON.parse(readFileSync(new URL("./generated/sources.json", import.meta.url)));
+  const overviews = docs.filter(s => s.kind === "overview");
+  assert.equal(new Set(overviews.map(s => s.module)).size, 40);
+  for (const item of overviews) {
+    const {invoke, calls} = make({docs: overviews, index: {}, output: {claims: [
+      {text: item.title, evidence: [{id:"S1", quote:item.text.split("\n")[0]}]}
+    ]}});
+    await invoke("/ask", {...base, module: item.module, question:"What are we working on here?"});
+    assert.equal(calls.length, 2);
+    const [draft, audit] = calls.map(call => JSON.parse(call.messages[1].content));
+    assert.equal(draft.currentModuleOverview, item.title);
+    assert.equal(draft.passages.length, 1);
+    assert.equal(draft.passages[0].text, item.text);
+    assert.equal(audit.module, item.module);
+    assert.equal(audit.claims[0].quotations[0].module, item.module);
+  }
+});
+
 test("SQLite daily limit is shared across requests and survives object recreation", async t => {
   let DatabaseSync;
   try { ({DatabaseSync}=await import("node:sqlite")); }

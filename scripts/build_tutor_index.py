@@ -244,6 +244,37 @@ QUESTION_VARIANTS = {
 }
 
 
+def module_overview(folder, module):
+    """Use the same module introduction or syllabus outcomes a student can open."""
+    path = folder / "index.html"
+    page = Page(path).root
+    hero = next(node for node in page.iter() if node.find("h1") is not None)
+    name = words(hero.find("h1"))
+    quote = words(hero.find("p"))
+    answer = name.rstrip(".") + ". " + quote
+    fragment = ""
+    if module.startswith("ml-foundations/"):
+        path = folder.parent / "syllabus.html"
+        selector = f".//a[@href='{folder.name}/']"
+        section = next(sec for sec in Page(path).root.iter("section")
+                       if any(row.find(selector) is not None for row in sec.iter("tr")))
+        fragment = "#" + section.attrib["id"]
+        row = next(row for row in section.iter("tr") if row.find(selector) is not None)
+        cells = row.findall("td")
+        name = words(cells[0]).split(" · ", 1)[1]
+        outcomes = [words(item).removeprefix("• ").strip() for item in cells[2].findall("div")]
+        if not outcomes:
+            raise ValueError("Missing published learning outcomes in " + module)
+        quote = words(cells[1])
+        answer = name + ". By the end of this module, you should be able to:\n" + "\n".join("• " + item for item in outcomes)
+        quote += "\n" + "\n".join("• " + item for item in outcomes)
+    if not name or not quote:
+        raise ValueError("Missing published module overview in " + module)
+    return {"module": module, "kind": "overview", "title": "Module overview · " + name,
+            "url": path.relative_to(ROOT).as_posix() + fragment, "text": name + "\n" + quote,
+            "question": "What is this module about?", "answer": answer, "quote": quote}
+
+
 def prepared(rows):
     result, seen = [], set()
     for row in rows:
@@ -308,6 +339,7 @@ def main():
             else:
                 static_module(rows, module, folder)
             notebook(rows, module, folder)
+            rows.append(module_overview(folder, module))
             shards[PUBLIC / (module + ".json")] = json_bytes(prepared(rows))
             corpus.extend(rows)
     validate_links(corpus)

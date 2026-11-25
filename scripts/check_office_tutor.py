@@ -162,6 +162,14 @@ def check_browser(browser, site, width):
         expect_citation(embedded, site, exact, exact["answer"])
         assert requests == [], "An exact existing answer consumed provider quota"
         check_layout(embedded)
+        for orientation in ("What is this module about?", "What will I learn here?"):
+            ask(embedded, orientation)
+            turn = embedded.get_by_role("article").last
+            expect(turn).to_contain_text("Linear Algebra and Tensor Operations")
+            expect(turn).to_contain_text("Construct feature vectors")
+            assert turn.locator(".tr-tutor-refs a").first.evaluate("el => el.href").endswith(
+                "/ml-foundations/syllabus.html#stage-01")
+            assert not requests, "A local overview should not require live verification"
         paraphrase = "How can previously labeled emails help a spam filter classify a new message?"
         ask(embedded, paraphrase)
         answered = embedded.get_by_role("article").last

@@ -23,7 +23,7 @@ function courseLabel(path) {
 
 function prepared(module) {
   if (!cache.has(module)) {
-    const url = new URL("assets/tutor/answers/" + module + ".json?v=2", site);
+    const url = new URL("assets/tutor/answers/" + module + ".json?v=3", site);
     cache.set(module, fetch(url, {signal: AbortSignal.timeout(8000)}).then(async response => {
       if (!response.ok) throw new Error("Lesson unavailable");
       const rows = await response.json();
@@ -36,10 +36,17 @@ function prepared(module) {
   return cache.get(module);
 }
 
+// Match complete orientation requests. Questions with extra conditions go to the tutor.
+function wantsOverview(question) {
+  const text = question.toLowerCase().replace(/’/g, "'").replace(/what's/g, "what is")
+    .trim().replace(/[?.!]+$/, "").replace(/^please | please$/g, "").replace(/\s+/g, " ");
+  return /^(?:what is (?:this|the current) (?:module|lesson) (?:about|on)|what (?:does|will) this (?:module|lesson) cover|what (?:topics|concepts) (?:are covered|will we cover) (?:in |by )?(?:this (?:module|lesson)|here)|what (?:will|should) (?:i|we) (?:learn|know)(?: (?:in|from|after|by the end of) this (?:module|lesson)| here)?|(?:summarize|summarise|explain) this (?:module|lesson)|(?:can you )?give me (?:a summary|an overview) of this (?:module|lesson)|what are (?:the |this module's )?learning (?:goals|objectives|outcomes)(?: (?:of|for) this (?:module|lesson))?)$/.test(text);
+}
+
 function exactAnswer(rows, question) {
   const key = exactKey(question);
-  const matches = rows.filter(row => exactKey(row.question) === key ||
-    row.variants?.some(variant => exactKey(variant).toLowerCase() === key.toLowerCase()));
+  const matches = rows.filter(row => row.kind !== "overview" && (exactKey(row.question) === key ||
+    row.variants?.some(variant => exactKey(variant).toLowerCase() === key.toLowerCase())));
   if (new Set(matches.map(row => row.answer)).size === 1) return matches[0];
 }
 
@@ -52,7 +59,7 @@ function terms(text) {
 
 function related(rows, question, module) {
   const query = terms(question);
-  const scored = rows.map(row => {
+  const scored = rows.filter(row => row.kind !== "overview" || row.module === module).map(row => {
     const words = new Set(terms(row.question));
     const matches = query.filter(t => words.has(t)).length;
     const score = matches ? matches / Math.sqrt(query.length * words.size) : 0;
@@ -259,7 +266,7 @@ function attach(host) {
   }
 
   function showPrepared(row, question = row.question) {
-    record(question, [{text:row.answer, references:[{title:row.title, url:row.url, quote:row.answer}]}]);
+    record(question, [{text:row.answer, references:[{title:row.title, url:row.url, quote:row.quote || row.answer}]}]);
   }
 
   function offerRelated(rows, question) {
@@ -300,6 +307,8 @@ function attach(host) {
     let rows = [];
     try {
       const local = await prepared(module);
+      const overview = wantsOverview(question) && local.find(row => row.kind === "overview");
+      if (overview) return showPrepared(overview, question);
       const match = exactAnswer(local, question);
       if (match) return showPrepared(match, question);
       const other = (await Promise.all(modules.filter(m => m !== module).map(prepared))).flat();
