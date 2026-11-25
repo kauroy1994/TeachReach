@@ -8,13 +8,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/check_curriculum.py
+      - name: Validate the tutor corpus and citation checks
+        run: |
+          python3 scripts/build_tutor_index.py --check
+          python3 scripts/build_tutor_index.py
+          python3 tutor-worker/build_search.py
+          node --test tutor-worker/*.test.mjs
       - name: Check slide questions and module transitions in Chromium
         run: |
           python3 -m venv "$RUNNER_TEMP/lesson-checks"
           source "$RUNNER_TEMP/lesson-checks/bin/activate"
           pip install playwright==1.56.0
           python -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
-          CHROME_BIN="$(command -v google-chrome)" python scripts/check_lesson_navigation.py http://127.0.0.1:8080
+          export CHROME_BIN="$(command -v google-chrome)"
+          python scripts/check_office_tutor.py http://127.0.0.1:8080
+          python scripts/check_lesson_navigation.py http://127.0.0.1:8080
   browser-layout:
     runs-on: ubuntu-24.04
     container:
@@ -33,4 +41,5 @@ jobs:
         run: |
           python -m pip install playwright==1.56.0
           python -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
+          python scripts/check_office_tutor.py http://127.0.0.1:8080 --engine ${{ matrix.engine }}
           python scripts/check_site_layout.py http://127.0.0.1:8080 --engine ${{ matrix.engine }}

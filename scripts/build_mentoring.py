@@ -8,6 +8,7 @@ import posixpath
 from html import escape
 from pathlib import Path
 
+from office_tutor import add_tutor_assets, tutor_markup
 from site_navigation import ROOT, add_navigation
 
 SLUG = "courses/research-mentoring"
@@ -24,7 +25,7 @@ READINGS = [
     ("Robert G. Sargent · Validation and Verification of Simulation Models", "https://www.informs-sim.org/wsc04papers/004.pdf", "Choose one check of the implementation and one check of the model’s intended use. What evidence could pass the first and fail the second?"),
     ("Poole and Mackworth · Representing States, Actions, and Goals", "https://www.cs.ubc.ca/~poole/aibook/2e/html2e/ArtInt2e.Ch6.S1.html", "Write the precondition and effect of one action. Which part of the resulting state can you verify from an observation?"),
 ]
-ACTIVITIES = [("seminar", "Worked examples"), ("workbench", "Workbench"), ("exercise", "Independent task"), ("notebook", "Notebook"), ("meeting", "Mentor review")]
+ACTIVITIES = [("seminar", "Worked examples"), ("workbench", "Workbench"), ("exercise", "Independent task"), ("notebook", "Notebook"), ("meeting", "Mentor review"), ("office", "Office hours")]
 
 
 def catalog():
@@ -151,10 +152,17 @@ def module_resources(m):
     meeting=f'<section class="panel" id="meeting"><h2>Mentor review</h2><p class="bring">{escape(meet["deliverable"])}</p><h3>What the artifact should show</h3>{listed(meet["criteria"])}<h3>Questions for the meeting</h3>{listed(meet["questions"])}</section>'
     prev=link(f'../module-{n-1:02}/','← Previous module') if n>1 else link('../syllabus.html','Syllabus')
     nxt=link(f'../module-{n+1:02}/','Next module →') if n<8 else link('../index.html','Course roadmap')
+    office = '<section class="panel" id="office"><h2>Office hours</h2>' + tutor_markup(
+        f"research-mentoring/module-{n:02}", "#register") + (
+        f'<details id="register"><summary>Register a new question</summary>'
+        f'<p>Email your question to Professor Roy. The link opens a draft with this module in the subject. '
+        f'Click Send in your email app to register it.</p>'
+        f'<a href="mailto:kroy2@ua.edu?subject=CS%20696%20Module%20{n:02}%20question">'
+        'Email your question to kroy2@ua.edu</a></details></section>')
     handoff=f'<section class="next"><h2>{"Carry this forward" if n<8 else "After the defense"}</h2><p>{escape(m["handoff"])}</p><div class="links">{prev}{link(f"../stage-{stage:02}/","Stage overview")}{nxt}</div></section>'
     overview_link=link(f'../stage-{stage:02}/',f'Stage {stage:02} · {STAGES[stage-1][0]}')
-    content=hero(f'CS 696 · Module {n:02} of 08',m["title"],m["goal"]) + f'<div class="entry"><p class="source">{overview_link}</p><p>{escape(m["bridge"])}</p></div>'+sections+seminar+lab+task+notebook+meeting+handoff
-    return page(f"module-{n:02}/index.html",m["title"],content,True), json.dumps(nb,ensure_ascii=False,indent=1)+"\n"
+    content=hero(f'CS 696 · Module {n:02} of 08',m["title"],m["goal"]) + f'<div class="entry"><p class="source">{overview_link}</p><p>{escape(m["bridge"])}</p></div>'+sections+seminar+lab+task+notebook+meeting+office+handoff
+    return add_tutor_assets(page(f"module-{n:02}/index.html",m["title"],content,True)), json.dumps(nb,ensure_ascii=False,indent=1)+"\n"
 
 
 def build(check=False):

@@ -5,12 +5,15 @@ import posixpath
 from pathlib import Path, PurePosixPath
 import re
 
+from office_tutor import add_office_tutor
+
 ROOT = Path(__file__).resolve().parents[1]
 CODES = {"ml-foundations": "CS 483/583", "neurosymbolic-ai": "CS 691", "research-mentoring": "CS 696"}
 
 
 def add_navigation(page, html):
     page = PurePosixPath(page)
+    html = add_office_tutor(page, html)
     def url(path):
         return posixpath.relpath(path, page.parent)
     def anchor(path, label):

@@ -1,0 +1,41 @@
+[data-tr-tutor] {
+  --tutor-accent: #841b32;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  margin: 1rem 0;
+  padding: clamp(1rem, 3vw, 1.8rem);
+  border: 1px solid #e2cdd3;
+  border-left: .28rem solid var(--tutor-accent);
+  border-radius: .8rem;
+  background: #fffafb;
+  color: #25252b;
+  overflow-wrap: anywhere;
+  text-align: left;
+  font: 1rem/1.55 system-ui, sans-serif;
+}
+[data-tr-tutor] *, [data-tr-tutor] *::before, [data-tr-tutor] *::after {box-sizing: border-box}
+[data-tr-tutor] h2 {margin: 0 0 .5rem; font: 750 clamp(1.3rem, 3vw, 1.7rem)/1.2 system-ui, sans-serif; letter-spacing: -.025em; color: #31232a}
+[data-tr-tutor] h3 {margin: 0 0 .6rem; font: 700 1.05rem/1.45 system-ui, sans-serif; color: #28232a}
+[data-tr-tutor] p {margin: .4rem 0 .75rem; max-width: 75ch; color: inherit}
+[data-tr-tutor] a, [data-tr-tutor] summary {color: var(--tutor-accent); text-decoration: underline; text-underline-offset: .15em}
+[data-tr-tutor] form {display: block; margin: 1rem 0 0}
+[data-tr-tutor] label {display: block; margin: 0 0 .3rem; font-weight: 700}
+[data-tr-tutor] textarea {display: block; width: 100%; max-width: 100%; min-height: 5.5rem; resize: vertical; font: inherit; border-radius: .4rem; padding: .65rem .8rem; color: #25252b; background: white; border: 1px solid #9e858c}
+[data-tr-tutor] .tr-tutor-notice {font-size: .82rem; color: #5e5457; line-height: 1.45}
+.tr-tutor-actions {display: flex; align-items: center; flex-wrap: wrap; gap: .55rem 1rem}
+[data-tr-tutor] .tr-tutor-actions button {font: 650 .95rem/1.4 system-ui,sans-serif; cursor: pointer; color: white; background: var(--tutor-accent); border: 1px solid var(--tutor-accent); border-radius: .45rem; padding: .55rem 1rem}
+[data-tr-tutor] .tr-tutor-actions button:disabled {cursor: wait; opacity: .65}
+[data-tr-tutor] :is(button,a,textarea,summary,.tr-tutor-turn):focus-visible {outline: 3px solid #773048; outline-offset: 3px}
+[data-tr-tutor] .tr-tutor-turn {min-width: 0; margin: .85rem 0; padding: .85rem; border: 1px solid #e0d7d9; border-radius: .55rem; background: white; scroll-margin: 5rem}
+[data-tr-tutor] .tr-tutor-claim, [data-tr-tutor] blockquote {white-space: pre-wrap; overflow-wrap: anywhere}
+[data-tr-tutor] .tr-tutor-refs {border-top: 1px solid #e6dcdf; padding-top: .65rem; font-size: .9rem}
+[data-tr-tutor] .tr-tutor-refs ol {margin: .3rem 0 0; padding-left: 1.5rem}
+[data-tr-tutor] .tr-tutor-refs details {margin: .15rem 0 .4rem; padding: 0; border: 0; box-shadow: none; background: transparent}
+[data-tr-tutor] .tr-tutor-refs summary {cursor: pointer; font-size: .84rem; font-weight: 500}
+[data-tr-tutor] blockquote {margin: .35rem 0; padding: .45rem .7rem; border-left: 3px solid #dfc4cc; background: #fcf7f8}
+[data-tr-tutor] .tr-tutor-status {margin: .55rem 0 0; font-size: .88rem}
+[data-tr-tutor] .tr-tutor-status:empty, .tr-tutor-challenge:empty, .tr-tutor-feedback:empty {display:none}
+.tr-tutor-challenge, .tr-tutor-feedback {margin-top: .85rem}
+[data-tr-tutor] .tr-tutor-feedback ul {padding-left: 1.3rem; margin: .4rem 0}
+[data-tr-tutor] .tr-tutor-feedback button {display: inline; padding: .22rem 0; font: inherit; text-align: left; border: 0; background: transparent; color: var(--tutor-accent); cursor: pointer; text-decoration: underline; white-space: normal}

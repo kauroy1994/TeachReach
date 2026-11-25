@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "teachreach-office-hours",
+  "main": "tutor-worker/worker.mjs",
+  "compatibility_date": "2025-11-01",
+  "workers_dev": true,
+  "keep_vars": true,
+  "build": {
+    "command": "python3 scripts/build_tutor_index.py && python3 tutor-worker/build_search.py"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "BUDGET", "class_name": "TutorBudget" }]
+  },
+  "migrations": [{ "tag": "v1-teachreach-tutor", "new_sqlite_classes": ["TutorBudget"] }],
+  "ratelimits": [{
+    "name": "BURST",
+    "namespace_id": "1001",
+    "simple": { "limit": 30, "period": 60 }
+  }]
+}
