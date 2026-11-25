@@ -39,3 +39,7 @@
 .tr-tutor-challenge, .tr-tutor-feedback {margin-top: .85rem}
 [data-tr-tutor] .tr-tutor-feedback ul {padding-left: 1.3rem; margin: .4rem 0}
 [data-tr-tutor] .tr-tutor-feedback button {display: inline; padding: .22rem 0; font: inherit; text-align: left; border: 0; background: transparent; color: var(--tutor-accent); cursor: pointer; text-decoration: underline; white-space: normal}
+
+[data-tr-tutor] .tr-tutor-example {margin: .4rem 0 .7rem; color: #51464a; font-size: .9rem}
+[data-tr-tutor] .tr-tutor-example:empty {display: none}
+[data-tr-tutor] .tr-tutor-example button {display: inline; border: 0; padding: 0; background: transparent; color: var(--tutor-accent); font: inherit; line-height: 1.45; text-align: left; text-decoration: underline; text-underline-offset: .15em; white-space: normal; cursor: pointer}

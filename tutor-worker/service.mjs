@@ -52,9 +52,10 @@ async function readInput(request) {
 
 function validInput(data) {
   if (!data || typeof data !== "object" || Object.keys(data).some(k => !["module","question","history","token"].includes(k))) return false;
+  if (typeof data.module !== "string") return false;
   const match = /^([a-z-]+)\/module-(\d\d)$/.exec(data.module);
   const short = s => typeof s === "string" && s.trim().length > 0 && s.length <= 500;
-  return typeof data.module === "string" && match && Object.hasOwn(moduleCounts, match[1]) &&
+  return match && Object.hasOwn(moduleCounts, match[1]) &&
     Number(match[2]) >= 1 && Number(match[2]) <= moduleCounts[match[1]] && short(data.question) &&
     Array.isArray(data.history) && data.history.length <= 2 && data.history.every(short) &&
     typeof data.token === "string" && data.token.length > 0 && data.token.length <= 2048;

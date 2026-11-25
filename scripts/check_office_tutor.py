@@ -148,6 +148,9 @@ def check_browser(browser, site, width):
     try:
         page.goto(urljoin(site, "courses/ml-foundations/module-01/index.html#office"))
         embedded = page.frame_locator("#officeFrame").locator(HOST)
+        suggestion = embedded.locator(".tr-tutor-example button")
+        suggestion.click()
+        expect(embedded.get_by_role("textbox")).to_have_value(suggestion.inner_text())
         ask(embedded, exact["question"])
         expect(embedded).to_contain_text(exact["answer"][:60])
         expect_citation(embedded, site, exact, exact["answer"])

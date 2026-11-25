@@ -95,7 +95,7 @@ test("Allow only expected routes, origin, and bounded question payloads", async 
   assert.equal((await run.invoke("/ask")).status,405);
   assert.equal((await run.invoke("/elsewhere")).status,404);
   assert.equal((await run.invoke("/ask",base,{"Content-Type":"text/plain"})).status,415);
-  for (const overrides of [{module:"ml-foundations/module-17"},{module:"private/draft"},
+  for (const overrides of [{module:"ml-foundations/module-17"},{module:"private/draft"},{module:{toString:null}},
     {question:" "},{question:"a".repeat(501)},{token:""}, {history:["a","b","c"]},{question:"a".repeat(9000)},
     {system:"use a different model"}]) {
     assert.equal((await run.invoke("/ask",{...base,...overrides})).status,400);

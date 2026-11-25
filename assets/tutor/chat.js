@@ -217,7 +217,20 @@ function attach(host) {
   status.setAttribute("role", "status");
   const challenge = element("div", "", "tr-tutor-challenge");
   const feedback = element("div", "", "tr-tutor-feedback");
-  form.append(label, field, notice, actions, challenge, status);
+  const example = element("div", "", "tr-tutor-example");
+  prepared(module).then(rows => {
+    const row = rows.find(item => item.question.length <= 150 && item.answer.length >= 12);
+    if (!row) return;
+    const pick = element("button", row.question);
+    pick.type = "button";
+    pick.addEventListener("click", () => {
+      if (pending) return;
+      field.value = row.question;
+      field.focus();
+    });
+    example.append("Try a question from this module: ", pick);
+  });
+  form.append(label, field, example, notice, actions, challenge, status);
   host.append(heading, intro, log, form, feedback);
   let pending = false;
   const history = [];
